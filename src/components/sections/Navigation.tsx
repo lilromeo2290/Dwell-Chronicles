@@ -72,6 +72,7 @@ const PROPERTIES_SUBMENU = [
 
 const NAV_LINKS: NavLink[] = [
   { label: 'Home', href: '#home', icon: <Home className="size-[18px]" /> },
+  { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
   { label: 'Rent', href: '#rent', icon: <Key className="size-[18px]" /> },
@@ -80,7 +81,6 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
   { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
-  { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Contact', href: '#contact', icon: <Phone className="size-[18px]" /> },
 ];
 
