@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
@@ -15,6 +15,12 @@ import {
   Info,
   Phone,
   Menu,
+  ChevronDown,
+  KeyRound,
+  ClipboardList,
+  Users,
+  MapPin,
+  FileCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,11 +41,22 @@ interface NavLink {
   label: string;
   href: string;
   icon: React.ReactNode;
+  children?: { label: string; href: string; icon: React.ReactNode }[];
 }
+
+const PROPERTIES_SUBMENU = [
+  { label: 'Property Rentals', href: '#properties', icon: <KeyRound className="size-4" /> },
+  { label: 'Project Management', href: '#construction', icon: <ClipboardList className="size-4" /> },
+  { label: 'Building Construction', href: '#construction', icon: <HardHat className="size-4" /> },
+  { label: 'Property Management', href: '#properties', icon: <Building2 className="size-4" /> },
+  { label: 'Agent Services', href: '#contact', icon: <Users className="size-4" /> },
+  { label: 'Buying & Selling of Lands', href: '#properties', icon: <MapPin className="size-4" /> },
+  { label: 'Land Registration & Consultancy', href: '#contact', icon: <FileCheck className="size-4" /> },
+];
 
 const NAV_LINKS: NavLink[] = [
   { label: 'Home', href: '#home', icon: <Home className="size-[18px]" /> },
-  { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" /> },
+  { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
   { label: 'Rent', href: '#rent', icon: <Key className="size-[18px]" /> },
   { label: 'Commercial', href: '#commercial', icon: <Warehouse className="size-[18px]" /> },
@@ -54,28 +71,174 @@ const NAV_LINKS: NavLink[] = [
 const SCROLL_THRESHOLD = 80;
 
 /* ------------------------------------------------------------------ */
+/*  Desktop Properties Dropdown                                         */
+/* ------------------------------------------------------------------ */
+
+function PropertiesDropdown({ isScrolled }: { isScrolled: boolean }) {
+  const [open, setOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+
+  const handleEnter = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <li
+      className="relative"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      <button
+        className={cn(
+          'inline-flex items-center gap-1 px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+          textColor,
+          isScrolled
+            ? 'hover:bg-white/15 hover:text-white'
+            : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+        )}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        Properties
+        <ChevronDown
+          className={cn(
+            'size-3.5 transition-transform duration-200',
+            open && 'rotate-180'
+          )}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className={cn(
+              'absolute top-full left-0 mt-1 w-64 rounded-xl border shadow-xl p-2 z-50',
+              isScrolled
+                ? 'bg-[#5F8768] border-[#5F8768]/60 shadow-[#2F3A33]/20'
+                : 'bg-white border-[#E5E3DC] shadow-[#2F3A33]/10'
+            )}
+            onMouseEnter={handleEnter}
+            onMouseLeave={handleLeave}
+          >
+            {PROPERTIES_SUBMENU.map((sub) => (
+              <a
+                key={sub.label}
+                href={sub.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+                  isScrolled
+                    ? 'text-white/90 hover:bg-white/15 hover:text-white'
+                    : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex size-8 shrink-0 items-center justify-center rounded-md',
+                    isScrolled
+                      ? 'bg-white/15 text-white'
+                      : 'bg-[#5F8768]/10 text-[#5F8768]'
+                  )}
+                >
+                  {sub.icon}
+                </span>
+                {sub.label}
+              </a>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Mobile Menu Item                                                    */
 /* ------------------------------------------------------------------ */
 
-function MobileMenuItem({ link, isScrolled }: { link: NavLink; isScrolled: boolean }) {
+function MobileMenuItem({
+  link,
+  isScrolled,
+}: {
+  link: NavLink;
+  isScrolled: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasChildren = link.children && link.children.length > 0;
+
+  if (hasChildren) {
+    return (
+      <div>
+        <button
+          onClick={() => setExpanded((prev) => !prev)}
+          className="group flex w-full items-center justify-between rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10"
+        >
+          <span className="flex items-center gap-3.5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768]">
+              {link.icon}
+            </span>
+            {link.label}
+          </span>
+          <ChevronDown
+            className={cn(
+              'size-4 text-[#6B7A6F] transition-transform duration-200',
+              expanded && 'rotate-180'
+            )}
+          />
+        </button>
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="overflow-hidden ml-6 border-l-2 border-[#5F8768]/20 pl-4"
+            >
+              {link.children!.map((sub) => (
+                <SheetClose asChild key={sub.label}>
+                  <a
+                    href={sub.href}
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
+                  >
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+                      {sub.icon}
+                    </span>
+                    {sub.label}
+                  </a>
+                </SheetClose>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
     <SheetClose asChild>
       <a
         href={link.href}
-        className={cn(
-          'group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium',
-          'transition-colors duration-200',
-          isScrolled
-            ? 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
-            : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
-        )}
+        className="group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
       >
-        <span
-          className={cn(
-            'flex size-9 shrink-0 items-center justify-center rounded-md transition-colors duration-200',
-            'bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white'
-          )}
-        >
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
           {link.icon}
         </span>
         {link.label}
@@ -106,14 +269,10 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  /* shared classes that change based on scroll state */
-  const textColor = isScrolled
-    ? 'text-white'
-    : 'text-[#2F3A33]';
+  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
 
   return (
     <>
-      {/* ---------- Desktop / Main Nav ---------- */}
       <header
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
@@ -140,33 +299,37 @@ export default function Navigation() {
 
           {/* ---- Desktop Links ---- */}
           <ul className="hidden xl:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  className={cn(
-                    'relative inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide',
-                    'rounded-md transition-colors duration-200',
-                    textColor,
-                    isScrolled
-                      ? 'hover:bg-white/15 hover:text-white'
-                      : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
-                  )}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) =>
+              link.children ? (
+                <PropertiesDropdown
+                  key={link.label}
+                  isScrolled={isScrolled}
+                />
+              ) : (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    className={cn(
+                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+                      textColor,
+                      isScrolled
+                        ? 'hover:bg-white/15 hover:text-white'
+                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                    )}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              )
+            )}
           </ul>
 
           {/* ---- Right Actions ---- */}
           <div className="flex items-center gap-3">
-            {/* CTA Button – visible on md+ */}
             <Button
               asChild
               className={cn(
-                'hidden md:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold tracking-wide',
-                'transition-all duration-300 shadow-sm',
+                'hidden md:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-300 shadow-sm',
                 isScrolled
                   ? 'bg-white text-[#5F8768] hover:bg-white/90 hover:shadow-md'
                   : 'bg-[#5F8768] text-white hover:bg-[#5F8768]/90 hover:shadow-md'
@@ -179,13 +342,12 @@ export default function Navigation() {
               </a>
             </Button>
 
-            {/* Mobile Hamburger – visible below xl breakpoint */}
+            {/* Mobile Hamburger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex xl:hidden items-center justify-center size-10 rounded-lg',
-                    'transition-colors duration-200',
+                    'inline-flex xl:hidden items-center justify-center size-10 rounded-lg transition-colors duration-200',
                     isScrolled
                       ? 'text-white hover:bg-white/15'
                       : 'text-[#2F3A33] hover:bg-[#5F8768]/10'
@@ -196,13 +358,11 @@ export default function Navigation() {
                 </button>
               </SheetTrigger>
 
-              {/* ---- Mobile Sheet Content ---- */}
               <SheetContent
                 side="right"
                 className="w-[320px] bg-[#F8F7F3] p-0"
               >
                 <div className="flex h-full flex-col">
-                  {/* Header */}
                   <SheetHeader className="border-b border-[#D8D5CC] px-5 py-4">
                     <SheetTitle className="flex items-center gap-2.5 text-[#2F3A33]">
                       <img
@@ -213,7 +373,6 @@ export default function Navigation() {
                     </SheetTitle>
                   </SheetHeader>
 
-                  {/* Links List */}
                   <div className="flex-1 overflow-y-auto px-3 py-4">
                     <AnimatePresence mode="wait">
                       {mobileOpen && (
@@ -236,7 +395,10 @@ export default function Navigation() {
                                 ease: 'easeOut',
                               }}
                             >
-                              <MobileMenuItem link={link} isScrolled={isScrolled} />
+                              <MobileMenuItem
+                                link={link}
+                                isScrolled={isScrolled}
+                              />
                             </motion.div>
                           ))}
                         </motion.div>
@@ -244,16 +406,11 @@ export default function Navigation() {
                     </AnimatePresence>
                   </div>
 
-                  {/* Footer CTA */}
                   <div className="border-t border-[#D8D5CC] p-4">
                     <SheetClose asChild>
                       <Button
                         asChild
-                        className={cn(
-                          'flex w-full items-center justify-center gap-2 rounded-full py-3',
-                          'bg-[#5F8768] text-white text-[14px] font-semibold tracking-wide',
-                          'hover:bg-[#5F8768]/90 transition-colors duration-200 shadow-sm'
-                        )}
+                        className="flex w-full items-center justify-center gap-2 rounded-full py-3 bg-[#5F8768] text-white text-[14px] font-semibold tracking-wide hover:bg-[#5F8768]/90 transition-colors duration-200 shadow-sm"
                       >
                         <a href="#contact">
                           <Phone className="size-4" />
