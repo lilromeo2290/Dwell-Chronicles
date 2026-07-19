@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
-  Calendar,
+  X,
   Youtube,
   ArrowRight,
   ExternalLink,
@@ -14,25 +14,11 @@ interface YouTubeVideo {
   videoId: string;
   title: string;
   thumbnail: string;
+  maxResThumbnail?: string;
   publishedAt: string;
-  description: string;
-  channelTitle: string;
 }
 
 const YOUTUBE_CHANNEL = 'https://www.youtube.com/@dwellchronicles/featured';
-
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return '';
-  }
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -54,26 +40,42 @@ const itemVariants = {
 export default function VideoSection() {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+  const fetchVideos = useCallback(async () => {
+    try {
+      const res = await fetch('/api/youtube');
+      const data = await res.json();
+      if (data.videos && data.videos.length > 0) {
+        setVideos(data.videos);
+      }
+    } catch {
+      // Silently fall back to channel link
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function fetchVideos() {
-      try {
-        const res = await fetch('/api/youtube');
-        const data = await res.json();
-        if (data.videos && data.videos.length > 0) {
-          setVideos(data.videos);
-        }
-      } catch {
-        // Silently fall back to channel link
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchVideos();
-  }, []);
+  }, [fetchVideos]);
 
   const featuredVideo = videos[0];
   const sideVideos = videos.slice(1, 5);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (!activeVideo) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveVideo(null);
+    };
+    window.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [activeVideo]);
 
   return (
     <section id="videos" className="bg-[#F8F7F3] py-20 md:py-28 px-4">
@@ -122,62 +124,48 @@ export default function VideoSection() {
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             >
-              <a
-                href={`https://www.youtube.com/watch?v=${featuredVideo.videoId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-2xl overflow-hidden relative aspect-video bg-[#2F3A33] group"
+              <button
+                onClick={() => setActiveVideo(featuredVideo.videoId)}
+                className="block w-full rounded-2xl overflow-hidden relative aspect-video bg-[#2F3A33] group cursor-pointer text-left"
               >
-                {/* Thumbnail */}
                 <img
-                  src={featuredVideo.thumbnail}
-                  alt={featuredVideo.title}
+                  src={featuredVideo.maxResThumbnail || featuredVideo.thumbnail}
+                  alt="Featured video"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
-                {/* Dark Overlay */}
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-300" />
-                {/* Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-white ml-1" />
                   </div>
                 </div>
-                {/* Title Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                  <h3 className="text-white text-lg md:text-xl font-semibold leading-tight line-clamp-2">
-                    {featuredVideo.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-2 text-white/80 text-xs">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {formatDate(featuredVideo.publishedAt)}
-                  </div>
+                <div className="absolute bottom-3 right-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+                  <Youtube className="w-3 h-3" />
+                  YouTube
                 </div>
-              </a>
+              </button>
             </motion.div>
 
             {/* Video List */}
             <motion.div
-              className="lg:col-span-2 flex flex-col gap-3 max-h-[520px] overflow-y-auto pr-1"
+              className="lg:col-span-2 flex flex-col gap-3"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-50px' }}
             >
               {sideVideos.map((video) => (
-                <motion.a
+                <motion.button
                   key={video.videoId}
-                  href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  onClick={() => setActiveVideo(video.videoId)}
                   variants={itemVariants}
-                  className="flex gap-4 p-3 rounded-xl hover:bg-white transition-colors cursor-pointer group no-underline"
+                  className="flex gap-4 p-3 rounded-xl hover:bg-white transition-colors cursor-pointer group text-left w-full"
                 >
-                  {/* Thumbnail */}
                   <div className="w-40 h-24 rounded-lg overflow-hidden relative shrink-0 bg-[#2F3A33]">
                     <img
                       src={video.thumbnail}
-                      alt={video.title}
+                      alt="Video thumbnail"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -187,17 +175,16 @@ export default function VideoSection() {
                       </div>
                     </div>
                   </div>
-                  {/* Info */}
                   <div className="flex flex-col justify-center min-w-0">
-                    <h4 className="font-medium text-sm text-[#2F3A33] line-clamp-2 group-hover:text-[#5F8768] transition-colors">
-                      {video.title}
-                    </h4>
-                    <div className="flex items-center gap-1 mt-2 text-xs text-[#6B7A6F]">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(video.publishedAt)}
-                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 uppercase tracking-wider mb-1">
+                      <Youtube className="w-3 h-3" />
+                      Dwell Chronicles
+                    </span>
+                    <p className="text-xs text-[#6B7A6F]">
+                      Click to watch on YouTube
+                    </p>
                   </div>
-                </motion.a>
+                </motion.button>
               ))}
             </motion.div>
           </div>
@@ -242,7 +229,7 @@ export default function VideoSection() {
             href={YOUTUBE_CHANNEL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border-2 border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white rounded-xl px-8 py-3 font-medium transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 border-2 border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white rounded-xl px-8 py-3 font-medium transition-all cursor-pointer no-underline"
           >
             <Youtube className="w-5 h-5" />
             Visit Our YouTube Channel
@@ -250,6 +237,48 @@ export default function VideoSection() {
           </a>
         </div>
       </div>
+
+      {/* Video Modal */}
+      <AnimatePresence>
+        {activeVideo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setActiveVideo(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="relative w-full max-w-4xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setActiveVideo(null)}
+                className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10 cursor-pointer"
+                aria-label="Close video"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+              {/* YouTube Embed */}
+              <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0`}
+                  title="YouTube video player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
