@@ -32,16 +32,24 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import LandRegistrationModal from './LandRegistrationModal';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
+interface SubMenuItem {
+  label: string;
+  href?: string;
+  action?: string;
+  icon: React.ReactNode;
+}
+
 interface NavLink {
   label: string;
   href: string;
   icon: React.ReactNode;
-  children?: { label: string; href: string; icon: React.ReactNode }[];
+  children?: SubMenuItem[];
 }
 
 const PROPERTIES_SUBMENU = [
@@ -51,7 +59,7 @@ const PROPERTIES_SUBMENU = [
   { label: 'Property Management', href: '#properties', icon: <Building2 className="size-4" /> },
   { label: 'Agent Services', href: '#contact', icon: <Users className="size-4" /> },
   { label: 'Buying & Selling of Lands', href: '#properties', icon: <MapPin className="size-4" /> },
-  { label: 'Land Registration & Consultancy', href: '#contact', icon: <FileCheck className="size-4" /> },
+  { label: 'Land Registration & Consultancy', action: 'land-registration', icon: <FileCheck className="size-4" /> },
 ];
 
 const NAV_LINKS: NavLink[] = [
@@ -74,7 +82,7 @@ const SCROLL_THRESHOLD = 80;
 /*  Desktop Properties Dropdown                                         */
 /* ------------------------------------------------------------------ */
 
-function PropertiesDropdown({ isScrolled }: { isScrolled: boolean }) {
+function PropertiesDropdown({ isScrolled, onAction }: { isScrolled: boolean; onAction: (action: string) => void }) {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
@@ -138,29 +146,55 @@ function PropertiesDropdown({ isScrolled }: { isScrolled: boolean }) {
             onMouseLeave={handleLeave}
           >
             {PROPERTIES_SUBMENU.map((sub) => (
-              <a
-                key={sub.label}
-                href={sub.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
-                  isScrolled
-                    ? 'text-white/90 hover:bg-white/15 hover:text-white'
-                    : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
-                )}
-              >
-                <span
+              sub.action ? (
+                <button
+                  key={sub.label}
+                  type="button"
+                  onClick={() => { setOpen(false); onAction(sub.action!); }}
                   className={cn(
-                    'flex size-8 shrink-0 items-center justify-center rounded-md',
+                    'flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 text-left',
                     isScrolled
-                      ? 'bg-white/15 text-white'
-                      : 'bg-[#5F8768]/10 text-[#5F8768]'
+                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
                   )}
                 >
-                  {sub.icon}
-                </span>
-                {sub.label}
-              </a>
+                  <span
+                    className={cn(
+                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+                      isScrolled
+                        ? 'bg-white/15 text-white'
+                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+                    )}
+                  >
+                    {sub.icon}
+                  </span>
+                  {sub.label}
+                </button>
+              ) : (
+                <a
+                  key={sub.label}
+                  href={sub.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+                    isScrolled
+                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+                      isScrolled
+                        ? 'bg-white/15 text-white'
+                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+                    )}
+                  >
+                    {sub.icon}
+                  </span>
+                  {sub.label}
+                </a>
+              )
             ))}
           </motion.div>
         )}
@@ -176,9 +210,11 @@ function PropertiesDropdown({ isScrolled }: { isScrolled: boolean }) {
 function MobileMenuItem({
   link,
   isScrolled,
+  onAction,
 }: {
   link: NavLink;
   isScrolled: boolean;
+  onAction: (action: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasChildren = link.children && link.children.length > 0;
@@ -212,19 +248,34 @@ function MobileMenuItem({
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="overflow-hidden ml-6 border-l-2 border-[#5F8768]/20 pl-4"
             >
-              {link.children!.map((sub) => (
-                <SheetClose asChild key={sub.label}>
-                  <a
-                    href={sub.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
-                  >
-                    <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
-                      {sub.icon}
-                    </span>
-                    {sub.label}
-                  </a>
-                </SheetClose>
-              ))}
+              {link.children!.map((sub) =>
+                sub.action ? (
+                  <SheetClose asChild key={sub.label}>
+                    <button
+                      type="button"
+                      onClick={() => onAction(sub.action!)}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5 text-left"
+                    >
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+                        {sub.icon}
+                      </span>
+                      {sub.label}
+                    </button>
+                  </SheetClose>
+                ) : (
+                  <SheetClose asChild key={sub.label}>
+                    <a
+                      href={sub.href}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
+                    >
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+                        {sub.icon}
+                      </span>
+                      {sub.label}
+                    </a>
+                  </SheetClose>
+                )
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -259,6 +310,11 @@ export default function Navigation() {
     return false;
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [modalAction, setModalAction] = useState<string | null>(null);
+
+  const handleAction = useCallback((action: string) => {
+    setModalAction(action);
+  }, []);
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -304,6 +360,7 @@ export default function Navigation() {
                 <PropertiesDropdown
                   key={link.label}
                   isScrolled={isScrolled}
+                  onAction={handleAction}
                 />
               ) : (
                 <li key={link.label}>
@@ -398,6 +455,7 @@ export default function Navigation() {
                               <MobileMenuItem
                                 link={link}
                                 isScrolled={isScrolled}
+                                onAction={handleAction}
                               />
                             </motion.div>
                           ))}
@@ -425,6 +483,10 @@ export default function Navigation() {
           </div>
         </nav>
       </header>
+      <LandRegistrationModal
+        open={modalAction === 'land-registration'}
+        onClose={() => setModalAction(null)}
+      />
     </>
   );
 }
