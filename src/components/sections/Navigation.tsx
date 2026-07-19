@@ -40,6 +40,7 @@ import BuildingConstructionModal from './BuildingConstructionModal';
 import ProjectManagementModal from './ProjectManagementModal';
 import PropertyRentalsModal from './PropertyRentalsModal';
 import AboutModal from './AboutModal';
+import RentModal from './RentModal';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -75,7 +76,7 @@ const NAV_LINKS: NavLink[] = [
   { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
-  { label: 'Rent', href: '#rent', icon: <Key className="size-[18px]" /> },
+  { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
   { label: 'Commercial', href: '#commercial', icon: <Warehouse className="size-[18px]" /> },
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
@@ -549,6 +550,10 @@ export default function Navigation() {
       />
       <AboutModal
         open={modalAction === 'about'}
+        onClose={() => setModalAction(null)}
+      />
+      <RentModal
+        open={modalAction === 'rent'}
         onClose={() => setModalAction(null)}
       />
     </>
