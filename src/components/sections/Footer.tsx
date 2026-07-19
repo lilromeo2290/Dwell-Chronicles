@@ -7,7 +7,7 @@ import {
   Instagram,
   Linkedin,
   Twitter,
-  Send,
+
   Mail,
   Phone,
   MapPin,
@@ -199,31 +199,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
-        {/* Newsletter Section */}
-        <div className="mt-12 border-t border-white/10 pt-10">
-          <div className="text-center max-w-xl mx-auto">
-            <h3 className="text-lg font-semibold mb-2">
-              Stay Updated
-            </h3>
-            <p className="text-sm text-white/60 mb-6 leading-relaxed">
-              Stay Updated with the Latest Property Listings and Construction
-              Insights.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className="flex-1 bg-white/10 border border-white/20 rounded-l-xl px-4 py-3 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent transition-shadow"
-              />
-              <button className="bg-[#5F8768] hover:bg-[#4A6B52] rounded-r-xl px-6 text-white font-medium text-sm inline-flex items-center gap-2 transition-colors duration-200">
-                <Send className="w-4 h-4" />
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Bar */}
         <div className="mt-10 border-t border-white/10 pt-8 flex justify-between items-center flex-wrap gap-4">
           <p className="text-sm text-white/50">
