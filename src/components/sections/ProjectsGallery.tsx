@@ -22,9 +22,6 @@ const projects: Project[] = [
   { title: "City Mall Expansion", category: "Commercial", location: "Lagos", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80", height: "h-64" },
   { title: "The Residence Towers", category: "Apartments", location: "Port Harcourt", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80", height: "h-80" },
   { title: "Hope Medical Center", category: "Healthcare", location: "Abuja", img: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=600&q=80", height: "h-72" },
-  { title: "Oakwood Family Residences", category: "Houses", location: "Lagos", img: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=600&q=80", height: "h-80" },
-  { title: "Coastal Resort & Spa", category: "Hospitality", location: "Accra", img: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&q=80", height: "h-64" },
-  { title: "Prime Office Hub", category: "Commercial", location: "Nairobi", img: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80", height: "h-72" },
 ];
 
 const categories = [
