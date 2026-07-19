@@ -1,6 +1,6 @@
 'use client';
 
-import { X, CheckCircle2, Shield, Search, Bell, Users, Home, Star, Heart, Eye, MessageSquare, ArrowRight, Key } from 'lucide-react';
+import { X, CheckCircle2, Shield, Search, Bell, Users, Home, Star, Heart, Eye, MessageSquare, ArrowRight, Key, MapPin, Building2, DollarSign, BedDouble } from 'lucide-react';
 
 const listingTypes = [
   'Single rooms',
@@ -95,8 +95,102 @@ export default function RentModal({ open, onClose }: Props) {
           </div>
         </div>
 
+        {/* Search Section */}
+        <div className="px-6 md:px-10 pt-6 md:pt-8 pb-2">
+          <h2 className="text-xl md:text-2xl font-bold text-[#2F3A33] leading-snug">
+            Your Dedicated Partner for Finding the Perfect Rental Space in{' '}
+            <span className="text-[#5F8768]">Ho, Volta Region</span>.
+          </h2>
+        </div>
+
+        {/* Search Filters */}
+        <div className="px-6 md:px-10 pb-6">
+          <div className="bg-[#F8F7F3] rounded-xl p-4 md:p-5">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {/* Location */}
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                    <option>Any Location</option>
+                    <option>Ho Municipality</option>
+                    <option>Adaklu</option>
+                    <option>Akatsi</option>
+                    <option>Amedzofe</option>
+                    <option>Hohoe</option>
+                    <option>Keta</option>
+                    <option>Kpando</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Property Type */}
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Property Type</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                    <option>All Types</option>
+                    <option>Single Room</option>
+                    <option>Chamber & Hall</option>
+                    <option>Self-Contained</option>
+                    <option>Studio</option>
+                    <option>1 Bedroom</option>
+                    <option>2 Bedroom</option>
+                    <option>3 Bedroom</option>
+                    <option>Executive</option>
+                    <option>Commercial</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Price Range</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                    <option>Any Price</option>
+                    <option>Under GHS 200/mo</option>
+                    <option>GHS 200 - 500/mo</option>
+                    <option>GHS 500 - 1,000/mo</option>
+                    <option>GHS 1,000 - 2,000/mo</option>
+                    <option>GHS 2,000 - 5,000/mo</option>
+                    <option>Above GHS 5,000/mo</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Bedrooms */}
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Bedrooms</label>
+                <div className="relative">
+                  <BedDouble className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                    <option>Any</option>
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5+</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Search Button */}
+              <div className="col-span-2 md:col-span-1 flex items-end">
+                <button className="w-full inline-flex items-center justify-center gap-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-semibold text-sm rounded-lg px-4 py-2.5 transition-colors">
+                  <Search className="w-4 h-4" />
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="p-6 md:p-10">
+        <div className="px-6 md:px-10 pb-6 md:pb-10">
           {/* Intro */}
           <p className="text-[#2F3A33] leading-relaxed mb-6">
             Moving to a new home doesn&apos;t have to be stressful. Whether your lease is ending in
