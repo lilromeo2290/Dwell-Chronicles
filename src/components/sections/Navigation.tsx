@@ -77,7 +77,7 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
   { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
-  { label: 'Commercial', href: '#commercial', icon: <Warehouse className="size-[18px]" /> },
+
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
