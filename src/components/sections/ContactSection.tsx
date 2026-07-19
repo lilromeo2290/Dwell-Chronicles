@@ -16,13 +16,13 @@ const contactInfo = [
   {
     icon: MapPin,
     label: 'Location',
-    value: '45 Admiralty Way, Lekki Phase 1, Lagos, Nigeria',
+    value: 'Ho, Ghana',
   },
   {
     icon: Phone,
     label: 'Phone',
-    value: '+234 801 234 5678',
-    href: 'tel:+2348012345678',
+    value: '233 20 470 0023',
+    href: 'tel:+233204700023',
   },
   {
     icon: Mail,
@@ -33,8 +33,8 @@ const contactInfo = [
   {
     icon: MessageCircle,
     label: 'WhatsApp',
-    value: '+234 801 234 5678',
-    href: 'https://wa.me/2348012345678',
+    value: '233 20 470 0023',
+    href: 'https://wa.me/233204700023',
     className: 'text-[#25D366]',
   },
   {
@@ -147,7 +147,7 @@ export default function ContactSection() {
                   Interactive Map
                 </span>
                 <span className="text-[#6B7A6F]/60 text-xs mt-1">
-                  Lekki Phase 1, Lagos
+                  Ho, Ghana
                 </span>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function ContactSection() {
               <p className="text-center text-sm text-[#6B7A6F]">
                 Or reach us directly via{' '}
                 <a
-                  href="https://wa.me/2348012345678"
+                  href="https://wa.me/233204700023"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[#25D366] font-medium hover:underline"
