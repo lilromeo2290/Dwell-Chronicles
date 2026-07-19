@@ -71,11 +71,6 @@ const socialLinks = [
   },
 ];
 
-const footerLinks = [
-  { label: 'Privacy Policy', href: '#privacy' },
-  { label: 'Terms of Service', href: '#terms' },
-  { label: 'Sitemap', href: '#sitemap' },
-];
 
 export default function Footer() {
   return (
@@ -204,17 +199,17 @@ export default function Footer() {
           <p className="text-sm text-white/50">
             &copy; 2026 Dwell Chronicles. All rights reserved.
           </p>
-          <div className="flex flex-wrap gap-6">
-            {footerLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-white/60 hover:text-white text-sm transition-colors duration-200"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
+          <p className="text-sm text-white/50">
+            Powered and Hosted by{' '}
+            <a
+              href="https://clipe233eng.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white font-medium transition-colors duration-200"
+            >
+              CLIPE233 ENGINEERS
+            </a>
+          </p>
         </div>
       </div>
     </footer>
