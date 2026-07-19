@@ -39,6 +39,7 @@ import PropertyManagementModal from './PropertyManagementModal';
 import BuildingConstructionModal from './BuildingConstructionModal';
 import ProjectManagementModal from './ProjectManagementModal';
 import PropertyRentalsModal from './PropertyRentalsModal';
+import AboutModal from './AboutModal';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -53,7 +54,8 @@ interface SubMenuItem {
 
 interface NavLink {
   label: string;
-  href: string;
+  href?: string;
+  action?: string;
   icon: React.ReactNode;
   children?: SubMenuItem[];
 }
@@ -78,7 +80,7 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
   { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
-  { label: 'About', href: '#about', icon: <Info className="size-[18px]" /> },
+  { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Contact', href: '#contact', icon: <Phone className="size-[18px]" /> },
 ];
 
@@ -291,15 +293,28 @@ function MobileMenuItem({
 
   return (
     <SheetClose asChild>
-      <a
-        href={link.href}
-        className="group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
-      >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
-          {link.icon}
-        </span>
-        {link.label}
-      </a>
+      {link.action ? (
+        <button
+          type="button"
+          onClick={() => onAction(link.action!)}
+          className="group flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+            {link.icon}
+          </span>
+          {link.label}
+        </button>
+      ) : (
+        <a
+          href={link.href}
+          className="group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+            {link.icon}
+          </span>
+          {link.label}
+        </a>
+      )}
     </SheetClose>
   );
 }
@@ -368,6 +383,21 @@ export default function Navigation() {
                   isScrolled={isScrolled}
                   onAction={handleAction}
                 />
+              ) : link.action ? (
+                <li key={link.label}>
+                  <button
+                    onClick={() => handleAction(link.action!)}
+                    className={cn(
+                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+                      textColor,
+                      isScrolled
+                        ? 'hover:bg-white/15 hover:text-white'
+                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                    )}
+                  >
+                    {link.label}
+                  </button>
+                </li>
               ) : (
                 <li key={link.label}>
                   <a
@@ -515,6 +545,10 @@ export default function Navigation() {
       />
       <PropertyRentalsModal
         open={modalAction === 'property-rentals'}
+        onClose={() => setModalAction(null)}
+      />
+      <AboutModal
+        open={modalAction === 'about'}
         onClose={() => setModalAction(null)}
       />
     </>
