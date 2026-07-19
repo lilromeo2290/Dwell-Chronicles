@@ -186,15 +186,15 @@ export default function Footer() {
                 info@dwellchronicles.com
               </a>
               <a
-                href="tel:+2348012345678"
+                href="tel:+233204700023"
                 className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-[#7BA384] transition-colors duration-200"
               >
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                +234 801 234 5678
+                233 20 470 0023
               </a>
               <span className="inline-flex items-center gap-2 text-sm text-white/70">
                 <MapPin className="w-4 h-4 flex-shrink-0" />
-                Lagos, Nigeria
+                Ho, Volta Region, Ghana
               </span>
             </div>
           </div>
