@@ -34,6 +34,7 @@ import {
 import { cn } from '@/lib/utils';
 import LandRegistrationModal from './LandRegistrationModal';
 import BuyingSellingLandsModal from './BuyingSellingLandsModal';
+import AgentServicesModal from './AgentServicesModal';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -58,7 +59,7 @@ const PROPERTIES_SUBMENU = [
   { label: 'Project Management', href: '#construction', icon: <ClipboardList className="size-4" /> },
   { label: 'Building Construction', href: '#construction', icon: <HardHat className="size-4" /> },
   { label: 'Property Management', href: '#properties', icon: <Building2 className="size-4" /> },
-  { label: 'Agent Services', href: '#contact', icon: <Users className="size-4" /> },
+  { label: 'Agent Services', action: 'agent-services', icon: <Users className="size-4" /> },
   { label: 'Buying & Selling of Lands', action: 'buying-selling', icon: <MapPin className="size-4" /> },
   { label: 'Land Registration & Consultancy', action: 'land-registration', icon: <FileCheck className="size-4" /> },
 ];
@@ -490,6 +491,10 @@ export default function Navigation() {
       />
       <BuyingSellingLandsModal
         open={modalAction === 'buying-selling'}
+        onClose={() => setModalAction(null)}
+      />
+      <AgentServicesModal
+        open={modalAction === 'agent-services'}
         onClose={() => setModalAction(null)}
       />
     </>
