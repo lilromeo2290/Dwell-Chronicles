@@ -31,7 +31,7 @@ const properties: Property[] = [
   {
     id: 1,
     title: 'Sage Manor Estate',
-    price: '$1,250,000',
+    price: 'GH₵ 15,500,000',
     location: 'Lagos, Ikoyi',
     beds: 5,
     baths: 4,
@@ -43,7 +43,7 @@ const properties: Property[] = [
   {
     id: 2,
     title: 'The Skyline Penthouse',
-    price: '$850,000',
+    price: 'GH₵ 10,500,000',
     location: 'Abuja, Maitama',
     beds: 4,
     baths: 3,
@@ -55,7 +55,7 @@ const properties: Property[] = [
   {
     id: 3,
     title: 'Harbour View Apartments',
-    price: '$3,500/mo',
+    price: 'GH₵ 4,500/mo',
     location: 'Lagos, Lekki',
     beds: 3,
     baths: 2,
@@ -67,7 +67,7 @@ const properties: Property[] = [
   {
     id: 4,
     title: 'Palm Grove Business Park',
-    price: '$2,800,000',
+    price: 'GH₵ 35,000,000',
     location: 'Port Harcourt',
     beds: 0,
     baths: 4,
@@ -79,7 +79,7 @@ const properties: Property[] = [
   {
     id: 5,
     title: 'Riverside Family Villa',
-    price: '$680,000',
+    price: 'GH₵ 8,400,000',
     location: 'Accra, East Legon',
     beds: 4,
     baths: 3,
@@ -91,7 +91,7 @@ const properties: Property[] = [
   {
     id: 6,
     title: 'Greenfield Estate Plot',
-    price: '$120,000',
+    price: 'GH₵ 1,500,000',
     location: 'Abuja, Guzape',
     beds: 0,
     baths: 0,
