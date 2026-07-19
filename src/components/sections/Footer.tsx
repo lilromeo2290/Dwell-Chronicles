@@ -83,7 +83,11 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto">
         {/* Brand Area */}
         <div className="text-center max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold">Dwell Chronicles</h2>
+          <img
+            src="/logo.jpg"
+            alt="Dwell Chronicles"
+            className="h-12 w-auto object-contain mx-auto brightness-0 invert"
+          />
           <p className="mt-3 text-white/60 text-sm leading-relaxed">
             Your trusted partner in premium property listings, construction
             solutions, and real estate investment across Africa.

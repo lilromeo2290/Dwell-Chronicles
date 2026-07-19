@@ -111,10 +111,6 @@ export default function Navigation() {
     ? 'text-white'
     : 'text-[#2F3A33]';
 
-  const iconColor = isScrolled
-    ? 'text-white'
-    : 'text-[#2F3A33]';
-
   return (
     <>
       {/* ---------- Desktop / Main Nav ---------- */}
@@ -133,27 +129,13 @@ export default function Navigation() {
           {/* ---- Logo ---- */}
           <a
             href="#home"
-            className={cn(
-              'flex items-center gap-2.5 transition-colors duration-300',
-              textColor
-            )}
+            className="flex items-center gap-2.5 transition-colors duration-300"
           >
-            <span
-              className={cn(
-                'flex size-9 items-center justify-center rounded-lg transition-colors duration-300',
-                isScrolled
-                  ? 'bg-white/20'
-                  : 'bg-[#5F8768]/10'
-              )}
-            >
-              <Home
-                className={cn('size-[18px] transition-colors duration-300', iconColor)}
-                strokeWidth={2.2}
-              />
-            </span>
-            <span className="text-[17px] font-semibold tracking-tight">
-              Dwell Chronicles
-            </span>
+            <img
+              src="/logo.jpg"
+              alt="Dwell Chronicles"
+              className="h-10 w-auto object-contain rounded-lg"
+            />
           </a>
 
           {/* ---- Desktop Links ---- */}
@@ -223,10 +205,11 @@ export default function Navigation() {
                   {/* Header */}
                   <SheetHeader className="border-b border-[#D8D5CC] px-5 py-4">
                     <SheetTitle className="flex items-center gap-2.5 text-[#2F3A33]">
-                      <span className="flex size-8 items-center justify-center rounded-md bg-[#5F8768]/10">
-                        <Home className="size-4 text-[#5F8768]" strokeWidth={2.2} />
-                      </span>
-                      Dwell Chronicles
+                      <img
+                        src="/logo.jpg"
+                        alt="Dwell Chronicles"
+                        className="h-8 w-auto object-contain"
+                      />
                     </SheetTitle>
                   </SheetHeader>
 

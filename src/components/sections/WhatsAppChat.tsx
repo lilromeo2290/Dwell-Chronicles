@@ -21,9 +21,11 @@ export default function WhatsAppChat() {
             {/* Header */}
             <div className="bg-[#25D366] p-4 text-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
+                <img
+                  src="/logo.jpg"
+                  alt="Dwell Chronicles"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold text-sm">Dwell Chronicles</p>
                   <p className="text-xs text-white/80">Usually replies within minutes</p>

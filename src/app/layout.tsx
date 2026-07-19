@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Dwell Chronicles" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.jpg",
   },
   openGraph: {
     title: "Dwell Chronicles — Premium Property Listings & Construction Solutions",
