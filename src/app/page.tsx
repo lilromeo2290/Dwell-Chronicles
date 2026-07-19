@@ -3,7 +3,6 @@ import Hero from '@/components/sections/Hero';
 import FeaturedProperties from '@/components/sections/FeaturedProperties';
 import ConstructionServices from '@/components/sections/ConstructionServices';
 import ProjectsGallery from '@/components/sections/ProjectsGallery';
-import InvestmentStats from '@/components/sections/InvestmentStats';
 import VideoSection from '@/components/sections/VideoSection';
 
 import CTABanner from '@/components/sections/CTABanner';
@@ -20,7 +19,6 @@ export default function Home() {
         <FeaturedProperties />
         <ConstructionServices />
         <ProjectsGallery />
-        <InvestmentStats />
         <VideoSection />
         <CTABanner />
         <ContactSection />
