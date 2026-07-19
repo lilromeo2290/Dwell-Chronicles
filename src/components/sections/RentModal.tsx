@@ -105,14 +105,14 @@ export default function RentModal({ open, onClose }: Props) {
 
         {/* Search Filters */}
         <div className="px-6 md:px-10 pb-6">
-          <div className="bg-[#F8F7F3] rounded-xl p-4 md:p-5">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="bg-[#F8F7F3] rounded-xl p-5 md:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
               {/* Location */}
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Location</label>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7A6F] mb-2 uppercase tracking-wider">Location</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
-                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                     <option>Any Location</option>
                     <option>Ho Municipality</option>
                     <option>Adaklu</option>
@@ -126,11 +126,11 @@ export default function RentModal({ open, onClose }: Props) {
               </div>
 
               {/* Property Type */}
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Property Type</label>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7A6F] mb-2 uppercase tracking-wider">Property Type</label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
-                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                     <option>All Types</option>
                     <option>Single Room</option>
                     <option>Chamber & Hall</option>
@@ -146,11 +146,11 @@ export default function RentModal({ open, onClose }: Props) {
               </div>
 
               {/* Price Range */}
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Price Range</label>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7A6F] mb-2 uppercase tracking-wider">Price Range</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
-                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                  <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                     <option>Any Price</option>
                     <option>Under GHS 200/mo</option>
                     <option>GHS 200 - 500/mo</option>
@@ -163,11 +163,11 @@ export default function RentModal({ open, onClose }: Props) {
               </div>
 
               {/* Bedrooms */}
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-xs font-medium text-[#6B7A6F] mb-1.5">Bedrooms</label>
+              <div>
+                <label className="block text-xs font-semibold text-[#6B7A6F] mb-2 uppercase tracking-wider">Bedrooms</label>
                 <div className="relative">
-                  <BedDouble className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
-                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-9 pr-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}>
+                  <BedDouble className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7A6F]" />
+                  <select className="w-full border border-[#E5E3DC] rounded-lg pl-10 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#5F8768] focus:border-transparent text-[#2F3A33] appearance-none cursor-pointer" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7A6F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center' }}>
                     <option>Any</option>
                     <option>1</option>
                     <option>2</option>
@@ -177,15 +177,13 @@ export default function RentModal({ open, onClose }: Props) {
                   </select>
                 </div>
               </div>
-
-              {/* Search Button */}
-              <div className="col-span-2 md:col-span-1 flex items-end">
-                <button className="w-full inline-flex items-center justify-center gap-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-semibold text-sm rounded-lg px-4 py-2.5 transition-colors">
-                  <Search className="w-4 h-4" />
-                  Search
-                </button>
-              </div>
             </div>
+
+            {/* Search Button - Full Width */}
+            <button className="w-full inline-flex items-center justify-center gap-2.5 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-semibold text-sm rounded-lg px-6 py-3.5 transition-colors">
+              <Search className="w-4 h-4" />
+              Search Properties
+            </button>
           </div>
         </div>
 
