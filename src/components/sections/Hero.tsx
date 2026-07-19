@@ -88,6 +88,9 @@ export default function Hero() {
             className="mt-14 w-full max-w-5xl md:mt-16"
             variants={searchBarVariants}
           >
+            <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-5 tracking-tight">
+              ROOM SEARCH IN AND AROUND HO.
+            </h3>
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl md:p-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-4">
                 {/* Location */}
