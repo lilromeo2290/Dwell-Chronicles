@@ -6,7 +6,7 @@ import ProjectsGallery from '@/components/sections/ProjectsGallery';
 import InvestmentStats from '@/components/sections/InvestmentStats';
 import BlogSection from '@/components/sections/BlogSection';
 import VideoSection from '@/components/sections/VideoSection';
-import TestimonialsSection from '@/components/sections/TestimonialsSection';
+
 import CTABanner from '@/components/sections/CTABanner';
 import ContactSection from '@/components/sections/ContactSection';
 import Footer from '@/components/sections/Footer';
@@ -24,7 +24,6 @@ export default function Home() {
         <InvestmentStats />
         <BlogSection />
         <VideoSection />
-        <TestimonialsSection />
         <CTABanner />
         <ContactSection />
       </main>
