@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Search, HardHat, Play, MapPin, ChevronDown, Building2, DollarSign, BedDouble } from 'lucide-react'
+import { Search, MapPin, ChevronDown, Building2, DollarSign, BedDouble } from 'lucide-react'
 
 const containerVariants = {
   hidden: {},
@@ -82,36 +82,6 @@ export default function Hero() {
             Premium Property Listings, Construction Solutions, Real Estate Insights &
             Investment Opportunities.
           </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            className="mt-10 flex flex-col items-center gap-4 sm:flex-row md:mt-12"
-            variants={fadeUp}
-          >
-            <button
-              className="group inline-flex items-center gap-2.5 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-[#2F3A33] shadow-lg shadow-black/10 transition-all duration-300 hover:bg-[#D8D5CC] md:px-8 md:py-4 md:text-base"
-              aria-label="Explore Properties"
-            >
-              <Search className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              Explore Properties
-            </button>
-
-            <button
-              className="group inline-flex items-center gap-2.5 rounded-xl border-2 border-white px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white hover:text-[#2F3A33] md:px-8 md:py-4 md:text-base"
-              aria-label="Request Construction Quote"
-            >
-              <HardHat className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              Request Construction Quote
-            </button>
-
-            <button
-              className="group inline-flex items-center gap-2.5 rounded-xl border-2 border-white px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/10 md:px-8 md:py-4 md:text-base"
-              aria-label="Watch Our Videos"
-            >
-              <Play className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              Watch Our Videos
-            </button>
-          </motion.div>
 
           {/* Search Bar */}
           <motion.div
