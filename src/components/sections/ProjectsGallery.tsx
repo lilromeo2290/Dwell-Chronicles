@@ -19,9 +19,6 @@ const projects: Project[] = [
   { title: "Serenity Hotel & Suites", category: "Hospitality", location: "Accra", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80", height: "h-80" },
   { title: "Greenspring Academy", category: "Education", location: "Nairobi", img: "https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80", height: "h-72" },
   { title: "Lakeside Villas Phase 2", category: "Houses", location: "Accra", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80", height: "h-96" },
-  { title: "City Mall Expansion", category: "Commercial", location: "Lagos", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80", height: "h-64" },
-  { title: "The Residence Towers", category: "Apartments", location: "Port Harcourt", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80", height: "h-80" },
-  { title: "Hope Medical Center", category: "Healthcare", location: "Abuja", img: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=600&q=80", height: "h-72" },
 ];
 
 const categories = [
@@ -31,7 +28,6 @@ const categories = [
   'Commercial',
   'Hospitality',
   'Education',
-  'Healthcare',
 ];
 
 const headerVariants = {
