@@ -38,6 +38,7 @@ import AgentServicesModal from './AgentServicesModal';
 import PropertyManagementModal from './PropertyManagementModal';
 import BuildingConstructionModal from './BuildingConstructionModal';
 import ProjectManagementModal from './ProjectManagementModal';
+import PropertyRentalsModal from './PropertyRentalsModal';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -58,7 +59,7 @@ interface NavLink {
 }
 
 const PROPERTIES_SUBMENU = [
-  { label: 'Property Rentals', href: '#properties', icon: <KeyRound className="size-4" /> },
+  { label: 'Property Rentals', action: 'property-rentals', icon: <KeyRound className="size-4" /> },
   { label: 'Project Management', action: 'project-management', icon: <ClipboardList className="size-4" /> },
   { label: 'Building Construction', action: 'building-construction', icon: <HardHat className="size-4" /> },
   { label: 'Property Management', action: 'property-management', icon: <Building2 className="size-4" /> },
@@ -510,6 +511,10 @@ export default function Navigation() {
       />
       <ProjectManagementModal
         open={modalAction === 'project-management'}
+        onClose={() => setModalAction(null)}
+      />
+      <PropertyRentalsModal
+        open={modalAction === 'property-rentals'}
         onClose={() => setModalAction(null)}
       />
     </>
