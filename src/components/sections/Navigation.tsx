@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
   Building2,
-  DollarSign,
   Key,
   Warehouse,
   HardHat,
@@ -75,7 +74,6 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Home', href: '#home', icon: <Home className="size-[18px]" /> },
   { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
-  { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
   { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
 
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
