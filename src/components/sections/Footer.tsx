@@ -4,9 +4,6 @@ import {
   ArrowRight,
   Youtube,
   Facebook,
-  Instagram,
-  Linkedin,
-  Twitter,
 
   Mail,
   Phone,
@@ -40,34 +37,16 @@ const resources = [
 
 const socialLinks = [
   {
-    icon: Youtube,
-    href: '#',
-    bg: 'bg-red-600',
-    label: 'YouTube',
-  },
-  {
     icon: Facebook,
-    href: '#',
+    href: 'https://web.facebook.com/dwellchronicles',
     bg: 'bg-blue-600',
     label: 'Facebook',
   },
   {
-    icon: Instagram,
-    href: '#',
-    bg: 'bg-pink-600',
-    label: 'Instagram',
-  },
-  {
-    icon: Linkedin,
-    href: '#',
-    bg: 'bg-blue-700',
-    label: 'LinkedIn',
-  },
-  {
-    icon: Twitter,
-    href: '#',
-    bg: 'bg-black',
-    label: 'Twitter',
+    icon: Youtube,
+    href: 'https://www.youtube.com/@dwellchronicles/featured',
+    bg: 'bg-red-600',
+    label: 'YouTube',
   },
 ];
 
