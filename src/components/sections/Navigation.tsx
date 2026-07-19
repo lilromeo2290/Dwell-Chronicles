@@ -82,7 +82,6 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
   { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
-  { label: 'Contact', href: '#contact', icon: <Phone className="size-[18px]" /> },
 ];
 
 const SCROLL_THRESHOLD = 80;
