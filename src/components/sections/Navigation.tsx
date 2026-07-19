@@ -4,15 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
-  Building2,
-  DollarSign,
-  Key,
-  Warehouse,
+  KeyRound,
+  ClipboardList,
   HardHat,
-  FolderOpen,
+  Building2,
+  Users,
+  MapPin,
+  FileCheck,
   BookOpen,
   Play,
-  Info,
   Phone,
   Menu,
 } from 'lucide-react';
@@ -39,15 +39,15 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { label: 'Home', href: '#home', icon: <Home className="size-[18px]" /> },
-  { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" /> },
-  { label: 'Buy', href: '#buy', icon: <DollarSign className="size-[18px]" /> },
-  { label: 'Rent', href: '#rent', icon: <Key className="size-[18px]" /> },
-  { label: 'Commercial', href: '#commercial', icon: <Warehouse className="size-[18px]" /> },
-  { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
-  { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
+  { label: 'Property Rentals', href: '#properties', icon: <KeyRound className="size-[18px]" /> },
+  { label: 'Project Management', href: '#construction', icon: <ClipboardList className="size-[18px]" /> },
+  { label: 'Building Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
+  { label: 'Property Management', href: '#properties', icon: <Building2 className="size-[18px]" /> },
+  { label: 'Agent Services', href: '#contact', icon: <Users className="size-[18px]" /> },
+  { label: 'Buying & Selling Lands', href: '#properties', icon: <MapPin className="size-[18px]" /> },
+  { label: 'Land Registration', href: '#contact', icon: <FileCheck className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
   { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
-  { label: 'About', href: '#about', icon: <Info className="size-[18px]" /> },
   { label: 'Contact', href: '#contact', icon: <Phone className="size-[18px]" /> },
 ];
 

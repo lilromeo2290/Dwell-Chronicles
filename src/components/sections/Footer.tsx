@@ -15,19 +15,21 @@ import {
 
 const quickLinks = [
   { label: 'Home', href: '#home' },
-  { label: 'Properties', href: '#properties' },
-  { label: 'Construction', href: '#construction' },
+  { label: 'Property Rentals', href: '#properties' },
+  { label: 'Building Construction', href: '#construction' },
   { label: 'Blog', href: '#blog' },
   { label: 'Videos', href: '#videos' },
   { label: 'Contact', href: '#contact' },
 ];
 
 const services = [
-  { label: 'Construction', href: '#construction' },
-  { label: 'Property Sales', href: '#properties' },
-  { label: 'Rentals', href: '#properties' },
-  { label: 'Consultancy', href: '#contact' },
-  { label: 'Property Management', href: '#services' },
+  { label: 'Building Construction', href: '#construction' },
+  { label: 'Buying & Selling Lands', href: '#properties' },
+  { label: 'Property Rentals', href: '#properties' },
+  { label: 'Land Registration', href: '#contact' },
+  { label: 'Property Management', href: '#properties' },
+  { label: 'Agent Services', href: '#contact' },
+  { label: 'Project Management', href: '#construction' },
 ];
 
 const resources = [
