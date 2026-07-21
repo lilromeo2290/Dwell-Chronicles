@@ -43,6 +43,18 @@ import ProjectManagementModal from './ProjectManagementModal';
 import PropertyRentalsModal from './PropertyRentalsModal';
 import AboutModal from './AboutModal';
 import RentModal from './RentModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
@@ -85,11 +97,11 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
   { label: 'Airbnb', href: '/airbnb', icon: <Hotel className="size-[18px]" />, isLink: true },
-  { label: 'Admin', href: '#admin', icon: <ShieldCheck className="size-[18px]" />, children: ADMIN_SUBMENU },
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
   { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
+  { label: 'Admin', href: '#admin', icon: <ShieldCheck className="size-[18px]" />, children: ADMIN_SUBMENU },
 ];
 
 const SCROLL_THRESHOLD = 80;
@@ -220,13 +232,117 @@ function PropertiesDropdown({ isScrolled, onAction }: { isScrolled: boolean; onA
 }
 
 /* ------------------------------------------------------------------ */
+/*  Admin Password Gate                                                   */
+/* ------------------------------------------------------------------ */
+
+const ADMIN_CREDS = { username: 'airbnb', password: 'clipeconsult' };
+
+function AdminPasswordGate({
+  isScrolled,
+  onSuccess,
+  onCancel,
+}: {
+  isScrolled: boolean;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === ADMIN_CREDS.username && password === ADMIN_CREDS.password) {
+      sessionStorage.setItem('dc_admin_auth', '1');
+      onSuccess();
+    } else {
+      setError('Invalid credentials');
+      setPassword('');
+    }
+  };
+
+  return (
+    <div className="p-3">
+      <p className={cn('text-xs font-medium mb-3', isScrolled ? 'text-white/70' : 'text-gray-500')}>
+        Enter admin credentials
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-2">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => { setUsername(e.target.value); setError(''); }}
+          className={cn(
+            'w-full rounded-lg border px-3 py-1.5 text-xs outline-none transition-colors',
+            isScrolled
+              ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+              : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#5F8768]'
+          )}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); setError(''); }}
+          className={cn(
+            'w-full rounded-lg border px-3 py-1.5 text-xs outline-none transition-colors',
+            isScrolled
+              ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+              : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#5F8768]'
+          )}
+        />
+        {error && (
+          <p className="text-xs text-red-400">{error}</p>
+        )}
+        <div className="flex gap-2 pt-1">
+          <button
+            type="submit"
+            className={cn(
+              'flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+              isScrolled
+                ? 'bg-white text-[#5F8768] hover:bg-white/90'
+                : 'bg-[#5F8768] text-white hover:bg-[#5F8768]/90'
+            )}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+              isScrolled
+                ? 'text-white/70 hover:text-white'
+                : 'text-gray-500 hover:text-gray-700'
+            )}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Desktop Admin Dropdown                                               */
 /* ------------------------------------------------------------------ */
 
 function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
   const [open, setOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+
+  useEffect(() => {
+    setAuthenticated(sessionStorage.getItem('dc_admin_auth') === '1');
+  }, []);
 
   const handleEnter = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -261,6 +377,7 @@ function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
         aria-expanded={open}
         aria-haspopup="true"
       >
+        <ShieldCheck className="size-[15px]" />
         Admin
         <ChevronDown
           className={cn(
@@ -278,7 +395,7 @@ function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={cn(
-              'absolute top-full right-0 mt-1 w-56 rounded-xl border shadow-xl p-2 z-50',
+              'absolute top-full right-0 mt-1 w-60 rounded-xl border shadow-xl p-2 z-50',
               isScrolled
                 ? 'bg-[#5F8768] border-[#5F8768]/60 shadow-[#2F3A33]/20'
                 : 'bg-white border-[#E5E3DC] shadow-[#2F3A33]/10'
@@ -286,31 +403,39 @@ function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
             onMouseEnter={handleEnter}
             onMouseLeave={handleLeave}
           >
-            {ADMIN_SUBMENU.map((sub) => (
-              <Link
-                key={sub.label}
-                href={sub.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
-                  isScrolled
-                    ? 'text-white/90 hover:bg-white/15 hover:text-white'
-                    : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
-                )}
-              >
-                <span
+            {authenticated ? (
+              ADMIN_SUBMENU.map((sub) => (
+                <Link
+                  key={sub.label}
+                  href={sub.href}
+                  onClick={() => setOpen(false)}
                   className={cn(
-                    'flex size-8 shrink-0 items-center justify-center rounded-md',
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
                     isScrolled
-                      ? 'bg-white/15 text-white'
-                      : 'bg-[#5F8768]/10 text-[#5F8768]'
+                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
                   )}
                 >
-                  {sub.icon}
-                </span>
-                {sub.label}
-              </Link>
-            ))}
+                  <span
+                    className={cn(
+                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+                      isScrolled
+                        ? 'bg-white/15 text-white'
+                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+                    )}
+                  >
+                    {sub.icon}
+                  </span>
+                  {sub.label}
+                </Link>
+              ))
+            ) : (
+              <AdminPasswordGate
+                isScrolled={isScrolled}
+                onSuccess={() => setAuthenticated(true)}
+                onCancel={() => setOpen(false)}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -326,10 +451,16 @@ function MobileMenuItem({
   link,
   isScrolled,
   onAction,
+  isAdmin,
+  adminAuthenticated,
+  onAdminClick,
 }: {
   link: NavLink;
   isScrolled: boolean;
   onAction: (action: string) => void;
+  isAdmin?: boolean;
+  adminAuthenticated?: boolean;
+  onAdminClick?: (href: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasChildren = link.children && link.children.length > 0;
@@ -364,7 +495,25 @@ function MobileMenuItem({
               className="overflow-hidden ml-6 border-l-2 border-[#5F8768]/20 pl-4"
             >
               {link.children!.map((sub) =>
-                sub.href && !sub.action ? (
+                isAdmin && !adminAuthenticated ? (
+                  <button
+                    key={sub.label}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onAdminClick?.(sub.href!);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5 text-left"
+                  >
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+                      {sub.icon}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      {sub.label}
+                      <span className="text-[10px] text-gray-400 font-normal">🔒</span>
+                    </span>
+                  </button>
+                ) : sub.href && !sub.action ? (
                   <SheetClose asChild key={sub.label}>
                     <Link
                       href={sub.href}
@@ -461,6 +610,42 @@ export default function Navigation() {
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [modalAction, setModalAction] = useState<string | null>(null);
+  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [pendingAdminHref, setPendingAdminHref] = useState<string | null>(null);
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
+
+  useEffect(() => {
+    setAdminAuth(sessionStorage.getItem('dc_admin_auth') === '1');
+  }, []);
+
+  const handleAdminClick = useCallback((href: string) => {
+    if (adminAuth) {
+      return; // already authenticated, link will navigate normally
+    }
+    setPendingAdminHref(href);
+    setAdminUsername('');
+    setAdminPassword('');
+    setAdminError('');
+    setAdminModalOpen(true);
+  }, [adminAuth]);
+
+  const handleAdminLogin = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminUsername === ADMIN_CREDS.username && adminPassword === ADMIN_CREDS.password) {
+      sessionStorage.setItem('dc_admin_auth', '1');
+      setAdminAuth(true);
+      setAdminModalOpen(false);
+      if (pendingAdminHref) {
+        window.location.href = pendingAdminHref;
+      }
+    } else {
+      setAdminError('Invalid credentials');
+      setAdminPassword('');
+    }
+  }, [adminUsername, adminPassword, pendingAdminHref]);
 
   const handleAction = useCallback((action: string) => {
     setModalAction(action);
@@ -641,6 +826,9 @@ export default function Navigation() {
                                 link={link}
                                 isScrolled={isScrolled}
                                 onAction={handleAction}
+                                isAdmin={link.label === 'Admin'}
+                                adminAuthenticated={adminAuth}
+                                onAdminClick={handleAdminClick}
                               />
                             </motion.div>
                           ))}
@@ -704,6 +892,54 @@ export default function Navigation() {
         open={modalAction === 'rent'}
         onClose={() => setModalAction(null)}
       />
+
+      {/* ── Admin Password Dialog (Mobile) ── */}
+      <AlertDialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
+        <AlertDialogContent className="sm:max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-[#5F8768]" />
+              Admin Access
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Enter your credentials to access the admin panel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <form onSubmit={handleAdminLogin} className="space-y-3 py-2">
+            <div>
+              <Label className="text-xs">Username</Label>
+              <Input
+                value={adminUsername}
+                onChange={(e) => { setAdminUsername(e.target.value); setAdminError(''); }}
+                placeholder="Username"
+                className="mt-1"
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Password</Label>
+              <Input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => { setAdminPassword(e.target.value); setAdminError(''); }}
+                placeholder="Password"
+                className="mt-1"
+              />
+            </div>
+            {adminError && (
+              <p className="text-xs text-red-500">{adminError}</p>
+            )}
+            <div className="flex gap-2 pt-1">
+              <AlertDialogCancel asChild>
+                <Button type="button" variant="outline" className="flex-1">Cancel</Button>
+              </AlertDialogCancel>
+              <Button type="submit" className="flex-1 bg-[#5F8768] text-white hover:bg-[#5F8768]/90">
+                Sign In
+              </Button>
+            </div>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
