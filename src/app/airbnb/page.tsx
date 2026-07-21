@@ -76,11 +76,7 @@ interface Apartment {
 const CITIES = [
   { label: 'All Cities', value: '' },
   { label: 'Ho', value: 'Ho' },
-  { label: 'Hohoe', value: 'Hohoe' },
-  { label: 'Keta', value: 'Keta' },
-  { label: 'Akosombo', value: 'Akosombo' },
-  { label: 'Aflao', value: 'Aflao' },
-  { label: 'Sogakope', value: 'Sogakope' },
+  { label: 'Accra', value: 'Accra' },
 ];
 
 const AREAS = [
@@ -665,7 +661,7 @@ export default function AirbnbListingPage() {
               <span className="text-white/90">in Volta Region</span>
             </h1>
             <p className="mt-2 text-sm sm:text-base text-white/70 leading-relaxed max-w-lg">
-              Discover handpicked short-term stays across Ho, Hohoe, Keta, and beyond.
+              Discover handpicked short-term stays across Ho, Accra, and beyond.
               Find the perfect apartment for your visit to Ghana&apos;s beautiful Volta Region.
             </p>
           </div>

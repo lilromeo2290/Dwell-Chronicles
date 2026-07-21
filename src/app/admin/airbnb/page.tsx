@@ -92,7 +92,7 @@ const BRAND = {
   charcoal: '#2F3A33',
 } as const;
 
-const CITIES = ['Ho', 'Hohoe', 'Keta', 'Akosombo', 'Aflao', 'Sogakope'] as const;
+const CITIES = ['Ho', 'Accra'] as const;
 
 const AMENITIES_LIST = [
   'Wi-Fi',
