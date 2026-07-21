@@ -747,15 +747,13 @@ export default function AirbnbListingPage() {
               value={bedrooms}
               onChange={handleBedroomsChange}
               options={BEDROOM_OPTIONS.map((b) => ({ label: b.label, value: b.value, min: '', max: '' }))}
-              placeholder="Any"
-              className="w-28"
+              className="w-36"
             />
             <FilterSelect
               value={guests}
               onChange={handleGuestsChange}
               options={GUEST_OPTIONS.map((g) => ({ label: g.label, value: g.value, min: '', max: '' }))}
-              placeholder="Any"
-              className="w-28"
+              className="w-36"
             />
             <Button
               onClick={applyFilters}
