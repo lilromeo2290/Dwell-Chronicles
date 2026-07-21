@@ -235,7 +235,7 @@ function PropertiesDropdown({ isScrolled, onAction }: { isScrolled: boolean; onA
 /*  Admin Password Gate                                                   */
 /* ------------------------------------------------------------------ */
 
-const ADMIN_CREDS = { username: 'airbnb', password: 'and/or' };
+const ADMIN_CREDS = { username: 'airbnb', password: 'Airbnb/Clipeconsult' };
 
 function AdminPasswordGate({
   isScrolled,
