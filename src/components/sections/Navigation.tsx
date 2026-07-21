@@ -22,6 +22,7 @@ import {
   MapPin,
   FileCheck,
   Hotel,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,6 +64,11 @@ interface NavLink {
   isLink?: boolean;
 }
 
+const ADMIN_SUBMENU = [
+  { label: 'Rental Properties', href: '/admin/rentals', icon: <KeyRound className="size-4" /> },
+  { label: 'Apartment Bookings', href: '/admin/airbnb', icon: <Hotel className="size-4" /> },
+];
+
 const PROPERTIES_SUBMENU = [
   { label: 'Property Rentals', action: 'property-rentals', icon: <KeyRound className="size-4" /> },
   { label: 'Project Management', action: 'project-management', icon: <ClipboardList className="size-4" /> },
@@ -79,7 +85,7 @@ const NAV_LINKS: NavLink[] = [
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
   { label: 'Airbnb', href: '/airbnb', icon: <Hotel className="size-[18px]" />, isLink: true },
-
+  { label: 'Admin', href: '#admin', icon: <ShieldCheck className="size-[18px]" />, children: ADMIN_SUBMENU },
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
   { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
@@ -214,6 +220,105 @@ function PropertiesDropdown({ isScrolled, onAction }: { isScrolled: boolean; onA
 }
 
 /* ------------------------------------------------------------------ */
+/*  Desktop Admin Dropdown                                               */
+/* ------------------------------------------------------------------ */
+
+function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
+  const [open, setOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+
+  const handleEnter = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  return (
+    <li
+      className="relative"
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      <button
+        className={cn(
+          'inline-flex items-center gap-1 px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+          textColor,
+          isScrolled
+            ? 'hover:bg-white/15 hover:text-white'
+            : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+        )}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        Admin
+        <ChevronDown
+          className={cn(
+            'size-3.5 transition-transform duration-200',
+            open && 'rotate-180'
+          )}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className={cn(
+              'absolute top-full right-0 mt-1 w-56 rounded-xl border shadow-xl p-2 z-50',
+              isScrolled
+                ? 'bg-[#5F8768] border-[#5F8768]/60 shadow-[#2F3A33]/20'
+                : 'bg-white border-[#E5E3DC] shadow-[#2F3A33]/10'
+            )}
+            onMouseEnter={handleEnter}
+            onMouseLeave={handleLeave}
+          >
+            {ADMIN_SUBMENU.map((sub) => (
+              <Link
+                key={sub.label}
+                href={sub.href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+                  isScrolled
+                    ? 'text-white/90 hover:bg-white/15 hover:text-white'
+                    : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex size-8 shrink-0 items-center justify-center rounded-md',
+                    isScrolled
+                      ? 'bg-white/15 text-white'
+                      : 'bg-[#5F8768]/10 text-[#5F8768]'
+                  )}
+                >
+                  {sub.icon}
+                </span>
+                {sub.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </li>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Mobile Menu Item                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -259,7 +364,19 @@ function MobileMenuItem({
               className="overflow-hidden ml-6 border-l-2 border-[#5F8768]/20 pl-4"
             >
               {link.children!.map((sub) =>
-                sub.action ? (
+                sub.href && !sub.action ? (
+                  <SheetClose asChild key={sub.label}>
+                    <Link
+                      href={sub.href}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
+                    >
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+                        {sub.icon}
+                      </span>
+                      {sub.label}
+                    </Link>
+                  </SheetClose>
+                ) : sub.action ? (
                   <SheetClose asChild key={sub.label}>
                     <button
                       type="button"
@@ -389,7 +506,12 @@ export default function Navigation() {
           {/* ---- Desktop Links ---- */}
           <ul className="hidden xl:flex items-center gap-1">
             {NAV_LINKS.map((link) =>
-              link.children ? (
+              link.label === 'Admin' && link.children ? (
+                <AdminDropdown
+                  key={link.label}
+                  isScrolled={isScrolled}
+                />
+              ) : link.children ? (
                 <PropertiesDropdown
                   key={link.label}
                   isScrolled={isScrolled}
