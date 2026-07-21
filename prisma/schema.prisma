@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -29,4 +23,72 @@ model Post {
   authorId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Apartment {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String
+  address     String
+  city        String
+  area        String
+  latitude    String?
+  longitude   String?
+  pricePerNight  Float
+  weeklyPrice    Float?
+  monthlyPrice   Float?
+  cleaningFee    Float?
+  securityDeposit Float?
+  bedrooms   Int
+  bathrooms  Int
+  maxGuests  Int
+  rating     Float    @default(4.5)
+  status     String   @default("available") // available, reserved, booked, maintenance
+  category   String   @default("standard") // standard, luxury, executive, budget
+  featured   Boolean  @default(false)
+  newlyAdded Boolean  @default(true)
+  amenities  String   // JSON array stored as string
+  whatsappNumber String @default("233204700023")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  images     ApartmentImage[]
+  availabilityDates ApartmentAvailability[]
+  enquiries  BookingEnquiry[]
+}
+
+model ApartmentImage {
+  id          String    @id @default(cuid())
+  apartmentId String
+  url         String
+  alt         String?
+  sortOrder   Int       @default(0)
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+model ApartmentAvailability {
+  id          String    @id @default(cuid())
+  apartmentId String
+  date        String    // YYYY-MM-DD format
+  status      String    @default("available") // available, booked, reserved, maintenance
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@unique([apartmentId, date])
+}
+
+model BookingEnquiry {
+  id          String    @id @default(cuid())
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  fullName    String
+  phoneNumber String
+  email       String
+  checkIn     String
+  checkOut    String
+  guests      Int
+  specialRequests String?
+  status      String    @default("new") // new, confirmed, cancelled
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

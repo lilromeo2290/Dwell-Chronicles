@@ -1,40 +1,27 @@
+# Worklog — Dwell Chronicles Airbnb Feature Build
+
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Build premium Dwell Chronicles property listing & construction website
+Task: Build premium Airbnb-style short-stay apartment section
 
 Work Log:
-- Initialized fullstack dev environment (Next.js 16 + Tailwind CSS 4 + shadcn/ui)
-- Configured brand color system: Primary #5F8768, Background #F8F7F3, Text #2F3A33, Accent #D8D5CC
-- Set up Poppins font via @font-face, custom CSS for glassmorphism, animations, scrollbars
-- Built 13 section components: Navigation, Hero, FeaturedProperties, ConstructionServices, ProjectsGallery, InvestmentStats, BlogSection, VideoSection, TestimonialsSection, CTABanner, ContactSection, Footer, WhatsAppChat
-- Composed all sections in page.tsx with proper flex layout for sticky footer
-- Ran ESLint — zero errors
-- Browser verification: all 10 H2 sections render, nav scroll works, mobile menu works, property filters work, favorite toggle works, testimonial carousel advances, contact form and newsletter present, WhatsApp floating button with pulse animation
-- Mobile responsiveness verified (390x844 iPhone 14 viewport)
-- Integrated uploaded logo.jpg into Navigation (desktop + mobile), Footer (inverted), WhatsApp widget, and favicon
+- Explored project structure: single-page Next.js 16 site with hash-based navigation
+- Designed Prisma schema: Apartment, ApartmentImage, ApartmentAvailability, BookingEnquiry models
+- Pushed schema to SQLite database via `bun run db:push`
+- Created seed script with 8 apartments across Ho, Hohoe, Keta, Akosombo (90-day availability each)
+- Built 5 API routes: apartments CRUD, availability management, booking enquiries
+- Built Airbnb listing page (/airbnb) with search, filters, category tabs, animated cards
+- Built apartment detail page (/airbnb/[id]) with gallery, calendar, amenities, WhatsApp booking, inquiry form
+- Built admin dashboard (/admin/airbnb) with apartment CRUD, availability calendar, enquiries, settings tabs
+- Built admin rentals page (/admin/rentals) with status toggle (available/taken), filters, add/edit
+- Added "Airbnb" to main navigation (using Next.js Link for page navigation)
+- Added "ADMIN" column to footer beside Connect (links to /admin/rentals and /admin/airbnb)
+- Verified all pages with agent browser: listing, detail, admin, homepage nav, footer
 
 Stage Summary:
-- Complete luxury real estate website with 13 sections
-- All interactive features verified: nav scroll, filters, favorites, carousel, mobile menu
-- Zero lint errors, zero console errors
-- Brand-consistent design with sage green theme throughout
-
----
-Task ID: 2
-Agent: Main Agent
-Task: Set up GitHub repository and periodic auto-push
-
-Work Log:
-- Initialized git repo, added remote origin for github.com/lilromeo2290/Dwell-Chronicles.git
-- Updated .gitignore to exclude .zscripts/, upload/, agent-ctx/
-- Created scripts/auto-push.sh — detects changes, commits with descriptive messages, pushes to GitHub
-- Started background process (PID 5228) running auto-push every 5 minutes
-- Tested end-to-end: script successfully committed and pushed to GitHub
-- Auto-push log maintained at .auto-push.log (gitignored via *.log)
-
-Stage Summary:
-- GitHub repo connected and all code pushed to main branch
-- Auto-push runs every 5 minutes in the background
-- Commit messages include timestamp and change summary (added/modified/deleted counts)
-- Log file: /home/z/my-project/.auto-push.log
+- All pages compile cleanly (0 lint errors)
+- 8 seed apartments with images, 90-day availability calendars
+- Full Airbnb-quality short-stay booking experience with WhatsApp integration
+- Admin can manage apartments, availability dates, and enquiries
+- Footer now has 5 columns: Quick Links, Services, Resources, Admin, Connect

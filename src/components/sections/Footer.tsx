@@ -1,10 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import {
   ArrowRight,
   Youtube,
   Facebook,
-
+  ShieldCheck,
   Mail,
   Phone,
   MapPin,
@@ -69,7 +70,7 @@ export default function Footer() {
         </div>
 
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 mt-12">
           {/* Column 1 — Quick Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-5">
@@ -130,7 +131,34 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4 — Connect */}
+          {/* Column 4 — Admin */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-5">
+              Admin
+            </h3>
+            <ul className="flex flex-col gap-3">
+              <li>
+                <Link
+                  href="/admin/rentals"
+                  className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-[#7BA384] transition-colors duration-200 group"
+                >
+                  <ShieldCheck className="w-4 h-4 opacity-60" />
+                  <span>Rental Properties</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin/airbnb"
+                  className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-[#7BA384] transition-colors duration-200 group"
+                >
+                  <ShieldCheck className="w-4 h-4 opacity-60" />
+                  <span>Apartment Bookings</span>
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 5 — Connect */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 mb-5">
               Connect

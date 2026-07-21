@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import {
   Home,
   Building2,
@@ -20,6 +21,7 @@ import {
   Users,
   MapPin,
   FileCheck,
+  Hotel,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,6 +60,7 @@ interface NavLink {
   action?: string;
   icon: React.ReactNode;
   children?: SubMenuItem[];
+  isLink?: boolean;
 }
 
 const PROPERTIES_SUBMENU = [
@@ -75,6 +78,7 @@ const NAV_LINKS: NavLink[] = [
   { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
   { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
   { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
+  { label: 'Airbnb', href: '/airbnb', icon: <Hotel className="size-[18px]" />, isLink: true },
 
   { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
   { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
@@ -291,7 +295,17 @@ function MobileMenuItem({
 
   return (
     <SheetClose asChild>
-      {link.action ? (
+      {link.isLink ? (
+        <Link
+          href={link.href!}
+          className="group flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+            {link.icon}
+          </span>
+          {link.label}
+        </Link>
+      ) : link.action ? (
         <button
           type="button"
           onClick={() => onAction(link.action!)}
@@ -381,6 +395,21 @@ export default function Navigation() {
                   isScrolled={isScrolled}
                   onAction={handleAction}
                 />
+              ) : link.isLink ? (
+                <li key={link.label}>
+                  <Link
+                    href={link.href!}
+                    className={cn(
+                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+                      textColor,
+                      isScrolled
+                        ? 'hover:bg-white/15 hover:text-white'
+                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
               ) : link.action ? (
                 <li key={link.label}>
                   <button
