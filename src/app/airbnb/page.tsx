@@ -79,27 +79,6 @@ const CITIES = [
   { label: 'Accra', value: 'Accra' },
 ];
 
-const AREAS = [
-  { label: 'All Areas', value: '' },
-  { label: 'Ho Central', value: 'Ho Central' },
-  { label: 'Hotel Area', value: 'Hotel Area' },
-  { label: 'Sokode', value: 'Sokode' },
-  { label: 'Riverside', value: 'Riverside' },
-  { label: 'Mission Hills', value: 'Mission Hills' },
-  { label: 'Lakeview', value: 'Lakeview' },
-  { label: 'Mountain View', value: 'Mountain View' },
-  { label: 'Beachfront', value: 'Beachfront' },
-];
-
-const PRICE_RANGES = [
-  { label: 'Any Price', min: '', max: '' },
-  { label: 'Under GH₵ 100', min: '0', max: '100' },
-  { label: 'GH₵ 100 - GH₵ 200', min: '100', max: '200' },
-  { label: 'GH₵ 200 - GH₵ 400', min: '200', max: '400' },
-  { label: 'GH₵ 400 - GH₵ 600', min: '400', max: '600' },
-  { label: 'Over GH₵ 600', min: '600', max: '' },
-];
-
 const BEDROOM_OPTIONS = [
   { label: 'Any', value: '' },
   { label: '1', value: '1' },
@@ -362,6 +341,8 @@ function MobileFilterSheet({
   guests,
   onGuestsChange,
   onApply,
+  areaOptions,
+  priceOptions,
 }: {
   search: string;
   onSearchChange: (v: string) => void;
@@ -376,6 +357,8 @@ function MobileFilterSheet({
   guests: string;
   onGuestsChange: (v: string) => void;
   onApply: () => void;
+  areaOptions: { label: string; value: string; min: string; max: string }[];
+  priceOptions: { label: string; value: string; min: string; max: string }[];
 }) {
   return (
     <Sheet>
@@ -423,7 +406,7 @@ function MobileFilterSheet({
             <FilterSelect
               value={area}
               onChange={onAreaChange}
-              options={AREAS.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+              options={areaOptions}
               placeholder="All Areas"
             />
           </div>
@@ -434,7 +417,7 @@ function MobileFilterSheet({
             <FilterSelect
               value={priceRange}
               onChange={onPriceRangeChange}
-              options={PRICE_RANGES}
+              options={priceOptions}
               placeholder="Any Price"
             />
           </div>
@@ -496,6 +479,14 @@ export default function AirbnbListingPage() {
   const [tabNewlyAdded, setTabNewlyAdded] = useState('');
   const [tabStatus, setTabStatus] = useState('');
 
+  // Dynamic filter options derived from apartment data
+  const [dynamicAreas, setDynamicAreas] = useState<{ label: string; value: string }[]>([
+    { label: 'All Areas', value: '' },
+  ]);
+  const [dynamicPriceRanges, setDynamicPriceRanges] = useState<
+    { label: string; value: string; min: string; max: string }[]
+  >([{ label: 'Any Price', value: '', min: '', max: '' }]);
+
   // Data state
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [total, setTotal] = useState(0);
@@ -545,12 +536,60 @@ export default function AirbnbListingPage() {
         const data = await res.json();
 
         if (res.ok) {
+          const fetched: Apartment[] = data.apartments;
           if (append) {
-            setApartments((prev) => [...prev, ...data.apartments]);
+            setApartments((prev) => [...prev, ...fetched]);
           } else {
-            setApartments(data.apartments);
+            setApartments(fetched);
           }
           setTotal(data.total);
+
+          // Build dynamic filter options from apartment data (only on initial full load)
+          if (!append && initialLoad) {
+            // Derive unique areas
+            const allApts = data.apartments || [];
+            const uniqueAreas = [...new Set(allApts.map((a: Apartment) => a.area).filter(Boolean))].sort();
+            setDynamicAreas([
+              { label: 'All Areas', value: '' },
+              ...uniqueAreas.map((a: string) => ({ label: a, value: a })),
+            ]);
+
+            // Derive price ranges from actual prices
+            const prices = allApts.map((a: Apartment) => a.pricePerNight).filter((p: number) => p > 0);
+            if (prices.length > 0) {
+              const minP = Math.min(...prices);
+              const maxP = Math.max(...prices);
+              const ranges: { label: string; value: string; min: string; max: string }[] = [
+                { label: 'Any Price', value: '', min: '', max: '' },
+              ];
+              const brackets = [100, 200, 400, 600, 1000, 1500, 2000].filter(
+                (b) => b >= Math.floor(minP / 100) * 100
+              );
+              for (let i = 0; i < brackets.length; i++) {
+                const lo = i === 0 ? Math.floor(minP / 100) * 100 : brackets[i - 1];
+                const hi = brackets[i];
+                if (lo < hi) {
+                  ranges.push({
+                    label: `GH₵ ${lo.toLocaleString()} - GH₵ ${hi.toLocaleString()}`,
+                    value: `${lo}|${hi}`,
+                    min: String(lo),
+                    max: String(hi),
+                  });
+                }
+              }
+              // "Over" bracket for the highest
+              const lastBracket = brackets[brackets.length - 1];
+              if (lastBracket < maxP) {
+                ranges.push({
+                  label: `Over GH₵ ${lastBracket.toLocaleString()}`,
+                  value: `${lastBracket}|`,
+                  min: String(lastBracket),
+                  max: '',
+                });
+              }
+              setDynamicPriceRanges(ranges);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch apartments:', err);
@@ -693,14 +732,14 @@ export default function AirbnbListingPage() {
             <FilterSelect
               value={area}
               onChange={handleAreaChange}
-              options={AREAS.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+              options={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
               placeholder="All Areas"
               className="w-40"
             />
             <FilterSelect
               value={priceRange}
               onChange={handlePriceRangeChange}
-              options={PRICE_RANGES}
+              options={dynamicPriceRanges}
               placeholder="Any Price"
               className="w-44"
             />
@@ -757,6 +796,8 @@ export default function AirbnbListingPage() {
               guests={guests}
               onGuestsChange={handleGuestsChange}
               onApply={applyFilters}
+              areaOptions={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+              priceOptions={dynamicPriceRanges}
             />
             <Button
               onClick={applyFilters}
