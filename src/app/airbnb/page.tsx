@@ -80,14 +80,14 @@ const CITIES = [
 ];
 
 const BEDROOM_OPTIONS = [
-  { label: 'Any', value: '' },
+  { label: 'Any Bedrooms', value: '' },
   { label: '1', value: '1' },
   { label: '2', value: '2' },
   { label: '3+', value: '3' },
 ];
 
 const GUEST_OPTIONS = [
-  { label: 'Any', value: '' },
+  { label: 'Any Guests', value: '' },
   { label: '1-2', value: '1' },
   { label: '3-4', value: '3' },
   { label: '5-8', value: '5' },
