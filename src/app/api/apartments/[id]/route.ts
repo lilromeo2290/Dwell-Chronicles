@@ -82,7 +82,26 @@ export async function PUT(
       newlyAdded,
       amenities,
       whatsappNumber,
+      images,
     } = body;
+
+    // ─── Sync images ───────────────────────────────────────────────────
+    if (images && Array.isArray(images)) {
+      // Delete all existing images for this apartment
+      await db.apartmentImage.deleteMany({ where: { apartmentId: id } });
+
+      // Create new image records
+      if (images.length > 0) {
+        await db.apartmentImage.createMany({
+          data: images.map((img: { url: string; alt?: string; sortOrder?: number }, idx: number) => ({
+            apartmentId: id,
+            url: img.url,
+            alt: img.alt || '',
+            sortOrder: img.sortOrder ?? idx,
+          })),
+        });
+      }
+    }
 
     const apartment = await db.apartment.update({
       where: { id },
