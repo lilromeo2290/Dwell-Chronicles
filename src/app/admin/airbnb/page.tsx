@@ -251,7 +251,7 @@ const apartmentSchema = z.object({
         url: z.string().min(1, 'Image URL is required'),
         alt: z.string().optional(),
         sortOrder: z.number().optional(),
-      })
+      }).passthrough()
     )
     .min(1, 'At least one image is required'),
 });
@@ -603,7 +603,7 @@ export default function AdminDashboard() {
       newlyAdded: true,
       whatsappNumber: '233204700023',
       amenities: [],
-      images: [{ url: '', alt: '', sortOrder: 0 }],
+      images: [{ url: '', alt: '', sortOrder: 0, _uid: `img_${Date.now()}` }],
     });
     setFormSheetOpen(true);
   };
@@ -636,12 +636,13 @@ export default function AdminDashboard() {
       amenities: parseAmenities(apt.amenities),
       images:
         apt.images.length > 0
-          ? apt.images.map((img) => ({
+          ? apt.images.map((img, i) => ({
               url: img.url,
               alt: img.alt || '',
               sortOrder: img.sortOrder || 0,
+              _uid: (img as any)._uid || `img_${img.id || i}_${Date.now()}`,
             }))
-          : [{ url: '', alt: '', sortOrder: 0 }],
+          : [{ url: '', alt: '', sortOrder: 0, _uid: `img_${Date.now()}` }],
     });
     setFormSheetOpen(true);
   };
@@ -658,8 +659,10 @@ export default function AdminDashboard() {
         latitude: data.latitude || null,
         longitude: data.longitude || null,
         images: data.images.map((img, i) => ({
-          ...img,
+          url: img.url,
+          alt: img.alt,
           sortOrder: img.sortOrder ?? i,
+          ...(img.id ? { id: img.id } : {}),
         })),
       };
 
@@ -703,7 +706,7 @@ export default function AdminDashboard() {
     const current = formImages || [];
     setValue('images', [
       ...current,
-      { url: '', alt: '', sortOrder: current.length },
+      { url: '', alt: '', sortOrder: current.length, _uid: `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` },
     ]);
   };
 
@@ -719,6 +722,11 @@ export default function AdminDashboard() {
         .filter((_, i) => i !== index)
         .map((img, i) => ({ ...img, sortOrder: i }))
     );
+    // Force a re-render tick so AnimatePresence picks up the removed key
+    setTimeout(() => {
+      const refreshed = watch('images') || [];
+      setValue('images', [...refreshed]);
+    }, 0);
   };
 
   const moveImageUp = (index: number) => {
@@ -2391,10 +2399,11 @@ export default function AdminDashboard() {
                             const current = formImages || [];
                             const newImages = [
                               ...current,
-                              ...data.files.map((f: { url: string; alt: string }) => ({
+                              ...data.files.map((f: { url: string; alt: string }, fi: number) => ({
                                 url: f.url,
                                 alt: f.alt,
-                                sortOrder: current.length + data.files.indexOf(f),
+                                sortOrder: current.length + fi,
+                                _uid: `img_${Date.now()}_up_${fi}`,
                               })),
                             ];
                             setValue('images', newImages);
@@ -2435,7 +2444,7 @@ export default function AdminDashboard() {
                 <AnimatePresence>
                   {(formImages || []).map((img, idx) => (
                     <motion.div
-                      key={idx}
+                      key={(img as any)._uid || idx}
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}

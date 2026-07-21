@@ -1,0 +1,2002 @@
+     1→'use client';
+     2→
+     3→import { useState, useEffect, useCallback, useRef } from 'react';
+     4→import { useForm, Controller } from 'react-hook-form';
+     5→import { zodResolver } from '@hookform/resolvers/zod';
+     6→import { z } from 'zod';
+     7→import { motion, AnimatePresence } from 'framer-motion';
+     8→import { toast } from 'sonner';
+     9→import Link from 'next/link';
+    10→import {
+    11→  Plus,
+    12→  Edit,
+    13→  Trash2,
+    14→  Calendar,
+    15→  Save,
+    16→  X,
+    17→  Search,
+    18→  Filter,
+    19→  ChevronLeft,
+    20→  ChevronRight,
+    21→  Download,
+    22→  Phone,
+    23→  Mail,
+    24→  MapPin,
+    25→  Star,
+    26→  Home,
+    27→  Settings,
+    28→  MessageCircle,
+    29→  ArrowUp,
+    30→  ArrowDown,
+    31→  Loader2,
+    32→  ChevronUp,
+    33→  ChevronDown,
+    34→  Users,
+    35→  Wrench,
+    36→  CheckCircle2,
+    37→  XCircle,
+    38→  Clock,
+    39→  Eye,
+    40→  Building2,
+    41→  Upload,
+    42→} from 'lucide-react';
+    43→import { Button } from '@/components/ui/button';
+    44→import { Input } from '@/components/ui/input';
+    45→import { Label } from '@/components/ui/label';
+    46→import { Badge } from '@/components/ui/badge';
+    47→import {
+    48→  Table,
+    49→  TableBody,
+    50→  TableCell,
+    51→  TableHead,
+    52→  TableHeader,
+    53→  TableRow,
+    54→} from '@/components/ui/table';
+    55→import {
+    56→  Sheet,
+    57→  SheetContent,
+    58→  SheetHeader,
+    59→  SheetTitle,
+    60→  SheetDescription,
+    61→} from '@/components/ui/sheet';
+    62→import {
+    63→  AlertDialog,
+    64→  AlertDialogAction,
+    65→  AlertDialogCancel,
+    66→  AlertDialogContent,
+    67→  AlertDialogDescription,
+    68→  AlertDialogFooter,
+    69→  AlertDialogHeader,
+    70→  AlertDialogTitle,
+    71→} from '@/components/ui/alert-dialog';
+    72→import {
+    73→  Select,
+    74→  SelectContent,
+    75→  SelectItem,
+    76→  SelectTrigger,
+    77→  SelectValue,
+    78→} from '@/components/ui/select';
+    79→import { Checkbox } from '@/components/ui/checkbox';
+    80→import { Textarea } from '@/components/ui/textarea';
+    81→import { Separator } from '@/components/ui/separator';
+    82→import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+    83→import { Card, CardContent } from '@/components/ui/card';
+    84→import { Skeleton } from '@/components/ui/skeleton';
+    85→import { ScrollArea } from '@/components/ui/scroll-area';
+    86→
+    87→// ─── Constants ────────────────────────────────────────────────────────────────
+    88→
+    89→const BRAND = {
+    90→  sage: '#5F8768',
+    91→  lightStone: '#D8D5CC',
+    92→  offWhite: '#F8F7F3',
+    93→  charcoal: '#2F3A33',
+    94→} as const;
+    95→
+    96→const CITIES = ['Ho', 'Accra'] as const;
+    97→
+    98→const AMENITIES_LIST = [
+    99→  'Wi-Fi',
+   100→  'Smart TV',
+   101→  'Air Conditioning',
+   102→  'Kitchen',
+   103→  'Refrigerator',
+   104→  'Microwave',
+   105→  'Washing Machine',
+   106→  'Hot Water',
+   107→  'Parking',
+   108→  'Balcony',
+   109→  'Swimming Pool',
+   110→  'Security',
+   111→  'Generator',
+   112→  'Workspace',
+   113→] as const;
+   114→
+   115→const STATUS_OPTIONS = ['available', 'reserved', 'booked', 'maintenance'] as const;
+   116→const CATEGORY_OPTIONS = ['standard', 'luxury', 'executive', 'budget'] as const;
+   117→
+   118→const STATUS_CONFIG: Record<
+   119→  string,
+   120→  { label: string; bg: string; text: string; dot: string }
+   121→> = {
+   122→  available: {
+   123→    label: 'Available',
+   124→    bg: 'bg-emerald-100',
+   125→    text: 'text-emerald-800',
+   126→    dot: 'bg-emerald-500',
+   127→  },
+   128→  reserved: {
+   129→    label: 'Reserved',
+   130→    bg: 'bg-amber-100',
+   131→    text: 'text-amber-800',
+   132→    dot: 'bg-amber-500',
+   133→  },
+   134→  booked: {
+   135→    label: 'Booked',
+   136→    bg: 'bg-red-100',
+   137→    text: 'text-red-800',
+   138→    dot: 'bg-red-500',
+   139→  },
+   140→  maintenance: {
+   141→    label: 'Maintenance',
+   142→    bg: 'bg-gray-100',
+   143→    text: 'text-gray-700',
+   144→    dot: 'bg-gray-500',
+   145→  },
+   146→};
+   147→
+   148→const ENQUIRY_STATUS_CONFIG: Record<
+   149→  string,
+   150→  { label: string; bg: string; text: string }
+   151→> = {
+   152→  new: { label: 'New', bg: 'bg-blue-100', text: 'text-blue-800' },
+   153→  confirmed: { label: 'Confirmed', bg: 'bg-emerald-100', text: 'text-emerald-800' },
+   154→  cancelled: { label: 'Cancelled', bg: 'bg-red-100', text: 'text-red-800' },
+   155→};
+   156→
+   157→const AVAIL_COLORS: Record<string, { bg: string; hover: string; label: string }> = {
+   158→  available: { bg: 'bg-emerald-500', hover: 'hover:bg-emerald-600', label: 'Available' },
+   159→  booked: { bg: 'bg-red-500', hover: 'hover:bg-red-600', label: 'Booked' },
+   160→  reserved: { bg: 'bg-amber-400', hover: 'hover:bg-amber-500', label: 'Reserved' },
+   161→  maintenance: { bg: 'bg-gray-400', hover: 'hover:bg-gray-500', label: 'Maintenance' },
+   162→};
+   163→
+   164→// ─── Types ────────────────────────────────────────────────────────────────────
+   165→
+   166→interface ApartmentImage {
+   167→  id?: string;
+   168→  url: string;
+   169→  alt?: string;
+   170→  sortOrder?: number;
+   171→}
+   172→
+   173→interface Apartment {
+   174→  id: string;
+   175→  name: string;
+   176→  code: string;
+   177→  description: string;
+   178→  address: string;
+   179→  city: string;
+   180→  area: string;
+   181→  latitude?: string | null;
+   182→  longitude?: string | null;
+   183→  pricePerNight: number;
+   184→  weeklyPrice?: number | null;
+   185→  monthlyPrice?: number | null;
+   186→  cleaningFee?: number | null;
+   187→  securityDeposit?: number | null;
+   188→  bedrooms: number;
+   189→  bathrooms: number;
+   190→  maxGuests: number;
+   191→  rating: number;
+   192→  status: string;
+   193→  category: string;
+   194→  featured: boolean;
+   195→  newlyAdded: boolean;
+   196→  amenities: string;
+   197→  whatsappNumber: string;
+   198→  images: ApartmentImage[];
+   199→  createdAt: string;
+   200→}
+   201→
+   202→interface Enquiry {
+   203→  id: string;
+   204→  apartmentId: string;
+   205→  apartment: { id: string; name: string; code: string };
+   206→  fullName: string;
+   207→  phoneNumber: string;
+   208→  email: string;
+   209→  checkIn: string;
+   210→  checkOut: string;
+   211→  guests: number;
+   212→  specialRequests?: string | null;
+   213→  status: string;
+   214→  createdAt: string;
+   215→}
+   216→
+   217→interface AvailabilityDate {
+   218→  date: string;
+   219→  status: string;
+   220→}
+   221→
+   222→// ─── Zod Schema ───────────────────────────────────────────────────────────────
+   223→
+   224→const apartmentSchema = z.object({
+   225→  name: z.string().min(1, 'Name is required'),
+   226→  code: z.string().min(1, 'Code is required'),
+   227→  description: z.string().min(1, 'Description is required'),
+   228→  address: z.string().min(1, 'Address is required'),
+   229→  city: z.string().min(1, 'City is required'),
+   230→  area: z.string().min(1, 'Area is required'),
+   231→  latitude: z.string().optional(),
+   232→  longitude: z.string().optional(),
+   233→  pricePerNight: z.coerce.number().min(0, 'Price must be positive'),
+   234→  weeklyPrice: z.coerce.number().optional().nullable(),
+   235→  monthlyPrice: z.coerce.number().optional().nullable(),
+   236→  cleaningFee: z.coerce.number().optional().nullable(),
+   237→  securityDeposit: z.coerce.number().optional().nullable(),
+   238→  bedrooms: z.coerce.number().int().min(0),
+   239→  bathrooms: z.coerce.number().int().min(0),
+   240→  maxGuests: z.coerce.number().int().min(1),
+   241→  rating: z.coerce.number().min(0).max(5),
+   242→  status: z.string(),
+   243→  category: z.string(),
+   244→  featured: z.boolean(),
+   245→  newlyAdded: z.boolean(),
+   246→  whatsappNumber: z.string(),
+   247→  amenities: z.array(z.string()),
+   248→  images: z
+   249→    .array(
+   250→      z.object({
+   251→        url: z.string().min(1, 'Image URL is required'),
+   252→        alt: z.string().optional(),
+   253→        sortOrder: z.number().optional(),
+   254→      })
+   255→    )
+   256→    .min(1, 'At least one image is required'),
+   257→});
+   258→
+   259→type ApartmentFormValues = z.infer<typeof apartmentSchema>;
+   260→
+   261→// ─── Helpers ──────────────────────────────────────────────────────────────────
+   262→
+   263→function formatCurrency(amount: number | null | undefined): string {
+   264→  if (amount === null || amount === undefined) return '—';
+   265→  return `GH\u20B5${amount.toLocaleString()}`;
+   266→}
+   267→
+   268→function formatDate(dateStr: string): string {
+   269→  try {
+   270→    return new Date(dateStr).toLocaleDateString('en-GB', {
+   271→      day: '2-digit',
+   272→      month: 'short',
+   273→      year: 'numeric',
+   274→    });
+   275→  } catch {
+   276→    return dateStr;
+   277→  }
+   278→}
+   279→
+   280→function formatDateTime(dateStr: string): string {
+   281→  try {
+   282→    return new Date(dateStr).toLocaleDateString('en-GB', {
+   283→      day: '2-digit',
+   284→      month: 'short',
+   285→      year: 'numeric',
+   286→      hour: '2-digit',
+   287→      minute: '2-digit',
+   288→    });
+   289→  } catch {
+   290→    return dateStr;
+   291→  }
+   292→}
+   293→
+   294→function getDaysInMonth(year: number, month: number): number {
+   295→  return new Date(year, month + 1, 0).getDate();
+   296→}
+   297→
+   298→function getFirstDayOfMonth(year: number, month: number): number {
+   299→  return new Date(year, month, 1).getDay();
+   300→}
+   301→
+   302→function getMonthName(year: number, month: number): string {
+   303→  return new Date(year, month, 1).toLocaleString('en-US', {
+   304→    month: 'long',
+   305→    year: 'numeric',
+   306→  });
+   307→}
+   308→
+   309→function parseAmenities(amenitiesStr: string): string[] {
+   310→  try {
+   311→    const parsed = JSON.parse(amenitiesStr);
+   312→    return Array.isArray(parsed) ? parsed : [];
+   313→  } catch {
+   314→    return [];
+   315→  }
+   316→}
+   317→
+   318→// ─── Animation Variants ───────────────────────────────────────────────────────
+   319→
+   320→const fadeInUp = {
+   321→  initial: { opacity: 0, y: 12 },
+   322→  animate: { opacity: 1, y: 0 },
+   323→  exit: { opacity: 0, y: -8 },
+   324→  transition: { duration: 0.25 },
+   325→};
+   326→
+   327→const staggerContainer = {
+   328→  animate: { transition: { staggerChildren: 0.05 } },
+   329→};
+   330→
+   331→// ─── Sub-Components ───────────────────────────────────────────────────────────
+   332→
+   333→function StatusBadge({ status }: { status: string }) {
+   334→  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.available;
+   335→  return (
+   336→    <span
+   337→      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.bg} ${cfg.text}`}
+   338→    >
+   339→      <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+   340→      {cfg.label}
+   341→    </span>
+   342→  );
+   343→}
+   344→
+   345→function EnquiryStatusBadge({ status }: { status: string }) {
+   346→  const cfg = ENQUIRY_STATUS_CONFIG[status] || ENQUIRY_STATUS_CONFIG.new;
+   347→  return (
+   348→    <span
+   349→      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.bg} ${cfg.text}`}
+   350→    >
+   351→      {cfg.label}
+   352→    </span>
+   353→  );
+   354→}
+   355→
+   356→function StatCard({
+   357→  icon: Icon,
+   358→  label,
+   359→  value,
+   360→  color,
+   361→}: {
+   362→  icon: React.ElementType;
+   363→  label: string;
+   364→  value: number;
+   365→  color: string;
+   366→}) {
+   367→  return (
+   368→    <motion.div {...fadeInUp}>
+   369→      <Card className="border border-gray-200/80 shadow-sm">
+   370→        <CardContent className="flex items-center gap-3 p-4">
+   371→          <div
+   372→            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+   373→            style={{ backgroundColor: `${color}15` }}
+   374→          >
+   375→            <Icon className="h-5 w-5" style={{ color }} />
+   376→          </div>
+   377→          <div>
+   378→            <p className="text-2xl font-bold tracking-tight" style={{ color }}>
+   379→              {value}
+   380→            </p>
+   381→            <p className="text-xs text-gray-500 font-medium">{label}</p>
+   382→          </div>
+   383→        </CardContent>
+   384→      </Card>
+   385→    </motion.div>
+   386→  );
+   387→}
+   388→
+   389→function LoadingSkeleton() {
+   390→  return (
+   391→    <div className="space-y-4">
+   392→      <div className="flex gap-4">
+   393→        {Array.from({ length: 4 }).map((_, i) => (
+   394→          <Skeleton key={i} className="h-24 flex-1 rounded-xl" />
+   395→        ))}
+   396→      </div>
+   397→      <Skeleton className="h-10 w-full rounded-lg" />
+   398→      <Skeleton className="h-64 w-full rounded-xl" />
+   399→    </div>
+   400→  );
+   401→}
+   402→
+   403→// ─── Main Component ───────────────────────────────────────────────────────────
+   404→
+   405→export default function AdminDashboard() {
+   406→  // Tab state
+   407→  const [activeTab, setActiveTab] = useState('apartments');
+   408→
+   409→  // Data state
+   410→  const [apartments, setApartments] = useState<Apartment[]>([]);
+   411→  const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+   412→  const [loading, setLoading] = useState(true);
+   413→  const [enquiriesLoading, setEnquiriesLoading] = useState(true);
+   414→
+   415→  // Filter state
+   416→  const [searchQuery, setSearchQuery] = useState('');
+   417→  const [statusFilter, setStatusFilter] = useState('all');
+   418→  const [categoryFilter, setCategoryFilter] = useState('all');
+   419→  const [enquiryStatusFilter, setEnquiryStatusFilter] = useState('all');
+   420→
+   421→  // Apartment form sheet state
+   422→  const [formSheetOpen, setFormSheetOpen] = useState(false);
+   423→  const [editingApartment, setEditingApartment] = useState<Apartment | null>(null);
+   424→  const [formSubmitting, setFormSubmitting] = useState(false);
+   425→
+   426→  // Availability sheet state
+   427→  const [availSheetOpen, setAvailSheetOpen] = useState(false);
+   428→  const [availApartment, setAvailApartment] = useState<Apartment | null>(null);
+   429→  const [availMonth, setAvailMonth] = useState(new Date().getMonth());
+   430→  const [availYear, setAvailYear] = useState(new Date().getFullYear());
+   431→  const [availDates, setAvailDates] = useState<AvailabilityDate[]>([]);
+   432→  const [selectedDates, setSelectedDates] = useState<Set<string>>(new Set());
+   433→  const [availLoading, setAvailLoading] = useState(false);
+   434→  const [availSaving, setAvailSaving] = useState(false);
+   435→  const [isDragging, setIsDragging] = useState(false);
+   436→  const dragStartRef = useRef<string | null>(null);
+   437→
+   438→  // Delete dialog state
+   439→  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   440→  const [deletingApartment, setDeletingApartment] = useState<Apartment | null>(null);
+   441→  const [deleteLoading, setDeleteLoading] = useState(false);
+   442→
+   443→  // Enquiry delete dialog
+   444→  const [enquiryDeleteDialogOpen, setEnquiryDeleteDialogOpen] = useState(false);
+   445→  const [deletingEnquiry, setDeletingEnquiry] = useState<Enquiry | null>(null);
+   446→  const [enquiryDeleteLoading, setEnquiryDeleteLoading] = useState(false);
+   447→
+   448→  // Settings state
+   449→  const [whatsappNumber, setWhatsappNumber] = useState('233204700023');
+   450→  const [updateWhatsappLoading, setUpdateWhatsappLoading] = useState(false);
+   451→
+   452→  // ─── Form Setup ─────────────────────────────────────────────────────────────
+   453→
+   454→  const {
+   455→    register,
+   456→    handleSubmit,
+   457→    control,
+   458→    reset,
+   459→    setValue,
+   460→    watch,
+   461→    formState: { errors },
+   462→  } = useForm<ApartmentFormValues>({
+   463→    resolver: zodResolver(apartmentSchema),
+   464→    defaultValues: {
+   465→      name: '',
+   466→      code: '',
+   467→      description: '',
+   468→      address: '',
+   469→      city: 'Ho',
+   470→      area: '',
+   471→      latitude: '',
+   472→      longitude: '',
+   473→      pricePerNight: 0,
+   474→      weeklyPrice: null,
+   475→      monthlyPrice: null,
+   476→      cleaningFee: null,
+   477→      securityDeposit: null,
+   478→      bedrooms: 1,
+   479→      bathrooms: 1,
+   480→      maxGuests: 2,
+   481→      rating: 4.5,
+   482→      status: 'available',
+   483→      category: 'standard',
+   484→      featured: false,
+   485→      newlyAdded: true,
+   486→      whatsappNumber: '233204700023',
+   487→      amenities: [],
+   488→      images: [{ url: '', alt: '', sortOrder: 0 }],
+   489→    },
+   490→  });
+   491→
+   492→  const formImages = watch('images');
+   493→  const formAmenities = watch('amenities');
+   494→
+   495→  // ─── Data Fetching ──────────────────────────────────────────────────────────
+   496→
+   497→  const fetchApartments = useCallback(async () => {
+   498→    try {
+   499→      setLoading(true);
+   500→      const params = new URLSearchParams({ limit: '50' });
+   501→      if (searchQuery) params.set('search', searchQuery);
+   502→      if (statusFilter !== 'all') params.set('status', statusFilter);
+   503→      if (categoryFilter !== 'all') params.set('category', categoryFilter);
+   504→      const res = await fetch(`/api/apartments?${params.toString()}`);
+   505→      if (!res.ok) throw new Error('Failed to fetch apartments');
+   506→      const data = await res.json();
+   507→      setApartments(data.apartments || []);
+   508→    } catch (err) {
+   509→      toast.error('Failed to load apartments');
+   510→    } finally {
+   511→      setLoading(false);
+   512→    }
+   513→  }, [searchQuery, statusFilter, categoryFilter]);
+   514→
+   515→  const fetchEnquiries = useCallback(async () => {
+   516→    try {
+   517→      setEnquiriesLoading(true);
+   518→      const res = await fetch('/api/enquiries');
+   519→      if (!res.ok) throw new Error('Failed to fetch enquiries');
+   520→      const data = await res.json();
+   521→      setEnquiries(data.enquiries || []);
+   522→    } catch {
+   523→      toast.error('Failed to load enquiries');
+   524→    } finally {
+   525→      setEnquiriesLoading(false);
+   526→    }
+   527→  }, []);
+   528→
+   529→  useEffect(() => {
+   530→    fetchApartments();
+   531→  }, [fetchApartments]);
+   532→
+   533→  useEffect(() => {
+   534→    if (activeTab === 'enquiries') fetchEnquiries();
+   535→  }, [activeTab, fetchEnquiries]);
+   536→
+   537→  // ─── Availability Fetching ──────────────────────────────────────────────────
+   538→
+   539→  const fetchAvailability = useCallback(async () => {
+   540→    if (!availApartment) return;
+   541→    try {
+   542→      setAvailLoading(true);
+   543→      const monthStr = `${availYear}-${String(availMonth + 1).padStart(2, '0')}`;
+   544→      const res = await fetch(
+   545→        `/api/apartments/${availApartment.id}/availability?month=${monthStr}`
+   546→      );
+   547→      if (!res.ok) throw new Error('Failed to fetch availability');
+   548→      const data = await res.json();
+   549→      setAvailDates(data.dates || []);
+   550→      setSelectedDates(new Set());
+   551→    } catch {
+   552→      toast.error('Failed to load availability');
+   553→    } finally {
+   554→      setAvailLoading(false);
+   555→    }
+   556→  }, [availApartment, availMonth, availYear]);
+   557→
+   558→  useEffect(() => {
+   559→    if (availSheetOpen && availApartment) fetchAvailability();
+   560→  }, [availSheetOpen, availApartment, fetchAvailability]);
+   561→
+   562→  // ─── Stats Computation ──────────────────────────────────────────────────────
+   563→
+   564→  const stats = {
+   565→    total: apartments.length,
+   566→    available: apartments.filter((a) => a.status === 'available').length,
+   567→    booked: apartments.filter((a) => a.status === 'booked').length,
+   568→    maintenance: apartments.filter((a) => a.status === 'maintenance').length,
+   569→  };
+   570→
+   571→  // ─── Filtered Enquiries ────────────────────────────────────────────────────
+   572→
+   573→  const filteredEnquiries =
+   574→    enquiryStatusFilter === 'all'
+   575→      ? enquiries
+   576→      : enquiries.filter((e) => e.status === enquiryStatusFilter);
+   577→
+   578→  // ─── Apartment Form Handlers ────────────────────────────────────────────────
+   579→
+   580→  const openAddForm = () => {
+   581→    setEditingApartment(null);
+   582→    reset({
+   583→      name: '',
+   584→      code: '',
+   585→      description: '',
+   586→      address: '',
+   587→      city: 'Ho',
+   588→      area: '',
+   589→      latitude: '',
+   590→      longitude: '',
+   591→      pricePerNight: 0,
+   592→      weeklyPrice: null,
+   593→      monthlyPrice: null,
+   594→      cleaningFee: null,
+   595→      securityDeposit: null,
+   596→      bedrooms: 1,
+   597→      bathrooms: 1,
+   598→      maxGuests: 2,
+   599→      rating: 4.5,
+   600→      status: 'available',
+   601→      category: 'standard',
+   602→      featured: false,
+   603→      newlyAdded: true,
+   604→      whatsappNumber: '233204700023',
+   605→      amenities: [],
+   606→      images: [{ url: '', alt: '', sortOrder: 0 }],
+   607→    });
+   608→    setFormSheetOpen(true);
+   609→  };
+   610→
+   611→  const openEditForm = (apt: Apartment) => {
+   612→    setEditingApartment(apt);
+   613→    reset({
+   614→      name: apt.name,
+   615→      code: apt.code,
+   616→      description: apt.description,
+   617→      address: apt.address,
+   618→      city: apt.city,
+   619→      area: apt.area,
+   620→      latitude: apt.latitude || '',
+   621→      longitude: apt.longitude || '',
+   622→      pricePerNight: apt.pricePerNight,
+   623→      weeklyPrice: apt.weeklyPrice,
+   624→      monthlyPrice: apt.monthlyPrice,
+   625→      cleaningFee: apt.cleaningFee,
+   626→      securityDeposit: apt.securityDeposit,
+   627→      bedrooms: apt.bedrooms,
+   628→      bathrooms: apt.bathrooms,
+   629→      maxGuests: apt.maxGuests,
+   630→      rating: apt.rating,
+   631→      status: apt.status,
+   632→      category: apt.category,
+   633→      featured: apt.featured,
+   634→      newlyAdded: apt.newlyAdded,
+   635→      whatsappNumber: apt.whatsappNumber,
+   636→      amenities: parseAmenities(apt.amenities),
+   637→      images:
+   638→        apt.images.length > 0
+   639→          ? apt.images.map((img) => ({
+   640→              url: img.url,
+   641→              alt: img.alt || '',
+   642→              sortOrder: img.sortOrder || 0,
+   643→            }))
+   644→          : [{ url: '', alt: '', sortOrder: 0 }],
+   645→    });
+   646→    setFormSheetOpen(true);
+   647→  };
+   648→
+   649→  const onFormSubmit = async (data: ApartmentFormValues) => {
+   650→    try {
+   651→      setFormSubmitting(true);
+   652→      const payload = {
+   653→        ...data,
+   654→        weeklyPrice: data.weeklyPrice || null,
+   655→        monthlyPrice: data.monthlyPrice || null,
+   656→        cleaningFee: data.cleaningFee || null,
+   657→        securityDeposit: data.securityDeposit || null,
+   658→        latitude: data.latitude || null,
+   659→        longitude: data.longitude || null,
+   660→        images: data.images.map((img, i) => ({
+   661→          ...img,
+   662→          sortOrder: img.sortOrder ?? i,
+   663→        })),
+   664→      };
+   665→
+   666→      let res: Response;
+   667→      if (editingApartment) {
+   668→        res = await fetch(`/api/apartments/${editingApartment.id}`, {
+   669→          method: 'PUT',
+   670→          headers: { 'Content-Type': 'application/json' },
+   671→          body: JSON.stringify(payload),
+   672→        });
+   673→      } else {
+   674→        res = await fetch('/api/apartments', {
+   675→          method: 'POST',
+   676→          headers: { 'Content-Type': 'application/json' },
+   677→          body: JSON.stringify(payload),
+   678→        });
+   679→      }
+   680→
+   681→      if (!res.ok) {
+   682→        const err = await res.json();
+   683→        throw new Error(err.error || 'Failed to save apartment');
+   684→      }
+   685→
+   686→      toast.success(
+   687→        editingApartment
+   688→          ? 'Apartment updated successfully'
+   689→          : 'Apartment created successfully'
+   690→      );
+   691→      setFormSheetOpen(false);
+   692→      fetchApartments();
+   693→    } catch (err) {
+   694→      toast.error(err instanceof Error ? err.message : 'Failed to save apartment');
+   695→    } finally {
+   696→      setFormSubmitting(false);
+   697→    }
+   698→  };
+   699→
+   700→  // ─── Image Management ───────────────────────────────────────────────────────
+   701→
+   702→  const addImageField = () => {
+   703→    const current = formImages || [];
+   704→    setValue('images', [
+   705→      ...current,
+   706→      { url: '', alt: '', sortOrder: current.length },
+   707→    ]);
+   708→  };
+   709→
+   710→  const removeImageField = (index: number) => {
+   711→    const current = formImages || [];
+   712→    if (current.length <= 1) {
+   713→      toast.error('At least one image is required');
+   714→      return;
+   715→    }
+   716→    setValue(
+   717→      'images',
+   718→      current
+   719→        .filter((_, i) => i !== index)
+   720→        .map((img, i) => ({ ...img, sortOrder: i }))
+   721→    );
+   722→  };
+   723→
+   724→  const moveImageUp = (index: number) => {
+   725→    if (index === 0) return;
+   726→    const current = formImages || [];
+   727→    const newImages = [...current];
+   728→    const temp = newImages[index];
+   729→    newImages[index] = newImages[index - 1];
+   730→    newImages[index - 1] = temp;
+   731→    newImages.forEach((img, i) => (img.sortOrder = i));
+   732→    setValue('images', newImages);
+   733→  };
+   734→
+   735→  const moveImageDown = (index: number) => {
+   736→    const current = formImages || [];
+   737→    if (index >= current.length - 1) return;
+   738→    const newImages = [...current];
+   739→    const temp = newImages[index];
+   740→    newImages[index] = newImages[index + 1];
+   741→    newImages[index + 1] = temp;
+   742→    newImages.forEach((img, i) => (img.sortOrder = i));
+   743→    setValue('images', newImages);
+   744→  };
+   745→
+   746→  // ─── Amenity Toggle ─────────────────────────────────────────────────────────
+   747→
+   748→  const toggleAmenity = (amenity: string) => {
+   749→    const current = formAmenities || [];
+   750→    if (current.includes(amenity)) {
+   751→      setValue(
+   752→        'amenities',
+   753→        current.filter((a) => a !== amenity)
+   754→      );
+   755→    } else {
+   756→      setValue('amenities', [...current, amenity]);
+   757→    }
+   758→  };
+   759→
+   760→  // ─── Delete Handlers ────────────────────────────────────────────────────────
+   761→
+   762→  const confirmDelete = (apt: Apartment) => {
+   763→    setDeletingApartment(apt);
+   764→    setDeleteDialogOpen(true);
+   765→  };
+   766→
+   767→  const executeDelete = async () => {
+   768→    if (!deletingApartment) return;
+   769→    try {
+   770→      setDeleteLoading(true);
+   771→      const res = await fetch(`/api/apartments/${deletingApartment.id}`, {
+   772→        method: 'DELETE',
+   773→      });
+   774→      if (!res.ok) throw new Error('Failed to delete apartment');
+   775→      toast.success('Apartment deleted successfully');
+   776→      setDeleteDialogOpen(false);
+   777→      setDeletingApartment(null);
+   778→      fetchApartments();
+   779→    } catch {
+   780→      toast.error('Failed to delete apartment');
+   781→    } finally {
+   782→      setDeleteLoading(false);
+   783→    }
+   784→  };
+   785→
+   786→  // ─── Availability Handlers ──────────────────────────────────────────────────
+   787→
+   788→  const openAvailability = (apt: Apartment) => {
+   789→    setAvailApartment(apt);
+   790→    setAvailMonth(new Date().getMonth());
+   791→    setAvailYear(new Date().getFullYear());
+   792→    setAvailSheetOpen(true);
+   793→  };
+   794→
+   795→  const getAvailStatus = (dateStr: string): string => {
+   796→    const found = availDates.find((d) => d.date === dateStr);
+   797→    return found?.status || 'available';
+   798→  };
+   799→
+   800→  const cycleDateStatus = (dateStr: string) => {
+   801→    const current = getAvailStatus(dateStr);
+   802→    const statuses = ['available', 'booked', 'reserved', 'maintenance'];
+   803→    const idx = statuses.indexOf(current);
+   804→    const next = statuses[(idx + 1) % statuses.length];
+   805→    setAvailDates((prev) => {
+   806→      const existing = prev.find((d) => d.date === dateStr);
+   807→      if (existing) {
+   808→        return prev.map((d) => (d.date === dateStr ? { ...d, status: next } : d));
+   809→      }
+   810→      return [...prev, { date: dateStr, status: next }];
+   811→    });
+   812→  };
+   813→
+   814→  const handleDateMouseDown = (dateStr: string, e: React.MouseEvent) => {
+   815→    e.preventDefault();
+   816→    setIsDragging(true);
+   817→    dragStartRef.current = dateStr;
+   818→    setSelectedDates(new Set([dateStr]));
+   819→  };
+   820→
+   821→  const handleDateMouseEnter = (dateStr: string) => {
+   822→    if (!isDragging) return;
+   823→    setSelectedDates((prev) => new Set(prev).add(dateStr));
+   824→  };
+   825→
+   826→  const handleDateMouseUp = () => {
+   827→    setIsDragging(false);
+   828→    dragStartRef.current = null;
+   829→  };
+   830→
+   831→  const markSelectedDates = (status: string) => {
+   832→    if (selectedDates.size === 0) {
+   833→      toast.info('No dates selected');
+   834→      return;
+   835→    }
+   836→    setAvailDates((prev) => {
+   837→      const updated = [...prev];
+   838→      selectedDates.forEach((dateStr) => {
+   839→        const idx = updated.findIndex((d) => d.date === dateStr);
+   840→        if (idx >= 0) {
+   841→          updated[idx] = { ...updated[idx], status };
+   842→        } else {
+   843→          updated.push({ date: dateStr, status });
+   844→        }
+   845→      });
+   846→      return updated;
+   847→    });
+   848→    setSelectedDates(new Set());
+   849→    toast.success(`${selectedDates.size} dates marked as ${status}`);
+   850→  };
+   851→
+   852→  const blockNext7Days = () => {
+   853→    const today = new Date();
+   854→    const newDates: string[] = [];
+   855→    for (let i = 0; i < 7; i++) {
+   856→      const d = new Date(today);
+   857→      d.setDate(d.getDate() + i);
+   858→      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+   859→      newDates.push(dateStr);
+   860→    }
+   861→    setAvailDates((prev) => {
+   862→      const updated = [...prev];
+   863→      newDates.forEach((dateStr) => {
+   864→        const idx = updated.findIndex((d) => d.date === dateStr);
+   865→        if (idx >= 0) {
+   866→          updated[idx] = { ...updated[idx], status: 'maintenance' };
+   867→        } else {
+   868→          updated.push({ date: dateStr, status: 'maintenance' });
+   869→        }
+   870→      });
+   871→      return updated;
+   872→    });
+   873→    toast.success('Next 7 days marked as maintenance');
+   874→  };
+   875→
+   876→  const clearAllBookings = () => {
+   877→    setAvailDates((prev) => prev.map((d) => ({ ...d, status: 'available' })));
+   878→    toast.success('All dates set to available');
+   879→  };
+   880→
+   881→  const saveAvailability = async () => {
+   882→    if (!availApartment) return;
+   883→    try {
+   884→      setAvailSaving(true);
+   885→      const res = await fetch(
+   886→        `/api/apartments/${availApartment.id}/availability`,
+   887→        {
+   888→          method: 'PUT',
+   889→          headers: { 'Content-Type': 'application/json' },
+   890→          body: JSON.stringify({ dates: availDates }),
+   891→        }
+   892→      );
+   893→      if (!res.ok) throw new Error('Failed to save availability');
+   894→      toast.success('Availability saved successfully');
+   895→      fetchApartments();
+   896→    } catch {
+   897→      toast.error('Failed to save availability');
+   898→    } finally {
+   899→      setAvailSaving(false);
+   900→    }
+   901→  };
+   902→
+   903→  const prevMonth = () => {
+   904→    if (availMonth === 0) {
+   905→      setAvailMonth(11);
+   906→      setAvailYear((y) => y - 1);
+   907→    } else {
+   908→      setAvailMonth((m) => m - 1);
+   909→    }
+   910→  };
+   911→
+   912→  const nextMonth = () => {
+   913→    if (availMonth === 11) {
+   914→      setAvailMonth(0);
+   915→      setAvailYear((y) => y + 1);
+   916→    } else {
+   917→      setAvailMonth((m) => m + 1);
+   918→    }
+   919→  };
+   920→
+   921→  // ─── Enquiry Handlers ───────────────────────────────────────────────────────
+   922→
+   923→  const updateEnquiryStatus = async (id: string, status: string) => {
+   924→    try {
+   925→      const res = await fetch(`/api/enquiries/${id}`, {
+   926→        method: 'PATCH',
+   927→        headers: { 'Content-Type': 'application/json' },
+   928→        body: JSON.stringify({ status }),
+   929→      });
+   930→      if (!res.ok) throw new Error('Failed to update enquiry');
+   931→      toast.success(`Enquiry marked as ${status}`);
+   932→      fetchEnquiries();
+   933→    } catch {
+   934→      toast.error('Failed to update enquiry');
+   935→    }
+   936→  };
+   937→
+   938→  const confirmDeleteEnquiry = (enq: Enquiry) => {
+   939→    setDeletingEnquiry(enq);
+   940→    setEnquiryDeleteDialogOpen(true);
+   941→  };
+   942→
+   943→  const executeDeleteEnquiry = async () => {
+   944→    if (!deletingEnquiry) return;
+   945→    try {
+   946→      setEnquiryDeleteLoading(true);
+   947→      const res = await fetch(`/api/enquiries/${deletingEnquiry.id}`, {
+   948→        method: 'DELETE',
+   949→      });
+   950→      if (!res.ok) throw new Error('Failed to delete enquiry');
+   951→      toast.success('Enquiry deleted');
+   952→      setEnquiryDeleteDialogOpen(false);
+   953→      setDeletingEnquiry(null);
+   954→      fetchEnquiries();
+   955→    } catch {
+   956→      toast.error('Failed to delete enquiry');
+   957→    } finally {
+   958→      setEnquiryDeleteLoading(false);
+   959→    }
+   960→  };
+   961→
+   962→  const exportCSV = () => {
+   963→    const headers = [
+   964→      'Date',
+   965→      'Guest Name',
+   966→      'Phone',
+   967→      'Email',
+   968→      'Apartment',
+   969→      'Code',
+   970→      'Check-In',
+   971→      'Check-Out',
+   972→      'Guests',
+   973→      'Status',
+   974→      'Special Requests',
+   975→    ];
+   976→    const rows = filteredEnquiries.map((e) => [
+   977→      e.createdAt,
+   978→      e.fullName,
+   979→      e.phoneNumber,
+   980→      e.email,
+   981→      e.apartment.name,
+   982→      e.apartment.code,
+   983→      e.checkIn,
+   984→      e.checkOut,
+   985→      e.guests,
+   986→      e.status,
+   987→      e.specialRequests || '',
+   988→    ]);
+   989→    const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}",`)).join('\n');
+   990→    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+   991→    const url = URL.createObjectURL(blob);
+   992→    const a = document.createElement('a');
+   993→    a.href = url;
+   994→    a.download = `enquiries-${new Date().toISOString().slice(0, 10)}.csv`;
+   995→    a.click();
+   996→    URL.revokeObjectURL(url);
+   997→    toast.success('CSV exported successfully');
+   998→  };
+   999→
+  1000→  // ─── Settings Handlers ──────────────────────────────────────────────────────
+  1001→
+  1002→  const updateAllWhatsapp = async () => {
+  1003→    if (!whatsappNumber.trim()) {
+  1004→      toast.error('Please enter a WhatsApp number');
+  1005→      return;
+  1006→    }
+  1007→    try {
+  1008→      setUpdateWhatsappLoading(true);
+  1009→      let successCount = 0;
+  1010→      let failCount = 0;
+  1011→      const results = await Promise.allSettled(
+  1012→        apartments.map((apt) =>
+  1013→          fetch(`/api/apartments/${apt.id}`, {
+  1014→            method: 'PUT',
+  1015→            headers: { 'Content-Type': 'application/json' },
+  1016→            body: JSON.stringify({ whatsappNumber: whatsappNumber.trim() }),
+  1017→          })
+  1018→        )
+  1019→      );
+  1020→      results.forEach((r) => {
+  1021→        if (r.status === 'fulfilled') successCount++;
+  1022→        else failCount++;
+  1023→      });
+  1024→      if (failCount === 0) {
+  1025→        toast.success(`Updated WhatsApp for all ${successCount} apartments`);
+  1026→      } else {
+  1027→        toast.warning(
+  1028→          `Updated ${successCount} apartments, ${failCount} failed`
+  1029→        );
+  1030→      }
+  1031→      fetchApartments();
+  1032→    } catch {
+  1033→      toast.error('Failed to update WhatsApp numbers');
+  1034→    } finally {
+  1035→      setUpdateWhatsappLoading(false);
+  1036→    }
+  1037→  };
+  1038→
+  1039→  // ─── Calendar Rendering ─────────────────────────────────────────────────────
+  1040→
+  1041→  const renderCalendar = () => {
+  1042→    const daysInMonth = getDaysInMonth(availYear, availMonth);
+  1043→    const firstDay = getFirstDayOfMonth(availYear, availMonth);
+  1044→    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  1045→
+  1046→    const cells: React.ReactNode[] = [];
+  1047→
+  1048→    // Day headers
+  1049→    days.forEach((day) => {
+  1050→      cells.push(
+  1051→        <div
+  1052→          key={`header-${day}`}
+  1053→          className="text-xs font-semibold text-gray-500 text-center py-2"
+  1054→        >
+  1055→          {day}
+  1056→        </div>
+  1057→      );
+  1058→    });
+  1059→
+  1060→    // Empty cells before first day
+  1061→    for (let i = 0; i < firstDay; i++) {
+  1062→      cells.push(
+  1063→        <div key={`empty-${i}`} className="aspect-square" />
+  1064→      );
+  1065→    }
+  1066→
+  1067→    // Date cells
+  1068→    for (let d = 1; d <= daysInMonth; d++) {
+  1069→      const dateStr = `${availYear}-${String(availMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  1070→      const status = getAvailStatus(dateStr);
+  1071→      const colorCfg = AVAIL_COLORS[status] || AVAIL_COLORS.available;
+  1072→      const isSelected = selectedDates.has(dateStr);
+  1073→
+  1074→      cells.push(
+  1075→        <button
+  1076→          key={dateStr}
+  1077→          type="button"
+  1078→          className={`
+  1079→            relative aspect-square rounded-md text-xs font-medium flex items-center justify-center
+  1080→            transition-all duration-150 cursor-pointer select-none
+  1081→            ${colorCfg.bg} text-white ${colorCfg.hover}
+  1082→            ${isSelected ? 'ring-2 ring-offset-2 ring-gray-800 scale-105' : 'opacity-90 hover:opacity-100'}
+  1083→          `}
+  1084→          onClick={() => cycleDateStatus(dateStr)}
+  1085→          onMouseDown={(e) => handleDateMouseDown(dateStr, e)}
+  1086→          onMouseEnter={() => handleDateMouseEnter(dateStr)}
+  1087→          onMouseUp={handleDateMouseUp}
+  1088→          title={`${dateStr} - ${colorCfg.label}`}
+  1089→        >
+  1090→          {d}
+  1091→        </button>
+  1092→      );
+  1093→    }
+  1094→
+  1095→    return cells;
+  1096→  };
+  1097→
+  1098→  // ─── Render ─────────────────────────────────────────────────────────────────
+  1099→
+  1100→  return (
+  1101→    <div
+  1102→      className="min-h-screen flex flex-col"
+  1103→      style={{ backgroundColor: BRAND.offWhite }}
+  1104→      onMouseUp={handleDateMouseUp}
+  1105→      onMouseLeave={() => setIsDragging(false)}
+  1106→    >
+  1107→      {/* Top Bar */}
+  1108→      <header
+  1109→        className="sticky top-0 z-40 border-b backdrop-blur-md"
+  1110→        style={{
+  1111→          backgroundColor: `${BRAND.charcoal}ee`,
+  1112→          borderColor: `${BRAND.sage}30`,
+  1113→        }}
+  1114→      >
+  1115→        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
+  1116→          <div className="flex items-center gap-3">
+  1117→            <Building2 className="h-5 w-5" style={{ color: BRAND.sage }} />
+  1118→            <h1 className="text-sm sm:text-base font-semibold text-white truncate">
+  1119→              Dwell Chronicles Admin — Apartment Management
+  1120→            </h1>
+  1121→          </div>
+  1122→          <Link
+  1123→            href="/"
+  1124→            className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-300 hover:text-white transition-colors"
+  1125→          >
+  1126→            <ChevronLeft className="h-4 w-4" />
+  1127→            Back to Site
+  1128→          </Link>
+  1129→        </div>
+  1130→      </header>
+  1131→
+  1132→      {/* Main Content */}
+  1133→      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 py-6">
+  1134→        <Tabs
+  1135→          value={activeTab}
+  1136→          onValueChange={setActiveTab}
+  1137→          className="w-full"
+  1138→        >
+  1139→          {/* Tab Navigation */}
+  1140→          <TabsList
+  1141→            className="mb-6 h-10 p-1 rounded-lg border"
+  1142→            style={{
+  1143→              backgroundColor: 'white',
+  1144→              borderColor: `${BRAND.lightStone}`,
+  1145→            }}
+  1146→          >
+  1147→            <TabsTrigger
+  1148→              value="apartments"
+  1149→              className="data-[state=active]:shadow-sm rounded-md px-4 gap-2"
+  1150→              style={{
+  1151→                ['--tw-ring-color' as string]: `${BRAND.sage}50`,
+  1152→              }}
+  1153→            >
+  1154→              <Home className="h-4 w-4" />
+  1155→              <span className="hidden sm:inline">Apartments</span>
+  1156→            </TabsTrigger>
+  1157→            <TabsTrigger
+  1158→              value="enquiries"
+  1159→              className="data-[state=active]:shadow-sm rounded-md px-4 gap-2"
+  1160→            >
+  1161→              <Mail className="h-4 w-4" />
+  1162→              <span className="hidden sm:inline">Enquiries</span>
+  1163→            </TabsTrigger>
+  1164→            <TabsTrigger
+  1165→              value="settings"
+  1166→              className="data-[state=active]:shadow-sm rounded-md px-4 gap-2"
+  1167→            >
+  1168→              <Settings className="h-4 w-4" />
+  1169→              <span className="hidden sm:inline">Settings</span>
+  1170→            </TabsTrigger>
+  1171→          </TabsList>
+  1172→
+  1173→          {/* ── TAB 1: APARTMENTS ── */}
+  1174→          <TabsContent value="apartments">
+  1175→            <AnimatePresence mode="wait">
+  1176→              <motion.div
+  1177→                key="apartments"
+  1178→                initial={{ opacity: 0, y: 8 }}
+  1179→                animate={{ opacity: 1, y: 0 }}
+  1180→                exit={{ opacity: 0, y: -8 }}
+  1181→                transition={{ duration: 0.2 }}
+  1182→              >
+  1183→                {loading ? (
+  1184→                  <LoadingSkeleton />
+  1185→                ) : (
+  1186→                  <div className="space-y-6">
+  1187→                    {/* Add Button */}
+  1188→                    <div className="flex justify-end">
+  1189→                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+  1190→                        <Button
+  1191→                          onClick={openAddForm}
+  1192→                          className="gap-2 text-white shadow-md hover:shadow-lg transition-shadow"
+  1193→                          style={{ backgroundColor: BRAND.sage }}
+  1194→                        >
+  1195→                          <Plus className="h-4 w-4" />
+  1196→                          Add New Apartment
+  1197→                        </Button>
+  1198→                      </motion.div>
+  1199→                    </div>
+  1200→
+  1201→                    {/* Stats Cards */}
+  1202→                    <motion.div
+  1203→                      className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+  1204→                      variants={staggerContainer}
+  1205→                      initial="initial"
+  1206→                      animate="animate"
+  1207→                    >
+  1208→                      <StatCard
+  1209→                        icon={Home}
+  1210→                        label="Total Apartments"
+  1211→                        value={stats.total}
+  1212→                        color={BRAND.charcoal}
+  1213→                      />
+  1214→                      <StatCard
+  1215→                        icon={CheckCircle2}
+  1216→                        label="Available"
+  1217→                        value={stats.available}
+  1218→                        color="#16a34a"
+  1219→                      />
+  1220→                      <StatCard
+  1221→                        icon={Clock}
+  1222→                        label="Booked"
+  1223→                        value={stats.booked}
+  1224→                        color="#dc2626"
+  1225→                      />
+  1226→                      <StatCard
+  1227→                        icon={Wrench}
+  1228→                        label="Under Maintenance"
+  1229→                        value={stats.maintenance}
+  1230→                        color="#6b7280"
+  1231→                      />
+  1232→                    </motion.div>
+  1233→
+  1234→                    {/* Filters */}
+  1235→                    <motion.div
+  1236→                      {...fadeInUp}
+  1237→                      className="flex flex-col sm:flex-row gap-3"
+  1238→                    >
+  1239→                      <div className="relative flex-1">
+  1240→                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+  1241→                        <Input
+  1242→                          placeholder="Search apartments..."
+  1243→                          value={searchQuery}
+  1244→                          onChange={(e) => setSearchQuery(e.target.value)}
+  1245→                          className="pl-9 h-10 bg-white border-gray-200"
+  1246→                        />
+  1247→                      </div>
+  1248→                      <Select
+  1249→                        value={statusFilter}
+  1250→                        onValueChange={setStatusFilter}
+  1251→                      >
+  1252→                        <SelectTrigger className="w-full sm:w-44 h-10 bg-white border-gray-200">
+  1253→                          <Filter className="h-4 w-4 mr-1 text-gray-400" />
+  1254→                          <SelectValue placeholder="Status" />
+  1255→                        </SelectTrigger>
+  1256→                        <SelectContent>
+  1257→                          <SelectItem value="all">All Statuses</SelectItem>
+  1258→                          {STATUS_OPTIONS.map((s) => (
+  1259→                            <SelectItem key={s} value={s}>
+  1260→                              {STATUS_CONFIG[s]?.label || s}
+  1261→                            </SelectItem>
+  1262→                          ))}
+  1263→                        </SelectContent>
+  1264→                      </Select>
+  1265→                      <Select
+  1266→                        value={categoryFilter}
+  1267→                        onValueChange={setCategoryFilter}
+  1268→                      >
+  1269→                        <SelectTrigger className="w-full sm:w-44 h-10 bg-white border-gray-200">
+  1270→                          <SelectValue placeholder="Category" />
+  1271→                        </SelectTrigger>
+  1272→                        <SelectContent>
+  1273→                          <SelectItem value="all">All Categories</SelectItem>
+  1274→                          {CATEGORY_OPTIONS.map((c) => (
+  1275→                            <SelectItem key={c} value={c}>
+  1276→                              {c.charAt(0).toUpperCase() + c.slice(1)}
+  1277→                            </SelectItem>
+  1278→                          ))}
+  1279→                        </SelectContent>
+  1280→                      </Select>
+  1281→                    </motion.div>
+  1282→
+  1283→                    {/* Apartments List - Desktop Table */}
+  1284→                    <motion.div {...fadeInUp} className="hidden md:block">
+  1285→                      <Card className="border-gray-200/80 shadow-sm overflow-hidden">
+  1286→                        <Table>
+  1287→                          <TableHeader>
+  1288→                            <TableRow className="hover:bg-gray-50/50" style={{ backgroundColor: `${BRAND.offWhite}` }}>
+  1289→                              <TableHead className="w-16">Image</TableHead>
+  1290→                              <TableHead>Name</TableHead>
+  1291→                              <TableHead>City</TableHead>
+  1292→                              <TableHead>Category</TableHead>
+  1293→                              <TableHead className="text-right">Price/Night</TableHead>
+  1294→                              <TableHead>Status</TableHead>
+  1295→                              <TableHead className="text-right">Actions</TableHead>
+  1296→                            </TableRow>
+  1297→                          </TableHeader>
+  1298→                          <TableBody>
+  1299→                            {apartments.length === 0 ? (
+  1300→                              <TableRow>
+  1301→                                <TableCell
+  1302→                                  colSpan={7}
+  1303→                                  className="text-center py-12 text-gray-400"
+  1304→                                >
+  1305→                                  <Home className="h-8 w-8 mx-auto mb-2 opacity-40" />
+  1306→                                  No apartments found.
+  1307→                                  <br />
+  1308→                                  <Button
+  1309→                                    variant="link"
+  1310→                                    onClick={openAddForm}
+  1311→                                    className="text-sm mt-1"
+  1312→                                    style={{ color: BRAND.sage }}
+  1313→                                  >
+  1314→                                    Add your first apartment
+  1315→                                  </Button>
+  1316→                                </TableCell>
+  1317→                              </TableRow>
+  1318→                            ) : (
+  1319→                              apartments.map((apt, idx) => (
+  1320→                                <motion.tr
+  1321→                                  key={apt.id}
+  1322→                                  initial={{ opacity: 0, x: -8 }}
+  1323→                                  animate={{ opacity: 1, x: 0 }}
+  1324→                                  transition={{ delay: idx * 0.03 }}
+  1325→                                  className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors group"
+  1326→                                >
+  1327→                                  <TableCell className="py-3">
+  1328→                                    <div className="h-10 w-[60px] rounded-md overflow-hidden bg-gray-100">
+  1329→                                      {apt.images[0]?.url ? (
+  1330→                                        <img
+  1331→                                          src={apt.images[0].url}
+  1332→                                          alt={apt.images[0].alt || apt.name}
+  1333→                                          className="h-full w-full object-cover"
+  1334→                                        />
+  1335→                                      ) : (
+  1336→                                        <div className="h-full w-full flex items-center justify-center">
+  1337→                                          <Home className="h-4 w-4 text-gray-300" />
+  1338→                                        </div>
+  1339→                                      )}
+  1340→                                    </div>
+  1341→                                  </TableCell>
+  1342→                                  <TableCell>
+  1343→                                    <div>
+  1344→                                      <p className="font-medium text-sm text-gray-900">
+  1345→                                        {apt.name}
+  1346→                                      </p>
+  1347→                                      <p className="text-xs text-gray-400">
+  1348→                                        {apt.code}
+  1349→                                      </p>
+  1350→                                    </div>
+  1351→                                  </TableCell>
+  1352→                                  <TableCell>
+  1353→                                    <span className="flex items-center gap-1 text-sm text-gray-600">
+  1354→                                      <MapPin className="h-3 w-3" />
+  1355→                                      {apt.city}
+  1356→                                    </span>
+  1357→                                  </TableCell>
+  1358→                                  <TableCell>
+  1359→                                    <Badge
+  1360→                                      variant="secondary"
+  1361→                                      className="text-xs font-normal capitalize"
+  1362→                                    >
+  1363→                                      {apt.category}
+  1364→                                    </Badge>
+  1365→                                  </TableCell>
+  1366→                                  <TableCell className="text-right">
+  1367→                                    <span className="font-semibold text-sm">
+  1368→                                      {formatCurrency(apt.pricePerNight)}
+  1369→                                    </span>
+  1370→                                  </TableCell>
+  1371→                                  <TableCell>
+  1372→                                    <StatusBadge status={apt.status} />
+  1373→                                  </TableCell>
+  1374→                                  <TableCell className="text-right">
+  1375→                                    <div className="flex items-center justify-end gap-1">
+  1376→                                      <Button
+  1377→                                        variant="ghost"
+  1378→                                        size="sm"
+  1379→                                        className="h-8 w-8 p-0 opacity-60 hover:opacity-100"
+  1380→                                        onClick={() => openEditForm(apt)}
+  1381→                                        title="Edit"
+  1382→                                      >
+  1383→                                        <Edit className="h-3.5 w-3.5" />
+  1384→                                      </Button>
+  1385→                                      <Button
+  1386→                                        variant="ghost"
+  1387→                                        size="sm"
+  1388→                                        className="h-8 w-8 p-0 opacity-60 hover:opacity-100"
+  1389→                                        onClick={() => openAvailability(apt)}
+  1390→                                        title="Manage Availability"
+  1391→                                      >
+  1392→                                        <Calendar className="h-3.5 w-3.5" />
+  1393→                                      </Button>
+  1394→                                      <Button
+  1395→                                        variant="ghost"
+  1396→                                        size="sm"
+  1397→                                        className="h-8 w-8 p-0 text-red-500 opacity-60 hover:opacity-100 hover:text-red-600 hover:bg-red-50"
+  1398→                                        onClick={() => confirmDelete(apt)}
+  1399→                                        title="Delete"
+  1400→                                      >
+  1401→                                        <Trash2 className="h-3.5 w-3.5" />
+  1402→                                      </Button>
+  1403→                                    </div>
+  1404→                                  </TableCell>
+  1405→                                </motion.tr>
+  1406→                              ))
+  1407→                            )}
+  1408→                          </TableBody>
+  1409→                        </Table>
+  1410→                      </Card>
+  1411→                    </motion.div>
+  1412→
+  1413→                    {/* Apartments List - Mobile Cards */}
+  1414→                    <div className="md:hidden space-y-3">
+  1415→                      {apartments.length === 0 ? (
+  1416→                        <Card className="p-8 text-center text-gray-400">
+  1417→                          <Home className="h-8 w-8 mx-auto mb-2 opacity-40" />
+  1418→                          No apartments found.
+  1419→                        </Card>
+  1420→                      ) : (
+  1421→                        <AnimatePresence>
+  1422→                          {apartments.map((apt) => (
+  1423→                            <motion.div
+  1424→                              key={apt.id}
+  1425→                              initial={{ opacity: 0, y: 8 }}
+  1426→                              animate={{ opacity: 1, y: 0 }}
+  1427→                              exit={{ opacity: 0, scale: 0.95 }}
+  1428→                            >
+  1429→                              <Card className="border-gray-200/80 shadow-sm overflow-hidden">
+  1430→                                <CardContent className="p-4">
+  1431→                                  <div className="flex gap-3">
+  1432→                                    <div className="h-16 w-16 shrink-0 rounded-lg overflow-hidden bg-gray-100">
+  1433→                                      {apt.images[0]?.url ? (
+  1434→                                        <img
+  1435→                                          src={apt.images[0].url}
+  1436→                                          alt={
+  1437→                                            apt.images[0].alt || apt.name
+  1438→                                          }
+  1439→                                          className="h-full w-full object-cover"
+  1440→                                        />
+  1441→                                      ) : (
+  1442→                                        <div className="h-full w-full flex items-center justify-center">
+  1443→                                          <Home className="h-5 w-5 text-gray-300" />
+  1444→                                        </div>
+  1445→                                      )}
+  1446→                                    </div>
+  1447→                                    <div className="flex-1 min-w-0">
+  1448→                                      <div className="flex items-start justify-between gap-2">
+  1449→                                        <div>
+  1450→                                          <p className="font-medium text-sm text-gray-900 truncate">
+  1451→                                            {apt.name}
+  1452→                                          </p>
+  1453→                                          <p className="text-xs text-gray-400">
+  1454→                                            {apt.code} · {apt.city}
+  1455→                                          </p>
+  1456→                                        </div>
+  1457→                                        <StatusBadge status={apt.status} />
+  1458→                                      </div>
+  1459→                                      <div className="flex items-center justify-between mt-2">
+  1460→                                        <div className="flex items-center gap-2">
+  1461→                                          <Badge variant="secondary" className="text-xs capitalize">
+  1462→                                            {apt.category}
+  1463→                                          </Badge>
+  1464→                                          <span className="text-sm font-semibold">
+  1465→                                            {formatCurrency(apt.pricePerNight)}
+  1466→                                            <span className="text-xs text-gray-400 font-normal">
+  1467→                                              /night
+  1468→                                            </span>
+  1469→                                          </span>
+  1470→                                        </div>
+  1471→                                      </div>
+  1472→                                    </div>
+  1473→                                  </div>
+  1474→                                  <Separator className="my-3" />
+  1475→                                  <div className="flex gap-2">
+  1476→                                    <Button
+  1477→                                      variant="outline"
+  1478→                                      size="sm"
+  1479→                                      className="flex-1 h-8 text-xs gap-1"
+  1480→                                      onClick={() => openEditForm(apt)}
+  1481→                                    >
+  1482→                                      <Edit className="h-3 w-3" />
+  1483→                                      Edit
+  1484→                                    </Button>
+  1485→                                    <Button
+  1486→                                      variant="outline"
+  1487→                                      size="sm"
+  1488→                                      className="flex-1 h-8 text-xs gap-1"
+  1489→                                      onClick={() => openAvailability(apt)}
+  1490→                                    >
+  1491→                                      <Calendar className="h-3 w-3" />
+  1492→                                      Availability
+  1493→                                    </Button>
+  1494→                                    <Button
+  1495→                                      variant="outline"
+  1496→                                      size="sm"
+  1497→                                      className="h-8 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+  1498→                                      onClick={() => confirmDelete(apt)}
+  1499→                                    >
+  1500→                                      <Trash2 className="h-3 w-3" />
+  1501→                                    </Button>
+  1502→                                  </div>
+  1503→                                </CardContent>
+  1504→                              </Card>
+  1505→                            </motion.div>
+  1506→                          ))}
+  1507→                        </AnimatePresence>
+  1508→                      )}
+  1509→                    </div>
+  1510→                  </div>
+  1511→                )}
+  1512→              </motion.div>
+  1513→            </AnimatePresence>
+  1514→          </TabsContent>
+  1515→
+  1516→          {/* ── TAB 2: ENQUIRIES ── */}
+  1517→          <TabsContent value="enquiries">
+  1518→            <AnimatePresence mode="wait">
+  1519→              <motion.div
+  1520→                key="enquiries"
+  1521→                initial={{ opacity: 0, y: 8 }}
+  1522→                animate={{ opacity: 1, y: 0 }}
+  1523→                exit={{ opacity: 0, y: -8 }}
+  1524→                transition={{ duration: 0.2 }}
+  1525→              >
+  1526→                <div className="space-y-6">
+  1527→                  {/* Header */}
+  1528→                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  1529→                    <h2 className="text-lg font-semibold text-gray-900">
+  1530→                      Booking Enquiries
+  1531→                      <span className="ml-2 text-sm font-normal text-gray-400">
+  1532→                        ({filteredEnquiries.length})
+  1533→                      </span>
+  1534→                    </h2>
+  1535→                    <div className="flex gap-2">
+  1536→                      <Select
+  1537→                        value={enquiryStatusFilter}
+  1538→                        onValueChange={setEnquiryStatusFilter}
+  1539→                      >
+  1540→                        <SelectTrigger className="w-40 h-9 bg-white border-gray-200 text-sm">
+  1541→                          <SelectValue placeholder="Filter status" />
+  1542→                        </SelectTrigger>
+  1543→                        <SelectContent>
+  1544→                          <SelectItem value="all">All Statuses</SelectItem>
+  1545→                          <SelectItem value="new">New</SelectItem>
+  1546→                          <SelectItem value="confirmed">Confirmed</SelectItem>
+  1547→                          <SelectItem value="cancelled">Cancelled</SelectItem>
+  1548→                        </SelectContent>
+  1549→                      </Select>
+  1550→                      <Button
+  1551→                        variant="outline"
+  1552→                        size="sm"
+  1553→                        className="h-9 gap-1.5"
+  1554→                        onClick={exportCSV}
+  1555→                      >
+  1556→                        <Download className="h-3.5 w-3.5" />
+  1557→                        Export CSV
+  1558→                      </Button>
+  1559→                    </div>
+  1560→                  </div>
+  1561→
+  1562→                  {/* Enquiries Table - Desktop */}
+  1563→                  {enquiriesLoading ? (
+  1564→                    <div className="space-y-3">
+  1565→                      <Skeleton className="h-10 w-full rounded-lg" />
+  1566→                      <Skeleton className="h-64 w-full rounded-xl" />
+  1567→                    </div>
+  1568→                  ) : (
+  1569→                    <>
+  1570→                      {/* Desktop Table */}
+  1571→                      <div className="hidden lg:block">
+  1572→                        <Card className="border-gray-200/80 shadow-sm overflow-hidden">
+  1573→                          <Table>
+  1574→                            <TableHeader>
+  1575→                              <TableRow
+  1576→                                className="hover:bg-gray-50/50"
+  1577→                                style={{ backgroundColor: BRAND.offWhite }}
+  1578→                              >
+  1579→                                <TableHead>Date</TableHead>
+  1580→                                <TableHead>Guest</TableHead>
+  1581→                                <TableHead>Apartment</TableHead>
+  1582→                                <TableHead>Check-In</TableHead>
+  1583→                                <TableHead>Check-Out</TableHead>
+  1584→                                <TableHead>Guests</TableHead>
+  1585→                                <TableHead>Status</TableHead>
+  1586→                                <TableHead className="text-right">Actions</TableHead>
+  1587→                              </TableRow>
+  1588→                            </TableHeader>
+  1589→                            <TableBody>
+  1590→                              {filteredEnquiries.length === 0 ? (
+  1591→                                <TableRow>
+  1592→                                  <TableCell
+  1593→                                    colSpan={8}
+  1594→                                    className="text-center py-12 text-gray-400"
+  1595→                                  >
+  1596→                                    <Mail className="h-8 w-8 mx-auto mb-2 opacity-40" />
+  1597→                                    No enquiries found.
+  1598→                                  </TableCell>
+  1599→                                </TableRow>
+  1600→                              ) : (
+  1601→                                filteredEnquiries.map((enq, idx) => (
+  1602→                                  <motion.tr
+  1603→                                    key={enq.id}
+  1604→                                    initial={{ opacity: 0, x: -8 }}
+  1605→                                    animate={{ opacity: 1, x: 0 }}
+  1606→                                    transition={{ delay: idx * 0.03 }}
+  1607→                                    className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+  1608→                                  >
+  1609→                                    <TableCell className="py-3 text-xs text-gray-500">
+  1610→                                      {formatDateTime(enq.createdAt)}
+  1611→                                    </TableCell>
+  1612→                                    <TableCell>
+  1613→                                      <div>
+  1614→                                        <p className="text-sm font-medium text-gray-900">
+  1615→                                          {enq.fullName}
+  1616→                                        </p>
+  1617→                                        <div className="flex items-center gap-3 text-xs text-gray-400">
+  1618→                                          <span className="flex items-center gap-1">
+  1619→                                            <Phone className="h-3 w-3" />
+  1620→                                            {enq.phoneNumber}
+  1621→                                          </span>
+  1622→                                          <span className="flex items-center gap-1 truncate max-w-[160px]">
+  1623→                                            <Mail className="h-3 w-3" />
+  1624→                                            {enq.email}
+  1625→                                          </span>
+  1626→                                        </div>
+  1627→                                      </div>
+  1628→                                    </TableCell>
+  1629→                                    <TableCell>
+  1630→                                      <div>
+  1631→                                        <p className="text-sm font-medium">
+  1632→                                          {enq.apartment.name}
+  1633→                                        </p>
+  1634→                                        <p className="text-xs text-gray-400">
+  1635→                                          {enq.apartment.code}
+  1636→                                        </p>
+  1637→                                      </div>
+  1638→                                    </TableCell>
+  1639→                                    <TableCell className="text-sm">
+  1640→                                      {formatDate(enq.checkIn)}
+  1641→                                    </TableCell>
+  1642→                                    <TableCell className="text-sm">
+  1643→                                      {formatDate(enq.checkOut)}
+  1644→                                    </TableCell>
+  1645→                                    <TableCell className="text-sm">
+  1646→                                      {enq.guests}
+  1647→                                    </TableCell>
+  1648→                                    <TableCell>
+  1649→                                      <EnquiryStatusBadge status={enq.status} />
+  1650→                                    </TableCell>
+  1651→                                    <TableCell className="text-right">
+  1652→                                      <div className="flex items-center justify-end gap-1">
+  1653→                                        {enq.status !== 'confirmed' && (
+  1654→                                          <Button
+  1655→                                            variant="ghost"
+  1656→                                            size="sm"
+  1657→                                            className="h-8 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+  1658→                                            onClick={() =>
+  1659→                                              updateEnquiryStatus(enq.id, 'confirmed')
+  1660→                                            }
+  1661→                                          >
+  1662→                                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+  1663→                                            Confirm
+  1664→                                          </Button>
+  1665→                                        )}
+  1666→                                        {enq.status !== 'cancelled' && (
+  1667→                                          <Button
+  1668→                                            variant="ghost"
+  1669→                                            size="sm"
+  1670→                                            className="h-8 px-2 text-xs text-red-500 hover:text-red-600 hover:bg-red-50"
+  1671→                                            onClick={() =>
+  1672→                                              updateEnquiryStatus(enq.id, 'cancelled')
+  1673→                                            }
+  1674→                                          >
+  1675→                                            <XCircle className="h-3.5 w-3.5 mr-1" />
+  1676→                                            Cancel
+  1677→                                          </Button>
+  1678→                                        )}
+  1679→                                        <Button
+  1680→                                          variant="ghost"
+  1681→                                          size="sm"
+  1682→                                          className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50"
+  1683→                                          onClick={() => confirmDeleteEnquiry(enq)}
+  1684→                                        >
+  1685→                                          <Trash2 className="h-3.5 w-3.5" />
+  1686→                                        </Button>
+  1687→                                      </div>
+  1688→                                    </TableCell>
+  1689→                                  </motion.tr>
+  1690→                                ))
+  1691→                              )}
+  1692→                            </TableBody>
+  1693→                          </Table>
+  1694→                        </Card>
+  1695→                      </div>
+  1696→
+  1697→                      {/* Mobile Cards */}
+  1698→                      <div className="lg:hidden space-y-3">
+  1699→                        {filteredEnquiries.length === 0 ? (
+  1700→                          <Card className="p-8 text-center text-gray-400">
+  1701→                            <Mail className="h-8 w-8 mx-auto mb-2 opacity-40" />
+  1702→                            No enquiries found.
+  1703→                          </Card>
+  1704→                        ) : (
+  1705→                          <AnimatePresence>
+  1706→                            {filteredEnquiries.map((enq) => (
+  1707→                              <motion.div
+  1708→                                key={enq.id}
+  1709→                                initial={{ opacity: 0, y: 8 }}
+  1710→                                animate={{ opacity: 1, y: 0 }}
+  1711→                                exit={{ opacity: 0, scale: 0.95 }}
+  1712→                              >
+  1713→                                <Card className="border-gray-200/80 shadow-sm overflow-hidden">
+  1714→                                  <CardContent className="p-4">
+  1715→                                    <div className="flex items-start justify-between gap-2 mb-3">
+  1716→                                      <div>
+  1717→                                        <p className="font-medium text-sm">
+  1718→                                          {enq.fullName}
+  1719→                                        </p>
+  1720→                                        <p className="text-xs text-gray-400">
+  1721→                                          {formatDateTime(enq.createdAt)}
+  1722→                                        </p>
+  1723→                                      </div>
+  1724→                                      <EnquiryStatusBadge status={enq.status} />
+  1725→                                    </div>
+  1726→                                    <div className="space-y-1.5 text-xs text-gray-600 mb-3">
+  1727→                                      <p className="flex items-center gap-1.5">
+  1728→                                        <Phone className="h-3 w-3 text-gray-400" />
+  1729→                                        {enq.phoneNumber}
+  1730→                                      </p>
+  1731→                                      <p className="flex items-center gap-1.5">
+  1732→                                        <Mail className="h-3 w-3 text-gray-400" />
+  1733→                                        {enq.email}
+  1734→                                      </p>
+  1735→                                      <p className="flex items-center gap-1.5">
+  1736→                                        <Home className="h-3 w-3 text-gray-400" />
+  1737→                                        {enq.apartment.name} ({enq.apartment.code})
+  1738→                                      </p>
+  1739→                                      <p className="flex items-center gap-1.5">
+  1740→                                        <Calendar className="h-3 w-3 text-gray-400" />
+  1741→                                        {formatDate(enq.checkIn)} → {formatDate(enq.checkOut)}
+  1742→                                        <span className="ml-auto flex items-center gap-1 text-gray-400">
+  1743→                                          <Users className="h-3 w-3" />
+  1744→                                          {enq.guests}
+  1745→                                        </span>
+  1746→                                      </p>
+  1747→                                    </div>
+  1748→                                    {enq.specialRequests && (
+  1749→                                      <p className="text-xs text-gray-400 italic mb-3 bg-gray-50 rounded px-2 py-1.5">
+  1750→                                        &quot;{enq.specialRequests}&quot;
+  1751→                                      </p>
+  1752→                                    )}
+  1753→                                    <Separator className="my-2" />
+  1754→                                    <div className="flex gap-2">
+  1755→                                      {enq.status !== 'confirmed' && (
+  1756→                                        <Button
+  1757→                                          variant="outline"
+  1758→                                          size="sm"
+  1759→                                          className="flex-1 h-8 text-xs gap-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+  1760→                                          onClick={() =>
+  1761→                                            updateEnquiryStatus(enq.id, 'confirmed')
+  1762→                                          }
+  1763→                                        >
+  1764→                                          <CheckCircle2 className="h-3 w-3" />
+  1765→                                          Confirm
+  1766→                                        </Button>
+  1767→                                      )}
+  1768→                                      {enq.status !== 'cancelled' && (
+  1769→                                        <Button
+  1770→                                          variant="outline"
+  1771→                                          size="sm"
+  1772→                                          className="flex-1 h-8 text-xs gap-1 text-red-500 border-red-200 hover:bg-red-50"
+  1773→                                          onClick={() =>
+  1774→                                            updateEnquiryStatus(enq.id, 'cancelled')
+  1775→                                          }
+  1776→                                        >
+  1777→                                          <XCircle className="h-3 w-3" />
+  1778→                                          Cancel
+  1779→                                        </Button>
+  1780→                                      )}
+  1781→                                      <Button
+  1782→                                        variant="outline"
+  1783→                                        size="sm"
+  1784→                                        className="h-8 text-xs text-red-400 hover:text-red-600 hover:bg-red-50 border-red-200"
+  1785→                                        onClick={() => confirmDeleteEnquiry(enq)}
+  1786→                                      >
+  1787→                                        <Trash2 className="h-3 w-3" />
+  1788→                                      </Button>
+  1789→                                    </div>
+  1790→                                  </CardContent>
+  1791→                                </Card>
+  1792→                              </motion.div>
+  1793→                            ))}
+  1794→                          </AnimatePresence>
+  1795→                        )}
+  1796→                      </div>
+  1797→                    </>
+  1798→                  )}
+  1799→                </div>
+  1800→              </motion.div>
+  1801→            </AnimatePresence>
+  1802→          </TabsContent>
+  1803→
+  1804→          {/* ── TAB 3: SETTINGS ── */}
+  1805→          <TabsContent value="settings">
+  1806→            <AnimatePresence mode="wait">
+  1807→              <motion.div
+  1808→                key="settings"
+  1809→                initial={{ opacity: 0, y: 8 }}
+  1810→                animate={{ opacity: 1, y: 0 }}
+  1811→                exit={{ opacity: 0, y: -8 }}
+  1812→                transition={{ duration: 0.2 }}
+  1813→              >
+  1814→                <div className="max-w-lg space-y-6">
+  1815→                  <div>
+  1816→                    <h2 className="text-lg font-semibold text-gray-900">
+  1817→                      Settings
+  1818→                    </h2>
+  1819→                    <p className="text-sm text-gray-500 mt-1">
+  1820→                      Manage global settings for your apartment listings.
+  1821→                    </p>
+  1822→                  </div>
+  1823→
+  1824→                  <Card className="border-gray-200/80 shadow-sm">
+  1825→                    <CardContent className="p-6 space-y-5">
+  1826→                      {/* Site Info */}
+  1827→                      <div>
+  1828→                        <Label className="text-sm font-medium text-gray-700">
+  1829→                          Site Name
+  1830→                        </Label>
+  1831→                        <p className="text-sm text-gray-500 mt-1">
+  1832→                          Dwell Chronicles
+  1833→                        </p>
+  1834→                      </div>
+  1835→
+  1836→                      <Separator />
+  1837→
+  1838→                      {/* WhatsApp Number */}
+  1839→                      <div className="space-y-3">
+  1840→                        <Label
+  1841→                          htmlFor="whatsapp-setting"
+  1842→                          className="text-sm font-medium text-gray-700 flex items-center gap-2"
+  1843→                        >
+  1844→                          <MessageCircle className="h-4 w-4" style={{ color: BRAND.sage }} />
+  1845→                          WhatsApp Number
+  1846→                        </Label>
+  1847→                        <Input
+  1848→                          id="whatsapp-setting"
+  1849→                          value={whatsappNumber}
+  1850→                          onChange={(e) => setWhatsappNumber(e.target.value)}
+  1851→                          placeholder="e.g. 233204700023"
+  1852→                          className="h-10 border-gray-200"
+  1853→                        />\n                        <p className="text-xs text-gray-400">
+  1854→                          This number will be set on all apartment listings.
+  1855→                          Include country code without + sign.
+  1856→                        </p>
+  1857→
+  1858→                        <Button
+  1859→                          onClick={updateAllWhatsapp}
+  1860→                          disabled={updateWhatsappLoading}
+  1861→                          className="gap-2 text-white"
+  1862→                          style={{ backgroundColor: BRAND.sage }}
+  1863→                        >
+  1864→                          {updateWhatsappLoading ? (
+  1865→                            <Loader2 className="h-4 w-4 animate-spin" />
+  1866→                          ) : (
+  1867→                            <Phone className="h-4 w-4" />
+  1868→                          )}
+  1869→                          Update All Apartments WhatsApp
+  1870→                        </Button>
+  1871→                      </div>
+  1872→
+  1873→                      <Separator />
+  1874→
+  1875→                      {/* Stats Summary */}
+  1876→                      <div>
+  1877→                        <Label className="text-sm font-medium text-gray-700">
+  1878→                          Dashboard Summary
+  1879→                        </Label>
+  1880→                        <div className="mt-3 grid grid-cols-2 gap-3">
+  1881→                          <div className="rounded-lg border border-gray-100 p-3">
+  1882→                            <p className="text-2xl font-bold" style={{ color: BRAND.sage }}>
+  1883→                              {apartments.length}
+  1884→                            </p>
+  1885→                            <p className="text-xs text-gray-500">Apartments</p>
+  1886→                          </div>
+  1887→                          <div className="rounded-lg border border-gray-100 p-3">
+  1888→                            <p className="text-2xl font-bold" style={{ color: BRAND.sage }}>
+  1889→                              {enquiries.length}
+  1890→                            </p>
+  1891→                            <p className="text-xs text-gray-500">Enquiries</p>
+  1892→                          </div>
+  1893→                        </div>
+  1894→                      </div>
+  1895→                    </CardContent>
+  1896→                  </Card>
+  1897→                </div>
+  1898→              </motion.div>
+  1899→            </AnimatePresence>
+  1900→          </TabsContent>
+  1901→        </Tabs>
+  1902→      </main>
+  1903→
+  1904→      {/* ── APARTMENT FORM SHEET ── */}
+  1905→      <Sheet open={formSheetOpen} onOpenChange={setFormSheetOpen}>
+  1906→        <SheetContent
+  1907→          side="right"
+  1908→          className="w-full sm:max-w-2xl overflow-y-auto p-0"
+  1909→        >
+  1910→          <SheetHeader className="sticky top-0 z-10 bg-white border-b px-6 py-4 rounded-none">
+  1911→            <SheetTitle className="text-base font-semibold">
+  1912→              {editingApartment ? 'Edit Apartment' : 'Add New Apartment'}
+  1913→            </SheetTitle>
+  1914→            <SheetDescription className="text-xs">
+  1915→              {editingApartment
+  1916→                ? `Editing ${editingApartment.name}`
+  1917→                : 'Fill in the details to create a new apartment listing.'}
+  1918→            </SheetDescription>
+  1919→          </SheetHeader>
+  1920→
+  1921→          <form
+  1922→            onSubmit={handleSubmit(onFormSubmit)}
+  1923→            className="px-6 py-4 space-y-5"
+  1924→          >
+  1925→            {/* Basic Info Section */}
+  1926→            <div>
+  1927→              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+  1928→                Basic Information
+  1929→              </h3>
+  1930→              <div className="space-y-4">
+  1931→                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  1932→                  <div className="space-y-1.5">
+  1933→                    <Label htmlFor="name" className="text-sm">
+  1934→                      Name <span className="text-red-500">*</span>
+  1935→                    </Label>
+  1936→                    <Input
+  1937→                      id="name"
+  1938→                      {...register('name')}
+  1939→                      placeholder="e.g. Serene Haven"
+  1940→                      className="h-9 border-gray-200"
+  1941→                    />
+  1942→                    {errors.name && (
+  1943→                      <p className="text-xs text-red-500">
+  1944→                        {errors.name.message}
+  1945→                      </p>
+  1946→                    )}
+  1947→                  </div>
+  1948→                  <div className="space-y-1.5">
+  1949→                    <Label htmlFor="code" className="text-sm">
+  1950→                      Code <span className="text-red-500">*</span>
+  1951→                    </Label>
+  1952→                    <Input
+  1953→                      id="code"
+  1954→                      {...register('code')}
+  1955→                      placeholder="DH-XXX-NNN"
+  1956→                      className="h-9 border-gray-200"
+  1957→                    />
+  1958→                    <p className="text-xs text-gray-400">
+  1959→                      Format: DH-CITY-NNN (e.g., DH-HO-001)
+  1960→                    </p>
+  1961→                    {errors.code && (
+  1962→                      <p className="text-xs text-red-500">
+  1963→                        {errors.code.message}
+  1964→                      </p>
+  1965→                    )}
+  1966→                  </div>
+  1967→                </div>
+  1968→
+  1969→                <div className="space-y-1.5">
+  1970→                  <Label htmlFor="description" className="text-sm">
+  1971→                    Description <span className="text-red-500">*</span>
+  1972→                  </Label>
+  1973→                  <Textarea
+  1974→                    id="description"
+  1975→                    {...register('description')}
+  1976→                    placeholder="Describe the apartment..."
+  1977→                    rows={3}
+  1978→                    className="border-gray-200 resize-none"
+  1979→                  />
+  1980→                  {errors.description && (
+  1981→                    <p className="text-xs text-red-500">
+  1982→                      {errors.description.message}
+  1983→                    </p>
+  1984→                  )}
+  1985→                </div>
+  1986→              </div>
+  1987→            </div>
+  1988→
+  1989→            <Separator />
+  1990→
+  1991→            {/* Location Section */}
+  1992→            <div>
+  1993→              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+  1994→                Location
+  1995→              </h3>
+  1996→              <div className="space-y-4">
+  1997→                <div className="space-y-1.5">
+  1998→                  <Label htmlFor="address" className="text-sm">
+  1999→                    Address <span className="text-red-500">*</span>
+  2000→                  </Label>
+
+[showing lines 1-2000 of 2757; use offset=2001 with limit to continue reading]
