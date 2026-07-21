@@ -38,6 +38,7 @@ import {
   Clock,
   Eye,
   Building2,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -2364,16 +2365,64 @@ export default function AdminDashboard() {
                 <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                   Images <span className="text-red-500">*</span>
                 </h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={addImageField}
-                >
-                  <Plus className="h-3 w-3" />
-                  Add Image
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1 border-dashed"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.multiple = true;
+                      input.accept = 'image/jpeg,image/png,image/webp,image/gif,image/avif';
+                      input.onchange = async (e) => {
+                        const files = (e.target as HTMLInputElement).files;
+                        if (!files || files.length === 0) return;
+                        const formData = new FormData();
+                        for (let i = 0; i < files.length; i++) {
+                          formData.append('files', files[i]);
+                        }
+                        toast.loading('Uploading images...', { id: 'upload' });
+                        try {
+                          const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                          const data = await res.json();
+                          if (res.ok && data.files) {
+                            const current = formImages || [];
+                            const newImages = [
+                              ...current,
+                              ...data.files.map((f: { url: string; alt: string }) => ({
+                                url: f.url,
+                                alt: f.alt,
+                                sortOrder: current.length + data.files.indexOf(f),
+                              })),
+                            ];
+                            setValue('images', newImages);
+                            toast.success(`${data.count} image(s) uploaded`, { id: 'upload' });
+                          } else {
+                            toast.error(data.error || 'Upload failed', { id: 'upload' });
+                          }
+                        } catch {
+                          toast.error('Upload failed', { id: 'upload' });
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    <Upload className="h-3 w-3" />
+                    Upload Files
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1"
+                    onClick={addImageField}
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add URL
+                  </Button>
+                </div>
               </div>
 
               {errors.images && (
