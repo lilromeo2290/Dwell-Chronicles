@@ -697,11 +697,11 @@ export default function AirbnbListingPage() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight tracking-tight">
               Short-Stay Apartments
               <br />
-              <span className="text-white/90">in Volta Region</span>
+              <span className="text-white/90">in Volta Region and Accra</span>
             </h1>
             <p className="mt-2 text-sm sm:text-base text-white/70 leading-relaxed max-w-lg">
               Discover handpicked short-term stays across Ho, Accra, and beyond.
-              Find the perfect apartment for your visit to Ghana&apos;s beautiful Volta Region.
+              Find the perfect apartment for your visit to Ghana&apos;s beautiful Volta Region and Accra.
             </p>
           </div>
         </div>
