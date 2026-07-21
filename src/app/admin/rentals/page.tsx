@@ -16,6 +16,7 @@ import {
   ToggleRight,
   Save,
   ArrowLeft,
+  ChevronLeft,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -356,18 +357,50 @@ export default function AdminRentalsPage() {
       className="min-h-screen"
       style={{ backgroundColor: BRAND.offWhite }}
     >
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* ─── Top Bar ─── */}
-        <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+      {/* ─── Top Bar ─── */}
+      <header
+        className="sticky top-0 z-40 border-b backdrop-blur-md"
+        style={{
+          backgroundColor: `${BRAND.charcoal}ee`,
+          borderColor: `${BRAND.sage}30`,
+        }}
+      >
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5" style={{ color: BRAND.sage }} />
+            <h1 className="text-sm sm:text-base font-semibold text-white truncate">
+              Dwell Chronicles Admin
+            </h1>
+          </div>
+          <div className="flex items-center gap-1">
+            <Link
+              href="/admin/airbnb"
+              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors text-gray-300 hover:text-white hover:bg-white/10"
+            >
+              Apartment Bookings
+            </Link>
+            <Link
+              href="/admin/rentals"
+              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors bg-white/15 text-white"
+            >
+              Rental Properties
+            </Link>
+            <span className="mx-1 w-px h-5 bg-white/20" />
             <Link
               href="/"
-              className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#5F8768]"
-              style={{ color: BRAND.charcoal }}
+              className="flex items-center gap-1 text-xs sm:text-sm text-gray-300 hover:text-white transition-colors"
             >
-              <ArrowLeft className="size-4" />
-              Back to Site
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Site
             </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* ─── Page Header ─── */}
+        <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <h1
               className="text-2xl font-bold tracking-tight sm:text-3xl"
               style={{ color: BRAND.charcoal }}

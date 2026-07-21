@@ -1124,16 +1124,31 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <Building2 className="h-5 w-5" style={{ color: BRAND.sage }} />
             <h1 className="text-sm sm:text-base font-semibold text-white truncate">
-              Dwell Chronicles Admin — Apartment Management
+              Dwell Chronicles Admin
             </h1>
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-300 hover:text-white transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Back to Site
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href="/admin/airbnb"
+              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors bg-white/15 text-white"
+            >
+              Apartment Bookings
+            </Link>
+            <Link
+              href="/admin/rentals"
+              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors text-gray-300 hover:text-white hover:bg-white/10"
+            >
+              Rental Properties
+            </Link>
+            <span className="mx-1 w-px h-5 bg-white/20" />
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-xs sm:text-sm text-gray-300 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Site
+            </Link>
+          </div>
         </div>
       </header>
 
