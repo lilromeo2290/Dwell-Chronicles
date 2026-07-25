@@ -1,0 +1,1018 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useEffect, useCallback } from 'react';
+     4→import Link from 'next/link';
+     5→import { useRouter } from 'next/navigation';
+     6→import { motion, AnimatePresence } from 'framer-motion';
+     7→import {
+     8→  Search,
+     9→  MapPin,
+    10→  BedDouble,
+    11→  Bath,
+    12→  Users,
+    13→  Star,
+    14→  Heart,
+    15→  ChevronDown,
+    16→  ArrowRight,
+    17→  SlidersHorizontal,
+    18→  Home,
+    19→  Sparkles,
+    20→  Clock,
+    21→  Crown,
+    22→  Building2,
+    23→  Wallet,
+    24→  X,
+    25→  MessageCircle,
+    26→  ArrowLeft,
+    27→  Loader2,
+    28→} from 'lucide-react';
+    29→import { Button } from '@/components/ui/button';
+    30→import { Input } from '@/components/ui/input';
+    31→import { Badge } from '@/components/ui/badge';
+    32→import { Skeleton } from '@/components/ui/skeleton';
+    33→import {
+    34→  Sheet,
+    35→  SheetTrigger,
+    36→  SheetContent,
+    37→  SheetHeader,
+    38→  SheetTitle,
+    39→  SheetDescription,
+    40→  SheetFooter,
+    41→} from '@/components/ui/sheet';
+    42→
+    43→// ─── Types ───────────────────────────────────────────────────────────────────
+    44→
+    45→interface ApartmentImage {
+    46→  id: string;
+    47→  url: string;
+    48→  alt?: string;
+    49→  sortOrder: number;
+    50→}
+    51→
+    52→interface Apartment {
+    53→  id: string;
+    54→  name: string;
+    55→  code: string;
+    56→  description: string;
+    57→  address: string;
+    58→  city: string;
+    59→  area: string;
+    60→  pricePerNight: number;
+    61→  weeklyPrice?: number | null;
+    62→  monthlyPrice?: number | null;
+    63→  bedrooms: number;
+    64→  bathrooms: number;
+    65→  maxGuests: number;
+    66→  rating: number;
+    67→  status: string;
+    68→  category: string;
+    69→  featured: boolean;
+    70→  newlyAdded: boolean;
+    71→  images: ApartmentImage[];
+    72→}
+    73→
+    74→// ─── Constants ───────────────────────────────────────────────────────────────
+    75→
+    76→const CITIES = [
+    77→  { label: 'All Cities', value: '' },
+    78→  { label: 'Ho', value: 'Ho' },
+    79→  { label: 'Accra', value: 'Accra' },
+    80→];
+    81→
+    82→const BEDROOM_OPTIONS = [
+    83→  { label: 'Any Bedrooms', value: '' },
+    84→  { label: '1', value: '1' },
+    85→  { label: '2', value: '2' },
+    86→  { label: '3+', value: '3' },
+    87→];
+    88→
+    89→const GUEST_OPTIONS = [
+    90→  { label: 'Any Guests', value: '' },
+    91→  { label: '1-2', value: '1' },
+    92→  { label: '3-4', value: '3' },
+    93→  { label: '5-8', value: '5' },
+    94→];
+    95→
+    96→const CATEGORY_TABS = [
+    97→  { label: 'All Apartments', icon: Home, category: '', featured: '', newlyAdded: '' },
+    98→  { label: 'Featured', icon: Sparkles, category: '', featured: 'true', newlyAdded: '' },
+    99→  { label: 'Newly Added', icon: Clock, category: '', featured: '', newlyAdded: 'true' },
+   100→  { label: 'Available Today', icon: Building2, category: '', featured: '', newlyAdded: '', status: 'available' },
+   101→  { label: 'Luxury', icon: Crown, category: 'luxury', featured: '', newlyAdded: '' },
+   102→  { label: 'Executive', icon: Star, category: 'executive', featured: '', newlyAdded: '' },
+   103→  { label: 'Budget', icon: Wallet, category: 'budget', featured: '', newlyAdded: '' },
+   104→];
+   105→
+   106→const CATEGORY_COLORS: Record<string, string> = {
+   107→  luxury: 'bg-amber-100 text-amber-800 border-amber-200',
+   108→  executive: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+   109→  budget: 'bg-orange-100 text-orange-800 border-orange-200',
+   110→  standard: 'bg-slate-100 text-slate-700 border-slate-200',
+   111→};
+   112→
+   113→const STATUS_CONFIG: Record<string, { label: string; dotColor: string; bgColor: string; textColor: string }> = {
+   114→  available: { label: 'Available', dotColor: 'bg-emerald-500', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+   115→  limited: { label: 'Limited', dotColor: 'bg-amber-500', bgColor: 'bg-amber-50', textColor: 'text-amber-700' },
+   116→  reserved: { label: 'Reserved', dotColor: 'bg-yellow-500', bgColor: 'bg-yellow-50', textColor: 'text-yellow-700' },
+   117→  booked: { label: 'Booked', dotColor: 'bg-red-500', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+   118→  maintenance: { label: 'Maintenance', dotColor: 'bg-gray-500', bgColor: 'bg-gray-50', textColor: 'text-gray-700' },
+   119→};
+   120→
+   121→// ─── Custom Select Component ─────────────────────────────────────────────────
+   122→
+   123→function FilterSelect({
+   124→  value,
+   125→  onChange,
+   126→  options,
+   127→  placeholder,
+   128→  className = '',
+   129→}: {
+   130→  value: string;
+   131→  onChange: (val: string) => void;
+   132→  options: { label: string; value: string; min?: string; max?: string }[];
+   133→  placeholder: string;
+   134→  className?: string;
+   135→}) {
+   136→  return (
+   137→    <div className={`relative ${className}`}>
+   138→      <select
+   139→        value={value}
+   140→        onChange={(e) => onChange(e.target.value)}
+   141→        className="appearance-none w-full h-10 pl-3 pr-8 text-sm bg-white border border-[#E5E3DC] rounded-lg text-[#2F3A33] focus:outline-none focus:border-[#5F8768] focus:ring-2 focus:ring-[#5F8768]/20 transition-all cursor-pointer"
+   142→      >
+   143→        {options.map((opt) => (
+   144→          <option key={opt.label} value={`${opt.value}|${opt.min || ''}|${opt.max || ''}`}>
+   145→            {opt.label}
+   146→          </option>
+   147→        ))}
+   148→      </select>
+   149→      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F] pointer-events-none" />
+   150→    </div>
+   151→  );
+   152→}
+   153→
+   154→// ─── Skeleton Card ───────────────────────────────────────────────────────────
+   155→
+   156→function SkeletonCard() {
+   157→  return (
+   158→    <div className="rounded-xl bg-white shadow-sm overflow-hidden border border-[#E5E3DC]/50">
+   159→      <Skeleton className="w-full aspect-[4/3]" />
+   160→      <div className="p-4 space-y-3">
+   161→        <Skeleton className="h-4 w-32" />
+   162→        <Skeleton className="h-5 w-full" />
+   163→        <Skeleton className="h-3 w-16" />
+   164→        <div className="border-t border-[#E5E3DC]" />
+   165→        <div className="flex gap-4">
+   166→          <Skeleton className="h-4 w-14" />
+   167→          <Skeleton className="h-4 w-14" />
+   168→          <Skeleton className="h-4 w-14" />
+   169→        </div>
+   170→        <div className="flex justify-between items-center">
+   171→          <Skeleton className="h-5 w-24" />
+   172→          <Skeleton className="h-4 w-12" />
+   173→        </div>
+   174→        <Skeleton className="h-9 w-full" />
+   175→      </div>
+   176→    </div>
+   177→  );
+   178→}
+   179→
+   180→// ─── Apartment Card ──────────────────────────────────────────────────────────
+   181→
+   182→function ApartmentCard({ apartment, index }: { apartment: Apartment; index: number }) {
+   183→  const router = useRouter();
+   184→  const [liked, setLiked] = useState(false);
+   185→  const statusCfg = STATUS_CONFIG[apartment.status] || STATUS_CONFIG.available;
+   186→  const catColor = CATEGORY_COLORS[apartment.category] || CATEGORY_COLORS.standard;
+   187→  const firstImage = apartment.images?.[0]?.url;
+   188→  const imageCount = apartment.images?.length || 0;
+   189→
+   190→  return (
+   191→    <motion.div
+   192→      layout
+   193→      initial={{ opacity: 0, y: 24 }}
+   194→      animate={{ opacity: 1, y: 0 }}
+   195→      exit={{ opacity: 0, scale: 0.95 }}
+   196→      transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+   197→      className="group cursor-pointer rounded-xl bg-white shadow-sm border border-[#E5E3DC]/50 overflow-hidden hover:shadow-lg hover:shadow-[#5F8768]/8 transition-shadow duration-300"
+   198→      onClick={() => router.push(`/airbnb/${apartment.id}`)}
+   199→    >
+   200→      {/* Image Container */}
+   201→      <div className="relative aspect-[4/3] bg-[#F0EFE9] overflow-hidden">
+   202→        {firstImage ? (
+   203→          <img
+   204→            src={firstImage}
+   205→            alt={apartment.images[0]?.alt || apartment.name}
+   206→            loading="lazy"
+   207→            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+   208→          />
+   209→        ) : (
+   210→          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#5F8768]/10 to-[#D8D5CC]/50">
+   211→            <Building2 className="size-10 text-[#5F8768]/40" />
+   212→          </div>
+   213→        )}
+   214→
+   215→        {/* Category Badge */}
+   216→        <span
+   217→          className={`absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${catColor}`}
+   218→        >
+   219→          {apartment.category}
+   220→        </span>
+   221→
+   222→        {/* Featured Badge */}
+   223→        {apartment.featured && (
+   224→          <span className="absolute top-3 left-[calc(3rem+8px+0.5rem)] flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-400 text-amber-900 border border-amber-300">
+   225→            <Star className="size-3 fill-amber-500 text-amber-600" />
+   226→            Featured
+   227→          </span>
+   228→        )}
+   229→
+   230→        {/* Status Badge */}
+   231→        <span
+   232→          className={`absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusCfg.bgColor} ${statusCfg.textColor}`}
+   233→        >
+   234→          <span className={`size-1.5 rounded-full ${statusCfg.dotColor}`} />
+   235→          {statusCfg.label}
+   236→        </span>
+   237→
+   238→        {/* Heart / Favorite */}
+   239→        <button
+   240→          onClick={(e) => {
+   241→            e.stopPropagation();
+   242→            setLiked(!liked);
+   243→          }}
+   244→          className="absolute top-11 right-3 mt-1 p-1.5 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white transition-colors"
+   245→          aria-label="Toggle favorite"
+   246→        >
+   247→          <Heart
+   248→            className={`size-4 transition-colors ${
+   249→              liked ? 'fill-red-500 text-red-500' : 'text-gray-500'
+   250→            }`}
+   251→          />
+   252→        </button>
+   253→
+   254→        {/* Image Dots */}
+   255→        {imageCount > 1 && (
+   256→          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1">
+   257→            <span className="size-1.5 rounded-full bg-white shadow-sm" />
+   258→            {imageCount > 1 && <span className="size-1.5 rounded-full bg-white/50 shadow-sm" />}
+   259→            {imageCount > 2 && <span className="size-1.5 rounded-full bg-white/50 shadow-sm" />}
+   260→          </div>
+   261→        )}
+   262→      </div>
+   263→
+   264→      {/* Card Body */}
+   265→      <div className="p-4 space-y-2">
+   266→        {/* Location */}
+   267→        <div className="flex items-center gap-1 text-sm text-gray-500">
+   268→          <MapPin className="size-3.5 shrink-0" />
+   269→          <span className="truncate">{apartment.city}, {apartment.area}</span>
+   270→        </div>
+   271→
+   272→        {/* Name */}
+   273→        <h3 className="font-semibold text-[15px] text-[#2F3A33] leading-snug truncate">
+   274→          {apartment.name}
+   275→        </h3>
+   276→
+   277→        {/* Code */}
+   278→        <span className="text-xs text-gray-400 font-medium">{apartment.code}</span>
+   279→
+   280→        {/* Divider */}
+   281→        <div className="border-t border-[#E5E3DC]" />
+   282→
+   283→        {/* Amenities Row */}
+   284→        <div className="flex items-center gap-4 text-sm text-gray-600">
+   285→          <span className="flex items-center gap-1">
+   286→            <BedDouble className="size-3.5 text-[#5F8768]" />
+   287→            {apartment.bedrooms} {apartment.bedrooms === 1 ? 'Bed' : 'Beds'}
+   288→          </span>
+   289→          <span className="flex items-center gap-1">
+   290→            <Bath className="size-3.5 text-[#5F8768]" />
+   291→            {apartment.bathrooms} {apartment.bathrooms === 1 ? 'Bath' : 'Baths'}
+   292→          </span>
+   293→          <span className="flex items-center gap-1">
+   294→            <Users className="size-3.5 text-[#5F8768]" />
+   295→            {apartment.maxGuests} Guests
+   296→          </span>
+   297→        </div>
+   298→
+   299→        {/* Price + Rating Row */}
+   300→        <div className="flex items-center justify-between">
+   301→          <span className="font-bold text-[15px] text-[#5F8768]">
+   302→            GH₵ {apartment.pricePerNight.toLocaleString()}
+   303→            <span className="font-normal text-xs text-gray-400 ml-1">/ night</span>
+   304→          </span>
+   305→          <span className="flex items-center gap-1 text-sm text-gray-600">
+   306→            <Star className="size-3.5 fill-amber-400 text-amber-400" />
+   307→            {apartment.rating.toFixed(1)}
+   308→          </span>
+   309→        </div>
+   310→
+   311→        {/* View Details Button */}
+   312→        <Button
+   313→          variant="default"
+   314→          className="w-full mt-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white h-9 text-sm font-medium gap-2 rounded-lg"
+   315→          onClick={(e) => {
+   316→            e.stopPropagation();
+   317→            router.push(`/airbnb/${apartment.id}`);
+   318→          }}
+   319→        >
+   320→          View Details
+   321→          <ArrowRight className="size-3.5" />
+   322→        </Button>
+   323→      </div>
+   324→    </motion.div>
+   325→  );
+   326→}
+   327→
+   328→// ─── Mobile Filter Sheet ─────────────────────────────────────────────────────
+   329→
+   330→function MobileFilterSheet({
+   331→  search,
+   332→  onSearchChange,
+   333→  city,
+   334→  onCityChange,
+   335→  area,
+   336→  onAreaChange,
+   337→  priceRange,
+   338→  onPriceRangeChange,
+   339→  bedrooms,
+   340→  onBedroomsChange,
+   341→  guests,
+   342→  onGuestsChange,
+   343→  onApply,
+   344→  areaOptions,
+   345→  priceOptions,
+   346→}: {
+   347→  search: string;
+   348→  onSearchChange: (v: string) => void;
+   349→  city: string;
+   350→  onCityChange: (v: string) => void;
+   351→  area: string;
+   352→  onAreaChange: (v: string) => void;
+   353→  priceRange: string;
+   354→  onPriceRangeChange: (v: string) => void;
+   355→  bedrooms: string;
+   356→  onBedroomsChange: (v: string) => void;
+   357→  guests: string;
+   358→  onGuestsChange: (v: string) => void;
+   359→  onApply: () => void;
+   360→  areaOptions: { label: string; value: string; min: string; max: string }[];
+   361→  priceOptions: { label: string; value: string; min: string; max: string }[];
+   362→}) {
+   363→  return (
+   364→    <Sheet>
+   365→      <SheetTrigger asChild>
+   366→        <Button variant="outline" className="h-10 gap-2 border-[#E5E3DC] text-[#2F3A33]">
+   367→          <SlidersHorizontal className="size-4" />
+   368→          Filters
+   369→        </Button>
+   370→      </SheetTrigger>
+   371→      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+   372→        <SheetHeader className="text-left">
+   373→          <SheetTitle className="text-lg font-semibold text-[#2F3A33]">Search & Filters</SheetTitle>
+   374→          <SheetDescription>Find your perfect short-stay apartment</SheetDescription>
+   375→        </SheetHeader>
+   376→
+   377→        <div className="px-4 space-y-4 pb-4">
+   378→          {/* Search Input */}
+   379→          <div className="space-y-1.5">
+   380→            <label className="text-sm font-medium text-[#2F3A33]">Search</label>
+   381→            <div className="relative">
+   382→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   383→              <Input
+   384→                placeholder="Apartment name, keyword..."
+   385→                value={search}
+   386→                onChange={(e) => onSearchChange(e.target.value)}
+   387→                className="pl-9 h-10 border-[#E5E3DC] bg-white"
+   388→              />
+   389→            </div>
+   390→          </div>
+   391→
+   392→          {/* City */}
+   393→          <div className="space-y-1.5">
+   394→            <label className="text-sm font-medium text-[#2F3A33]">City</label>
+   395→            <FilterSelect
+   396→              value={city}
+   397→              onChange={onCityChange}
+   398→              options={CITIES.map((c) => ({ label: c.label, value: c.value, min: '', max: '' }))}
+   399→              placeholder="All Cities"
+   400→            />
+   401→          </div>
+   402→
+   403→          {/* Area */}
+   404→          <div className="space-y-1.5">
+   405→            <label className="text-sm font-medium text-[#2F3A33]">Area</label>
+   406→            <FilterSelect
+   407→              value={area}
+   408→              onChange={onAreaChange}
+   409→              options={areaOptions}
+   410→              placeholder="All Areas"
+   411→            />
+   412→          </div>
+   413→
+   414→          {/* Price Range */}
+   415→          <div className="space-y-1.5">
+   416→            <label className="text-sm font-medium text-[#2F3A33]">Price Range</label>
+   417→            <FilterSelect
+   418→              value={priceRange}
+   419→              onChange={onPriceRangeChange}
+   420→              options={priceOptions}
+   421→              placeholder="Any Price"
+   422→            />
+   423→          </div>
+   424→
+   425→          {/* Bedrooms & Guests in a row */}
+   426→          <div className="grid grid-cols-2 gap-3">
+   427→            <div className="space-y-1.5">
+   428→              <label className="text-sm font-medium text-[#2F3A33]">Bedrooms</label>
+   429→              <FilterSelect
+   430→                value={bedrooms}
+   431→                onChange={onBedroomsChange}
+   432→                options={BEDROOM_OPTIONS.map((b) => ({ label: b.label, value: b.value, min: '', max: '' }))}
+   433→                placeholder="Any"
+   434→              />
+   435→            </div>
+   436→            <div className="space-y-1.5">
+   437→              <label className="text-sm font-medium text-[#2F3A33]">Guests</label>
+   438→              <FilterSelect
+   439→                value={guests}
+   440→                onChange={onGuestsChange}
+   441→                options={GUEST_OPTIONS.map((g) => ({ label: g.label, value: g.value, min: '', max: '' }))}
+   442→                placeholder="Any"
+   443→              />
+   444→            </div>
+   445→          </div>
+   446→        </div>
+   447→
+   448→        <SheetFooter className="border-t border-[#E5E3DC] pt-4 px-4 pb-6">
+   449→          <Button
+   450→            onClick={onApply}
+   451→            className="w-full h-11 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-medium gap-2 text-sm"
+   452→          >
+   453→            <Search className="size-4" />
+   454→            Search Apartments
+   455→          </Button>
+   456→        </SheetFooter>
+   457→      </SheetContent>
+   458→    </Sheet>
+   459→  );
+   460→}
+   461→
+   462→// ─── Main Page Component ─────────────────────────────────────────────────────
+   463→
+   464→export default function AirbnbListingPage() {
+   465→  const router = useRouter();
+   466→
+   467→  // Filter state
+   468→  const [search, setSearch] = useState('');
+   469→  const [city, setCity] = useState('');
+   470→  const [area, setArea] = useState('');
+   471→  const [priceRange, setPriceRange] = useState('');
+   472→  const [bedrooms, setBedrooms] = useState('');
+   473→  const [guests, setGuests] = useState('');
+   474→
+   475→  // Tab state
+   476→  const [activeTab, setActiveTab] = useState(0);
+   477→  const [tabCategory, setTabCategory] = useState('');
+   478→  const [tabFeatured, setTabFeatured] = useState('');
+   479→  const [tabNewlyAdded, setTabNewlyAdded] = useState('');
+   480→  const [tabStatus, setTabStatus] = useState('');
+   481→
+   482→  // Dynamic filter options derived from apartment data
+   483→  const [dynamicAreas, setDynamicAreas] = useState<{ label: string; value: string }[]>([
+   484→    { label: 'All Areas', value: '' },
+   485→  ]);
+   486→  const [dynamicPriceRanges, setDynamicPriceRanges] = useState<
+   487→    { label: string; value: string; min: string; max: string }[]
+   488→  >([{ label: 'Any Price', value: '', min: '', max: '' }]);
+   489→
+   490→  // Data state
+   491→  const [apartments, setApartments] = useState<Apartment[]>([]);
+   492→  const [total, setTotal] = useState(0);
+   493→  const [loading, setLoading] = useState(true);
+   494→  const [loadingMore, setLoadingMore] = useState(false);
+   495→
+   496→  // Track if initial load
+   497→  const [initialLoad, setInitialLoad] = useState(true);
+   498→
+   499→  // Parse price range value from combined select value
+   500→  const parsePriceRange = useCallback((val: string) => {
+   501→    if (!val) return { min: '', max: '' };
+   502→    const parts = val.split('|');
+   503→    return { min: parts[1] || '', max: parts[2] || '' };
+   504→  }, []);
+   505→
+   506→  // Fetch apartments
+   507→  const fetchApartments = useCallback(
+   508→    async (offset = 0, append = false) => {
+   509→      if (offset === 0) {
+   510→        setLoading(true);
+   511→      } else {
+   512→        setLoadingMore(true);
+   513→      }
+   514→
+   515→      try {
+   516→        const params = new URLSearchParams();
+   517→        if (search) params.set('search', search);
+   518→        if (city) params.set('city', city);
+   519→        if (area) params.set('area', area);
+   520→        if (tabCategory) params.set('category', tabCategory);
+   521→        if (tabFeatured) params.set('featured', tabFeatured);
+   522→        if (tabNewlyAdded) params.set('newlyAdded', tabNewlyAdded);
+   523→        if (tabStatus) params.set('status', tabStatus);
+   524→
+   525→        const { min, max } = parsePriceRange(priceRange);
+   526→        if (min) params.set('minPrice', min);
+   527→        if (max) params.set('maxPrice', max);
+   528→
+   529→        if (bedrooms) params.set('bedrooms', bedrooms);
+   530→        if (guests) params.set('minGuests', guests);
+   531→
+   532→        params.set('limit', '20');
+   533→        params.set('offset', String(offset));
+   534→
+   535→        const res = await fetch(`/api/apartments?${params.toString()}`);
+   536→        const data = await res.json();
+   537→
+   538→        if (res.ok) {
+   539→          const fetched: Apartment[] = data.apartments;
+   540→          if (append) {
+   541→            setApartments((prev) => [...prev, ...fetched]);
+   542→          } else {
+   543→            setApartments(fetched);
+   544→          }
+   545→          setTotal(data.total);
+   546→
+   547→          // Build dynamic filter options from apartment data (only on initial full load)
+   548→          if (!append && initialLoad) {
+   549→            // Derive unique areas
+   550→            const allApts = data.apartments || [];
+   551→            const uniqueAreas = [...new Set(allApts.map((a: Apartment) => a.area).filter(Boolean))].sort();
+   552→            setDynamicAreas([
+   553→              { label: 'All Areas', value: '' },
+   554→              ...uniqueAreas.map((a: string) => ({ label: a, value: a })),
+   555→            ]);
+   556→
+   557→            // Derive price ranges from actual prices
+   558→            const prices = allApts.map((a: Apartment) => a.pricePerNight).filter((p: number) => p > 0);
+   559→            if (prices.length > 0) {
+   560→              const minP = Math.min(...prices);
+   561→              const maxP = Math.max(...prices);
+   562→              const ranges: { label: string; value: string; min: string; max: string }[] = [
+   563→                { label: 'Any Price', value: '', min: '', max: '' },
+   564→              ];
+   565→              const brackets = [100, 200, 400, 600, 1000, 1500, 2000].filter(
+   566→                (b) => b >= Math.floor(minP / 100) * 100
+   567→              );
+   568→              for (let i = 0; i < brackets.length; i++) {
+   569→                const lo = i === 0 ? Math.floor(minP / 100) * 100 : brackets[i - 1];
+   570→                const hi = brackets[i];
+   571→                if (lo < hi) {
+   572→                  ranges.push({
+   573→                    label: `GH₵ ${lo.toLocaleString()} - GH₵ ${hi.toLocaleString()}`,
+   574→                    value: `${lo}|${hi}`,
+   575→                    min: String(lo),
+   576→                    max: String(hi),
+   577→                  });
+   578→                }
+   579→              }
+   580→              // "Over" bracket for the highest
+   581→              const lastBracket = brackets[brackets.length - 1];
+   582→              if (lastBracket < maxP) {
+   583→                ranges.push({
+   584→                  label: `Over GH₵ ${lastBracket.toLocaleString()}`,
+   585→                  value: `${lastBracket}|`,
+   586→                  min: String(lastBracket),
+   587→                  max: '',
+   588→                });
+   589→              }
+   590→              setDynamicPriceRanges(ranges);
+   591→            }
+   592→          }
+   593→        }
+   594→      } catch (err) {
+   595→        console.error('Failed to fetch apartments:', err);
+   596→      } finally {
+   597→        setLoading(false);
+   598→        setLoadingMore(false);
+   599→        setInitialLoad(false);
+   600→      }
+   601→    },
+   602→    [search, city, area, tabCategory, tabFeatured, tabNewlyAdded, tabStatus, priceRange, bedrooms, guests, parsePriceRange]
+   603→  );
+   604→
+   605→  // Handle select value changes (parsing combined value)
+   606→  const handleCityChange = (val: string) => {
+   607→    const parts = val.split('|');
+   608→    setCity(parts[0]);
+   609→  };
+   610→  const handleAreaChange = (val: string) => {
+   611→    const parts = val.split('|');
+   612→    setArea(parts[0]);
+   613→  };
+   614→  const handlePriceRangeChange = (val: string) => {
+   615→    setPriceRange(val);
+   616→  };
+   617→  const handleBedroomsChange = (val: string) => {
+   618→    const parts = val.split('|');
+   619→    setBedrooms(parts[0]);
+   620→  };
+   621→  const handleGuestsChange = (val: string) => {
+   622→    const parts = val.split('|');
+   623→    setGuests(parts[0]);
+   624→  };
+   625→
+   626→  // Tab click
+   627→  const handleTabClick = (index: number) => {
+   628→    setActiveTab(index);
+   629→    const tab = CATEGORY_TABS[index];
+   630→    setTabCategory(tab.category);
+   631→    setTabFeatured(tab.featured);
+   632→    setTabNewlyAdded(tab.newlyAdded);
+   633→    setTabStatus(tab.status || '');
+   634→  };
+   635→
+   636→  // Apply filters (triggers fetch)
+   637→  const applyFilters = () => {
+   638→    fetchApartments(0, false);
+   639→  };
+   640→
+   641→  // Load more
+   642→  const loadMore = () => {
+   643→    fetchApartments(apartments.length, true);
+   644→  };
+   645→
+   646→  // Reset all filters
+   647→  const resetFilters = () => {
+   648→    setSearch('');
+   649→    setCity('');
+   650→    setArea('');
+   651→    setPriceRange('');
+   652→    setBedrooms('');
+   653→    setGuests('');
+   654→    setActiveTab(0);
+   655→    setTabCategory('');
+   656→    setTabFeatured('');
+   657→    setTabNewlyAdded('');
+   658→    setTabStatus('');
+   659→  };
+   660→
+   661→  // Auto-fetch when filters or tabs change
+   662→  useEffect(() => {
+   663→    const timer = setTimeout(() => {
+   664→      fetchApartments(0, false);
+   665→    }, 100);
+   666→    return () => clearTimeout(timer);
+   667→  }, [tabCategory, tabFeatured, tabNewlyAdded, tabStatus, fetchApartments]);
+   668→
+   669→  const hasMore = apartments.length < total;
+   670→
+   671→  return (
+   672→    <div className="min-h-screen bg-[#F8F7F3]">
+   673→      {/* ── Hero Banner ──────────────────────────────────────────────── */}
+   674→      <section className="relative bg-gradient-to-br from-[#2F3A33] via-[#5F8768] to-[#4A6B52] overflow-hidden">
+   675→        {/* Subtle pattern overlay */}
+   676→        <div className="absolute inset-0 opacity-10">
+   677→          <div
+   678→            className="w-full h-full"
+   679→            style={{
+   680→              backgroundImage:
+   681→                'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+   682→            }}
+   683→          />
+   684→        </div>
+   685→
+   686→        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+   687→          {/* Back Link */}
+   688→          <Link
+   689→            href="/"
+   690→            className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium mb-4 transition-colors"
+   691→          >
+   692→            <ArrowLeft className="size-3.5" />
+   693→            Back to Home
+   694→          </Link>
+   695→
+   696→          <div className="max-w-2xl">
+   697→            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight tracking-tight">
+   698→              Short-Stay Apartments
+   699→              <br />
+   700→              <span className="text-white/90">in Volta Region and Accra</span>
+   701→            </h1>
+   702→            <p className="mt-2 text-sm sm:text-base text-white/70 leading-relaxed max-w-lg">
+   703→              Discover handpicked short-term stays across Ho, Accra, and beyond.
+   704→              Find the perfect apartment for your visit to Ghana&apos;s beautiful Volta Region and Accra.
+   705→            </p>
+   706→          </div>
+   707→        </div>
+   708→      </section>
+   709→
+   710→      {/* ── Room Rates Section ─────────────────────────────────────── */
+   711→      <section className="bg-[#F8F7F3] py-12 sm:py-16">
+   712→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   713→          {/* Section Header */}
+   714→          <div className="text-center mb-8">
+   715→            <h2 className="text-2xl sm:text-3xl font-bold text-[#2F3A33]">Room Rates</h2>
+   716→            <p className="mt-2 text-sm sm:text-base text-[#6B7A6F] max-w-xl mx-auto">
+   717→              Opposite New Youth Resources Center, Ho &ndash; Adaklu Road, Volta Region
+   718→            </p>
+   719→          </div>
+   720→
+   721→          {/* Rates Grid */}
+   722→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+   723→            {/* 2 Bedroom */}
+   724→            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+   725→              <div className="flex items-center justify-between mb-3">
+   726→                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">2 Bedroom</span>
+   727→                <BedDouble className="size-4 text-[#6B7A6F]" />
+   728→              </div>
+   729→              <p className="text-2xl font-bold text-[#2F3A33]">GHS 1,500</p>
+   730→              <p className="text-xs text-[#6B7A6F] mt-2">Room 101</p>
+   731→            </div>
+   732→
+   733→            {/* Executive Suite */}
+   734→            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+   735→              <div className="flex items-center justify-between mb-3">
+   736→                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Executive Suite</span>
+   737→                <Crown className="size-4 text-[#6B7A6F]" />
+   738→              </div>
+   739→              <p className="text-2xl font-bold text-[#2F3A33]">GHS 1,000</p>
+   740→              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 201, 202, 301, 302</p>
+   741→            </div>
+   742→
+   743→            {/* Deluxe Suite */}
+   744→            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+   745→              <div className="flex items-center justify-between mb-3">
+   746→                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Deluxe Suite</span>
+   747→                <Sparkles className="size-4 text-[#6B7A6F]" />
+   748→              </div>
+   749→              <p className="text-2xl font-bold text-[#2F3A33]">GHS 750</p>
+   750→              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 206, 207, 304, 306, 307</p>
+   751→            </div>
+   752→
+   753→            {/* Superior Room */}
+   754→            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+   755→              <div className="flex items-center justify-between mb-3">
+   756→                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Superior Room</span>
+   757→                <Star className="size-4 text-[#6B7A6F]" />
+   758→              </div>
+   759→              <p className="text-2xl font-bold text-[#2F3A33]">GHS 600</p>
+   760→              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 203, 204, 208, 303, 308</p>
+   761→            </div>
+   762→
+   763→            {/* Standard Room */}
+   764→            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+   765→              <div className="flex items-center justify-between mb-3">
+   766→                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Standard Room</span>
+   767→                <Home className="size-4 text-[#6B7A6F]" />
+   768→              </div>
+   769→              <p className="text-2xl font-bold text-[#2F3A33]">GHS 500</p>
+   770→              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 205, 209, 305, 309</p>
+   771→            </div>
+   772→          </div>
+   773→
+   774→          {/* CTA */}
+   775→          <div className="text-center mt-8">
+   776→            <a
+   777→              href="https://wa.me/233204700023?text=" + encodeURIComponent("Hi, I am interested in booking a room at your Ho property. Please share availability.")
+   778→              target="_blank"
+   779→              rel="noopener noreferrer"
+   780→              className="inline-flex items-center gap-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-medium text-sm px-6 py-3 rounded-xl transition-colors"
+   781→            >
+   782→              <MessageCircle className="size-4" />
+   783→              Book a Room on WhatsApp
+   784→            </a>
+   785→          </div>
+   786→        </div>
+   787→      </section>
+   788→
+   789→      {/* ── Sticky Search Bar ────────────────────────────────────────── */}
+   790→      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E3DC] shadow-sm">
+   791→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   792→          {/* Desktop Search Row */}
+   793→          <div className="hidden md:flex items-center gap-2 py-3">
+   794→            <div className="relative flex-1 max-w-xs">
+   795→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   796→              <Input
+   797→                placeholder="Search apartments..."
+   798→                value={search}
+   799→                onChange={(e) => setSearch(e.target.value)}
+   800→                onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+   801→                className="pl-9 h-10 border-[#E5E3DC] bg-white"
+   802→              />
+   803→            </div>
+   804→            <FilterSelect
+   805→              value={city}
+   806→              onChange={handleCityChange}
+   807→              options={CITIES.map((c) => ({ label: c.label, value: c.value, min: '', max: '' }))}
+   808→              placeholder="All Cities"
+   809→              className="w-36"
+   810→            />
+   811→            <FilterSelect
+   812→              value={area}
+   813→              onChange={handleAreaChange}
+   814→              options={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+   815→              placeholder="All Areas"
+   816→              className="w-40"
+   817→            />
+   818→            <FilterSelect
+   819→              value={priceRange}
+   820→              onChange={handlePriceRangeChange}
+   821→              options={dynamicPriceRanges}
+   822→              placeholder="Any Price"
+   823→              className="w-44"
+   824→            />
+   825→            <FilterSelect
+   826→              value={bedrooms}
+   827→              onChange={handleBedroomsChange}
+   828→              options={BEDROOM_OPTIONS.map((b) => ({ label: b.label, value: b.value, min: '', max: '' }))}
+   829→              className="w-36"
+   830→            />
+   831→            <FilterSelect
+   832→              value={guests}
+   833→              onChange={handleGuestsChange}
+   834→              options={GUEST_OPTIONS.map((g) => ({ label: g.label, value: g.value, min: '', max: '' }))}
+   835→              className="w-36"
+   836→            />
+   837→            <Button
+   838→              onClick={applyFilters}
+   839→              className="h-10 bg-[#5F8768] hover:bg-[#4A6B52] text-white gap-2 px-5 shrink-0"
+   840→            >
+   841→              <Search className="size-4" />
+   842→              Search
+   843→            </Button>
+   844→            {(search || city || area || priceRange || bedrooms || guests) && (
+   845→              <Button variant="ghost" size="icon" onClick={resetFilters} className="shrink-0 text-gray-400 hover:text-[#2F3A33]" title="Reset filters">
+   846→                <X className="size-4" />
+   847→              </Button>
+   848→            )}
+   849→          </div>
+   850→
+   851→          {/* Mobile Search Row */}
+   852→          <div className="flex md:hidden items-center gap-2 py-3">
+   853→            <div className="relative flex-1">
+   854→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   855→              <Input
+   856→                placeholder="Search apartments..."
+   857→                value={search}
+   858→                onChange={(e) => setSearch(e.target.value)}
+   859→                className="pl-9 h-10 border-[#E5E3DC] bg-white text-sm"
+   860→              />
+   861→            </div>
+   862→            <MobileFilterSheet
+   863→              search={search}
+   864→              onSearchChange={setSearch}
+   865→              city={city}
+   866→              onCityChange={handleCityChange}
+   867→              area={area}
+   868→              onAreaChange={handleAreaChange}
+   869→              priceRange={priceRange}
+   870→              onPriceRangeChange={handlePriceRangeChange}
+   871→              bedrooms={bedrooms}
+   872→              onBedroomsChange={handleBedroomsChange}
+   873→              guests={guests}
+   874→              onGuestsChange={handleGuestsChange}
+   875→              onApply={applyFilters}
+   876→              areaOptions={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+   877→              priceOptions={dynamicPriceRanges}
+   878→            />
+   879→            <Button
+   880→              onClick={applyFilters}
+   881→              size="icon"
+   882→              className="h-10 w-10 bg-[#5F8768] hover:bg-[#4A6B52] text-white shrink-0"
+   883→            >
+   884→              <Search className="size-4" />
+   885→            </Button>
+   886→          </div>
+   887→        </div>
+   888→      </div>
+   889→
+   890→      {/* ── Category Tabs ────────────────────────────────────────────── */}
+   891→      <div className="border-b border-[#E5E3DC] bg-white">
+   892→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   893→          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2 -mb-px">
+   894→            {CATEGORY_TABS.map((tab, i) => {
+   895→              const Icon = tab.icon;
+   896→              const isActive = activeTab === i;
+   897→              return (
+   898→                <button
+   899→                  key={tab.label}
+   900→                  onClick={() => handleTabClick(i)}
+   901→                  className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-all duration-200 shrink-0 ${
+   902→                    isActive
+   903→                      ? 'bg-[#5F8768] text-white shadow-sm'
+   904→                      : 'text-[#6B7A6F] hover:text-[#2F3A33] hover:bg-[#F0EFE9]'
+   905→                  }`}
+   906→                >
+   907→                  <Icon className="size-3.5" />
+   908→                  {tab.label}
+   909→                </button>
+   910→              );
+   911→            })}
+   912→          </div>
+   913→        </div>
+   914→      </div>
+   915→
+   916→      {/* ── Main Content ─────────────────────────────────────────────── */}
+   917→      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+   918→        {/* Results Count */}
+   919→        {!loading && !initialLoad && apartments.length > 0 && (
+   920→          <motion.p
+   921→            initial={{ opacity: 0, y: -8 }}
+   922→            animate={{ opacity: 1, y: 0 }}
+   923→            className="text-sm text-[#6B7A6F] mb-5 font-medium"
+   924→          >
+   925→            {total} apartment{total !== 1 ? 's' : ''} found
+   926→          </motion.p>
+   927→        )}
+   928→
+   929→        {/* Loading State */}
+   930→        {loading && initialLoad && (
+   931→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   932→            {Array.from({ length: 6 }).map((_, i) => (
+   933→              <SkeletonCard key={i} />
+   934→            ))}
+   935→          </div>
+   936→        )}
+   937→
+   938→        {/* Empty State */}
+   939→        {!loading && !initialLoad && apartments.length === 0 && (
+   940→          <motion.div
+   941→            initial={{ opacity: 0, y: 20 }}
+   942→            animate={{ opacity: 1, y: 0 }}
+   943→            className="flex flex-col items-center justify-center py-20 text-center"
+   944→          >
+   945→            <div className="w-16 h-16 rounded-full bg-[#F0EFE9] flex items-center justify-center mb-4">
+   946→              <Building2 className="size-7 text-[#6B7A6F]" />
+   947→            </div>
+   948→            <h3 className="text-lg font-semibold text-[#2F3A33] mb-1">No apartments found</h3>
+   949→            <p className="text-sm text-[#6B7A6F] mb-5 max-w-sm">
+   950→              Try adjusting your search or filter criteria to discover available apartments.
+   951→            </p>
+   952→            <Button
+   953→              onClick={resetFilters}
+   954→              variant="outline"
+   955→              className="border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white gap-2"
+   956→            >
+   957→              <X className="size-4" />
+   958→              Reset Filters
+   959→            </Button>
+   960→          </motion.div>
+   961→        )}
+   962→
+   963→        {/* Apartment Grid */}
+   964→        <AnimatePresence mode="popLayout">
+   965→          {!loading && apartments.length > 0 && (
+   966→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   967→              {apartments.map((apt, i) => (
+   968→                <ApartmentCard key={apt.id} apartment={apt} index={i} />
+   969→              ))}
+   970→            </div>
+   971→          )}
+   972→        </AnimatePresence>
+   973→
+   974→        {/* Load More */}
+   975→        {!loading && hasMore && apartments.length > 0 && (
+   976→          <div className="flex justify-center mt-8 mb-4">
+   977→            <Button
+   978→              onClick={loadMore}
+   979→              disabled={loadingMore}
+   980→              variant="outline"
+   981→              className="h-11 px-8 border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white gap-2 font-medium text-sm rounded-lg transition-all"
+   982→            >
+   983→              {loadingMore ? (
+   984→                <>
+   985→                  <Loader2 className="size-4 animate-spin" />
+   986→                  Loading...
+   987→                </>
+   988→              ) : (
+   989→                <>
+   990→                  Load More
+   991→                  <ArrowRight className="size-4" />
+   992→                </>
+   993→              )}
+   994→            </Button>
+   995→          </div>
+   996→        )}
+   997→
+   998→        {/* End of results indicator */}
+   999→        {!loading && !hasMore && apartments.length > 0 && (
+  1000→          <p className="text-center text-xs text-[#6B7A6F] mt-6 mb-4">
+  1001→            You&apos;ve viewed all {apartments.length} apartments
+  1002→          </p>
+  1003→        )}
+  1004→      </main>
+  1005→
+  1006→      {/* ── Floating WhatsApp Button ─────────────────────────────────── */}
+  1007→      <a
+  1008→        href="https://wa.me/233204700023"
+  1009→        target="_blank"
+  1010→        rel="noopener noreferrer"
+  1011→        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 whatsapp-pulse"
+  1012→        aria-label="Chat on WhatsApp"
+  1013→      >
+  1014→        <MessageCircle className="size-6" />
+  1015→      </a>
+  1016→    </div>
+  1017→  );
+  1018→}
