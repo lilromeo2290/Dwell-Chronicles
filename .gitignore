@@ -54,4 +54,6 @@ server.log
 /skills/
 .zscripts/
 upload/
+!src/app/api/upload/
+!.gitkeep
 agent-ctx/
