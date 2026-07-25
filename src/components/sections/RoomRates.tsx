@@ -37,6 +37,10 @@ const galleryImages = [
   { src: '/room-exterior.jpg', alt: 'Modern apartment exterior - Dwell Chronicles Ho' },
   { src: '/room-living.jpg', alt: 'Spacious living room with Smart TV - Dwell Chronicles Ho' },
   { src: '/room-bedroom.jpg', alt: 'Modern bedroom with ensuite - Dwell Chronicles Ho' },
+  { src: '/room-hallway.jpg', alt: 'Bright corridor with modern wall lights - Dwell Chronicles Ho' },
+  { src: '/room-staircase.jpg', alt: 'Modern staircase with black railings - Dwell Chronicles Ho' },
+  { src: '/room-living2.jpg', alt: 'Spacious living area with bar counter and kitchen - Dwell Chronicles Ho' },
+  { src: '/room-kitchen.jpg', alt: 'Modern kitchen with induction cooktop - Dwell Chronicles Ho' },
 ];
 
 function RateIcon({ type }: { type: string }) {
@@ -111,23 +115,63 @@ export default function RoomRates() {
               />
             </div>
             <div
-              className="hidden sm:block rounded-2xl overflow-hidden cursor-pointer group"
+              className="rounded-2xl overflow-hidden cursor-pointer group"
               onClick={() => openLightbox(0)}
             >
               <img
                 src={galleryImages[0].src}
                 alt={galleryImages[0].alt}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-24 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
             <div
-              className="hidden sm:block rounded-2xl overflow-hidden cursor-pointer group"
+              className="rounded-2xl overflow-hidden cursor-pointer group"
               onClick={() => openLightbox(2)}
             >
               <img
                 src={galleryImages[2].src}
                 alt={galleryImages[2].alt}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-24 sm:h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div
+              className="col-span-3 rounded-2xl overflow-hidden cursor-pointer group"
+              onClick={() => openLightbox(5)}
+            >
+              <img
+                src={galleryImages[5].src}
+                alt={galleryImages[5].alt}
+                className="w-full h-36 sm:h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div
+              className="rounded-2xl overflow-hidden cursor-pointer group"
+              onClick={() => openLightbox(3)}
+            >
+              <img
+                src={galleryImages[3].src}
+                alt={galleryImages[3].alt}
+                className="w-full h-24 sm:h-28 object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div
+              className="rounded-2xl overflow-hidden cursor-pointer group"
+              onClick={() => openLightbox(4)}
+            >
+              <img
+                src={galleryImages[4].src}
+                alt={galleryImages[4].alt}
+                className="w-full h-24 sm:h-28 object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div
+              className="rounded-2xl overflow-hidden cursor-pointer group"
+              onClick={() => openLightbox(6)}
+            >
+              <img
+                src={galleryImages[6].src}
+                alt={galleryImages[6].alt}
+                className="w-full h-24 sm:h-28 object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
           </div>
