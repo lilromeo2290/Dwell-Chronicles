@@ -62,6 +62,7 @@ const property2Rates = [
 
 const property2Images = [
   { src: '/property2-living.jpg', alt: 'Luxury furnished living room with LED ceiling lights - Dwell Chronicles Ho Mirage' },
+  { src: '/property2-bedroom.jpg', alt: 'Neat bedroom with white bed and colorful curtains - Dwell Chronicles Ho Mirage' },
 ];
 
 const property2Amenities = [
@@ -330,15 +331,27 @@ function Property2Block() {
       <h3 className="text-xl sm:text-2xl font-bold text-[#2F3A33] text-center mb-2">Luxury Furnished Apartments</h3>
       <p className="text-sm text-[#6B7A6F] text-center mb-6">A minute drive from Mirage, Ho - Volta Region</p>
 
-      <div
-        className="max-w-3xl mx-auto rounded-2xl overflow-hidden cursor-pointer group mb-8"
-        onClick={() => lb.open(0)}
-      >
-        <img
-          src={property2Images[0].src}
-          alt={property2Images[0].alt}
-          className="w-full h-64 sm:h-80 lg:h-96 object-cover group-hover:scale-[1.02] transition-transform duration-500"
-        />
+      <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        <div
+          className="rounded-2xl overflow-hidden cursor-pointer group"
+          onClick={() => lb.open(0)}
+        >
+          <img
+            src={property2Images[0].src}
+            alt={property2Images[0].alt}
+            className="w-full h-56 sm:h-72 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          />
+        </div>
+        <div
+          className="rounded-2xl overflow-hidden cursor-pointer group"
+          onClick={() => lb.open(1)}
+        >
+          <img
+            src={property2Images[1].src}
+            alt={property2Images[1].alt}
+            className="w-full h-56 sm:h-72 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          />
+        </div>
       </div>
 
       <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#E5E3DC] p-6 sm:p-8 mb-8">
