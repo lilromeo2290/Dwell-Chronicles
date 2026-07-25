@@ -1,38 +1,38 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Search, MapPin, ChevronDown, Building2, DollarSign, BedDouble } from 'lucide-react'
+import {
+  Search,
+  ChevronDown,
+  BedDouble,
+  LandPlot,
+  Tag,
+  CalendarCheck,
+  HeadphonesIcon,
+  ArrowRight,
+} from 'lucide-react'
 
 const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.3,
+      staggerChildren: 0.08,
+      delayChildren: 0.2,
     },
   },
 }
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
-  },
-}
-
-const searchBarVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.75 },
+    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
   },
 }
 
 const bounceAnimation = {
-  y: [0, 10, 0],
+  y: [0, 8, 0],
   transition: {
     duration: 2,
     repeat: Infinity,
@@ -40,12 +40,69 @@ const bounceAnimation = {
   },
 }
 
+const actions = [
+  {
+    label: 'Search Properties',
+    description: 'Browse all listings',
+    icon: Search,
+    href: '#properties',
+    color: 'from-[#5F8768] to-[#4A6B52]',
+  },
+  {
+    label: 'Executive Rooms',
+    description: 'Premium short-stay',
+    icon: BedDouble,
+    href: '/airbnb',
+    color: 'from-[#2F3A33] to-[#1a231d]',
+  },
+  {
+    label: 'Buy Land',
+    description: 'Verified plots',
+    icon: LandPlot,
+    href: '#contact',
+    color: 'from-[#8B7355] to-[#6B5740]',
+  },
+  {
+    label: 'Sell Property',
+    description: 'List with us',
+    icon: Tag,
+    href: '#contact',
+    color: 'from-[#5F7687] to-[#4A5E6B]',
+  },
+  {
+    label: 'Book Inspection',
+    description: 'Schedule a visit',
+    icon: CalendarCheck,
+    href: '#contact',
+    color: 'from-[#87655F] to-[#6B4E4A]',
+  },
+  {
+    label: 'Contact an Agent',
+    description: 'Speak to us now',
+    icon: HeadphonesIcon,
+    href: '#contact',
+    color: 'from-[#6B5F87] to-[#554A6B]',
+  },
+]
+
 export default function Hero() {
+  const handleClick = (href: string) => {
+    if (href.startsWith('#')) {
+      const el = document.querySelector(href)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+    }
+    window.location.href = href
+  }
+
   return (
     <section
       id="home"
-      className="relative min-h-screen w-full overflow-hidden"
+      className="relative w-full overflow-hidden"
       style={{
+        minHeight: '100dvh',
         backgroundImage:
           'url(https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80)',
         backgroundSize: 'cover',
@@ -57,183 +114,108 @@ export default function Hero() {
       <div className="hero-overlay absolute inset-0 z-10" />
 
       {/* Content */}
-      <div className="relative z-20 flex min-h-screen flex-col items-center justify-center px-4 py-20 sm:px-6 md:px-8">
+      <div className="relative z-20 flex min-h-[100dvh] flex-col items-center justify-center px-4 py-20 sm:px-6 md:px-8">
         <motion.div
-          className="mx-auto flex max-w-5xl flex-col items-center text-center"
+          className="mx-auto flex max-w-6xl flex-col items-center text-center"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Headline */}
+          {/* Badge */}
+          <motion.div variants={fadeUp} className="mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wider text-white/90 uppercase backdrop-blur-sm">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#5F8768] animate-pulse" />
+              Your Trusted Real Estate Partner in Ghana
+            </span>
+          </motion.div>
+
+          {/* Headline — more compact */}
           <motion.h1
-            className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-7xl"
+            className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl"
             variants={fadeUp}
           >
             Find Your Dream Property.
             <br />
-            <span className="mt-2 block">Build Your Future.</span>
+            <span className="mt-1 block text-white/90">Take Action Now.</span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subtitle — shorter */}
           <motion.p
-            className="mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:mt-8 md:text-xl"
+            className="mt-4 max-w-xl text-base leading-relaxed text-white/80 md:mt-5 md:text-lg"
             variants={fadeUp}
           >
-            Premium Property Listings, Construction Solutions, Real Estate Insights &
-            Investment Opportunities.
+            Premium listings, construction solutions & investment opportunities — all in one place.
           </motion.p>
 
-          {/* Search Bar */}
+          {/* ── Quick Action Grid ─────────────────────────── */}
           <motion.div
-            className="mt-14 w-full max-w-5xl md:mt-16"
-            variants={searchBarVariants}
+            className="mt-8 w-full max-w-5xl md:mt-10"
+            variants={fadeUp}
           >
-            <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-5 tracking-tight">
-              ROOM SEARCH IN AND AROUND HO.
-            </h3>
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-xl md:p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-4">
-                {/* Location */}
-                <div className="relative">
-                  <label
-                    htmlFor="hero-location"
-                    className="mb-2 block text-left text-xs font-semibold tracking-wider text-white/70 uppercase"
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
+              {actions.map((action) => {
+                const Icon = action.icon
+                return (
+                  <button
+                    key={action.label}
+                    onClick={() => handleClick(action.href)}
+                    className="group relative flex flex-col items-center gap-2.5 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/20 hover:shadow-xl hover:shadow-black/20 sm:p-5"
                   >
-                    Location
-                  </label>
-                  <div className="relative">
-                    <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                    <select
-                      id="hero-location"
-                      defaultValue=""
-                      className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 py-3 pl-10 pr-10 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/30"
-                      aria-label="Select location"
+                    {/* Icon circle */}
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${action.color} shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14`}
                     >
-                      <option value="" disabled className="bg-[#2F3A33] text-white">
-                        Any Location
-                      </option>
-                      <option value="ho" className="bg-[#2F3A33] text-white">Ho Municipality</option>
-                      <option value="adaklu" className="bg-[#2F3A33] text-white">Adaklu</option>
-                      <option value="akatsi" className="bg-[#2F3A33] text-white">Akatsi</option>
-                      <option value="amedzofe" className="bg-[#2F3A33] text-white">Amedzofe</option>
-                      <option value="hohoe" className="bg-[#2F3A33] text-white">Hohoe</option>
-                      <option value="keta" className="bg-[#2F3A33] text-white">Keta</option>
-                      <option value="kpando" className="bg-[#2F3A33] text-white">Kpando</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                  </div>
-                </div>
-
-                {/* Property Type */}
-                <div>
-                  <label
-                    htmlFor="hero-type"
-                    className="mb-2 block text-left text-xs font-semibold tracking-wider text-white/70 uppercase"
-                  >
-                    Property Type
-                  </label>
-                  <div className="relative">
-                    <Building2 className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                    <select
-                      id="hero-type"
-                      defaultValue=""
-                      className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 py-3 pl-10 pr-10 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/30"
-                      aria-label="Select property type"
-                    >
-                      <option value="" disabled className="bg-[#2F3A33] text-white">All Types</option>
-                      <option value="single-room" className="bg-[#2F3A33] text-white">Single Room</option>
-                      <option value="chamber-hall" className="bg-[#2F3A33] text-white">Chamber & Hall</option>
-                      <option value="self-contained" className="bg-[#2F3A33] text-white">Self-Contained</option>
-                      <option value="studio" className="bg-[#2F3A33] text-white">Studio</option>
-                      <option value="1-bedroom" className="bg-[#2F3A33] text-white">1 Bedroom</option>
-                      <option value="2-bedroom" className="bg-[#2F3A33] text-white">2 Bedroom</option>
-                      <option value="3-bedroom" className="bg-[#2F3A33] text-white">3 Bedroom</option>
-                      <option value="executive" className="bg-[#2F3A33] text-white">Executive</option>
-                      <option value="commercial" className="bg-[#2F3A33] text-white">Commercial</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div>
-                  <label
-                    htmlFor="hero-price"
-                    className="mb-2 block text-left text-xs font-semibold tracking-wider text-white/70 uppercase"
-                  >
-                    Price Range
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                    <select
-                      id="hero-price"
-                      defaultValue=""
-                      className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 py-3 pl-10 pr-10 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/30"
-                      aria-label="Select price range"
-                    >
-                      <option value="" disabled className="bg-[#2F3A33] text-white">Any Price</option>
-                      <option value="under-200" className="bg-[#2F3A33] text-white">Under GHS 200/mo</option>
-                      <option value="200-500" className="bg-[#2F3A33] text-white">GHS 200 - 500/mo</option>
-                      <option value="500-1000" className="bg-[#2F3A33] text-white">GHS 500 - 1,000/mo</option>
-                      <option value="1000-2000" className="bg-[#2F3A33] text-white">GHS 1,000 - 2,000/mo</option>
-                      <option value="2000-5000" className="bg-[#2F3A33] text-white">GHS 2,000 - 5,000/mo</option>
-                      <option value="over-5000" className="bg-[#2F3A33] text-white">Above GHS 5,000/mo</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                  </div>
-                </div>
-
-                {/* Bedrooms */}
-                <div>
-                  <label
-                    htmlFor="hero-bedrooms"
-                    className="mb-2 block text-left text-xs font-semibold tracking-wider text-white/70 uppercase"
-                  >
-                    Bedrooms
-                  </label>
-                  <div className="relative">
-                    <BedDouble className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                    <select
-                      id="hero-bedrooms"
-                      defaultValue=""
-                      className="w-full appearance-none rounded-xl border border-white/20 bg-white/10 py-3 pl-10 pr-10 text-sm text-white focus:border-white/40 focus:outline-none focus:ring-1 focus:ring-white/30"
-                      aria-label="Select number of bedrooms"
-                    >
-                      <option value="" disabled className="bg-[#2F3A33] text-white">Any</option>
-                      <option value="1" className="bg-[#2F3A33] text-white">1</option>
-                      <option value="2" className="bg-[#2F3A33] text-white">2</option>
-                      <option value="3" className="bg-[#2F3A33] text-white">3</option>
-                      <option value="4" className="bg-[#2F3A33] text-white">4</option>
-                      <option value="5+" className="bg-[#2F3A33] text-white">5+</option>
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Search Button - Full Width */}
-              <button
-                className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#5F8768] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#5F8768]/25 transition-all duration-300 hover:bg-[#4A6B52] hover:shadow-[#5F8768]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#5F8768]"
-                aria-label="Search properties"
-              >
-                <Search className="h-4 w-4" />
-                Search Properties
-              </button>
+                      <Icon className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+                    </div>
+                    {/* Label */}
+                    <span className="text-sm font-semibold text-white sm:text-base">
+                      {action.label}
+                    </span>
+                    {/* Sub-label */}
+                    <span className="text-[11px] text-white/60 sm:text-xs">
+                      {action.description}
+                    </span>
+                    {/* Hover arrow */}
+                    <ArrowRight className="absolute right-3 top-3 h-3.5 w-3.5 text-white/0 transition-all duration-300 group-hover:text-white/70 sm:right-3 sm:top-3" />
+                  </button>
+                )
+              })}
             </div>
+          </motion.div>
+
+          {/* Bottom CTA bar */}
+          <motion.div
+            className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:gap-4 md:mt-10"
+            variants={fadeUp}
+          >
+            <button
+              onClick={() => handleClick('#properties')}
+              className="flex items-center gap-2 rounded-xl bg-[#5F8768] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-[#5F8768]/25 transition-all duration-300 hover:bg-[#4A6B52] hover:shadow-[#5F8768]/40"
+            >
+              <Search className="h-4 w-4" />
+              Browse All Properties
+            </button>
+            <button
+              onClick={() => handleClick('/airbnb')}
+              className="flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-7 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 hover:border-white/40"
+            >
+              <BedDouble className="h-4 w-4" />
+              Book Airbnb Stay
+            </button>
           </motion.div>
         </motion.div>
 
         {/* Scroll Down Indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2"
+          className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2"
           animate={bounceAnimation}
           aria-hidden="true"
         >
           <div className="flex flex-col items-center gap-1">
-            <span className="text-xs font-medium tracking-widest text-white/60 uppercase">
-              Scroll Down
+            <span className="text-[10px] font-medium tracking-widest text-white/50 uppercase">
+              Scroll
             </span>
-            <ChevronDown className="h-6 w-6 text-white/60" />
+            <ChevronDown className="h-5 w-5 text-white/50" />
           </div>
         </motion.div>
       </div>
