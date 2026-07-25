@@ -707,6 +707,85 @@ export default function AirbnbListingPage() {
         </div>
       </section>
 
+      {/* ── Room Rates Section ─────────────────────────────────────── */
+      <section className="bg-[#F8F7F3] py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#2F3A33]">Room Rates</h2>
+            <p className="mt-2 text-sm sm:text-base text-[#6B7A6F] max-w-xl mx-auto">
+              Opposite New Youth Resources Center, Ho &ndash; Adaklu Road, Volta Region
+            </p>
+          </div>
+
+          {/* Rates Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {/* 2 Bedroom */}
+            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">2 Bedroom</span>
+                <BedDouble className="size-4 text-[#6B7A6F]" />
+              </div>
+              <p className="text-2xl font-bold text-[#2F3A33]">GHS 1,500</p>
+              <p className="text-xs text-[#6B7A6F] mt-2">Room 101</p>
+            </div>
+
+            {/* Executive Suite */}
+            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Executive Suite</span>
+                <Crown className="size-4 text-[#6B7A6F]" />
+              </div>
+              <p className="text-2xl font-bold text-[#2F3A33]">GHS 1,000</p>
+              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 201, 202, 301, 302</p>
+            </div>
+
+            {/* Deluxe Suite */}
+            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Deluxe Suite</span>
+                <Sparkles className="size-4 text-[#6B7A6F]" />
+              </div>
+              <p className="text-2xl font-bold text-[#2F3A33]">GHS 750</p>
+              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 206, 207, 304, 306, 307</p>
+            </div>
+
+            {/* Superior Room */}
+            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Superior Room</span>
+                <Star className="size-4 text-[#6B7A6F]" />
+              </div>
+              <p className="text-2xl font-bold text-[#2F3A33]">GHS 600</p>
+              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 203, 204, 208, 303, 308</p>
+            </div>
+
+            {/* Standard Room */}
+            <div className="relative bg-white rounded-2xl border border-[#E5E3DC] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold tracking-wider uppercase text-[#5F8768] bg-[#5F8768]/10 px-2.5 py-1 rounded-full">Standard Room</span>
+                <Home className="size-4 text-[#6B7A6F]" />
+              </div>
+              <p className="text-2xl font-bold text-[#2F3A33]">GHS 500</p>
+              <p className="text-xs text-[#6B7A6F] mt-2">Rooms: 205, 209, 305, 309</p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-8">
+            <a
+              href="https://wa.me/233204700023?text=" + encodeURIComponent("Hi, I am interested in booking a room at your Ho property. Please share availability.")
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-medium text-sm px-6 py-3 rounded-xl transition-colors"
+            >
+              <MessageCircle className="size-4" />
+              Book a Room on WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── Sticky Search Bar ────────────────────────────────────────── */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E3DC] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
