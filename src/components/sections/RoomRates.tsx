@@ -61,8 +61,18 @@ const property2Rates = [
 ];
 
 const property2Images = [
-  { src: '/property2-living.jpg', alt: 'Luxury furnished living room with LED ceiling lights - Dwell Chronicles Ho Mirage' },
-  { src: '/property2-bedroom.jpg', alt: 'Neat bedroom with white bed and colorful curtains - Dwell Chronicles Ho Mirage' },
+  { src: '/p2-1.jpg', alt: 'Living room with TV and sofas - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-2.jpg', alt: 'Bathroom with sink and tub - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-3.jpg', alt: 'Outdoor covered balcony area - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-4.jpg', alt: 'Bedroom with white bed sheets - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-5.jpg', alt: 'Bathroom with toilet and tub - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-6.jpg', alt: 'Modern kitchen with appliances - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-7.jpg', alt: 'Living room with purple LED lighting - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-8.jpg', alt: 'Hallway with ironing board - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-9.jpg', alt: 'Balcony with yellow walls - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-10.jpg', alt: 'Bedroom with red curtains - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-11.jpg', alt: 'Spacious living room area - Dwell Chronicles Luxury Apartment Ho' },
+  { src: '/p2-12.jpg', alt: 'Dining room with table set - Dwell Chronicles Luxury Apartment Ho' },
 ];
 
 const property2Amenities = [
@@ -331,27 +341,43 @@ function Property2Block() {
       <h3 className="text-xl sm:text-2xl font-bold text-[#2F3A33] text-center mb-2">Luxury Furnished Apartments</h3>
       <p className="text-sm text-[#6B7A6F] text-center mb-6">A minute drive from Mirage, Ho - Volta Region</p>
 
-      <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
         <div
-          className="rounded-2xl overflow-hidden cursor-pointer group"
+          className="col-span-2 sm:col-span-2 row-span-2 rounded-2xl overflow-hidden cursor-pointer group"
           onClick={() => lb.open(0)}
         >
           <img
             src={property2Images[0].src}
             alt={property2Images[0].alt}
-            className="w-full h-56 sm:h-72 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
         </div>
-        <div
-          className="rounded-2xl overflow-hidden cursor-pointer group"
-          onClick={() => lb.open(1)}
-        >
-          <img
-            src={property2Images[1].src}
-            alt={property2Images[1].alt}
-            className="w-full h-56 sm:h-72 object-cover group-hover:scale-[1.02] transition-transform duration-500"
-          />
-        </div>
+        {property2Images.slice(1, 5).map((img, i) => (
+          <div
+            key={img.src}
+            className="rounded-2xl overflow-hidden cursor-pointer group"
+            onClick={() => lb.open(i + 1)}
+          >
+            <img
+              src={img.src}
+              alt={img.alt}
+              className="w-full h-28 sm:h-32 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            />
+          </div>
+        ))}
+        {property2Images.slice(5).map((img, i) => (
+          <div
+            key={img.src}
+            className="rounded-2xl overflow-hidden cursor-pointer group"
+            onClick={() => lb.open(i + 5)}
+          >
+            <img
+              src={img.src}
+              alt={img.alt}
+              className="w-full h-28 sm:h-32 object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            />
+          </div>
+        ))}
       </div>
 
       <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-[#E5E3DC] p-6 sm:p-8 mb-8">
