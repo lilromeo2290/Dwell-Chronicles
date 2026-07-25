@@ -417,7 +417,7 @@ export default function FeaturedProperties() {
             Featured Properties
           </h2>
           <p className="mt-3 text-[#6B7A6F] max-w-2xl mx-auto">
-            Handpicked premium properties matching your lifestyle and investment goals
+            Handpicked properties across Ghana — homes, apartments for rent, lands for sale, and commercial real estate Ghana listings matching your lifestyle and investment goals
           </p>
         </div>
 

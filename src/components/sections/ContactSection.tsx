@@ -62,8 +62,7 @@ export default function ContactSection() {
             Get In Touch
           </h2>
           <p className="mt-4 text-[#6B7A6F] max-w-xl mx-auto leading-relaxed">
-            We&apos;d love to hear from you. Reach out for inquiries,
-            consultations, or partnerships.
+            Located in Ho, Volta Region — contact Dwell Chronicles Ghana for any inquiries about property, real estate, or construction services.
           </p>
         </div>
 

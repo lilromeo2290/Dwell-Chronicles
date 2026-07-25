@@ -27,8 +27,8 @@ const trustItems = [
   },
   {
     icon: Users,
-    title: 'Professional Support',
-    desc: 'Dedicated agents and consultants at every step',
+    title: 'Property Management',
+    desc: 'Full property management services for landlords and investors across Ghana',
   },
 ]
 

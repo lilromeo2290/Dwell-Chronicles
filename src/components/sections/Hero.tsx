@@ -43,28 +43,28 @@ const bounceAnimation = {
 const actions = [
   {
     label: 'Search Properties',
-    description: 'Browse all listings',
+    description: 'Find property in Ghana',
     icon: Search,
     href: '#properties',
     color: 'from-[#5F8768] to-[#4A6B52]',
   },
   {
     label: 'Executive Rooms',
-    description: 'Premium short-stay',
+    description: 'Apartments for rent',
     icon: BedDouble,
     href: '/airbnb',
     color: 'from-[#2F3A33] to-[#1a231d]',
   },
   {
     label: 'Buy Land',
-    description: 'Verified plots',
+    description: 'Lands for sale in Ghana',
     icon: LandPlot,
     href: '#contact',
     color: 'from-[#8B7355] to-[#6B5740]',
   },
   {
     label: 'Sell Property',
-    description: 'List with us',
+    description: 'Sell property in Ghana',
     icon: Tag,
     href: '#contact',
     color: 'from-[#5F7687] to-[#4A5E6B]',
@@ -142,7 +142,7 @@ export default function Hero() {
             className="mt-4 max-w-xl text-base leading-relaxed text-white/80 md:mt-5 md:text-lg"
             variants={fadeUp}
           >
-            Premium listings, construction solutions & investment opportunities — all in one place.
+            Discover property in Ghana — from apartments for rent to lands for sale. Dwell Chronicles Ghana is your trusted partner for real estate, building construction, and property management.
           </motion.p>
 
           {/* ── Quick Action Grid ─────────────────────────── */}
