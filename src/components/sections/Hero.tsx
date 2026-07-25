@@ -129,14 +129,12 @@ export default function Hero() {
             </span>
           </motion.div>
 
-          {/* Headline — more compact */}
+          {/* Headline — SEO-optimized H1 */}
           <motion.h1
             className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl"
             variants={fadeUp}
           >
-            Find Your Dream Property.
-            <br />
-            <span className="mt-1 block text-white/90">Take Action Now.</span>
+            Property Listings and Real Estate Services in Ghana
           </motion.h1>
 
           {/* Subtitle — shorter */}
