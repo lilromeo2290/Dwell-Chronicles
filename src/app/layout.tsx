@@ -3,18 +3,21 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "Dwell Chronicles — Premium Property Listings & Construction Solutions",
+  title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
   description:
-    "Find your dream property and build your future with Dwell Chronicles. Premium property listings, construction solutions, real estate insights & investment opportunities.",
+    "Find your dream property and build your future with Dwell Chronicles. Premium property listings, land sales, short-stay rentals, construction solutions & investment opportunities in Ghana.",
   keywords: [
     "Dwell Chronicles",
-    "property listings",
-    "real estate",
-    "construction",
-    "luxury homes",
+    "property listings Ghana",
+    "real estate Ghana",
+    "land for sale Ghana",
+    "rentals Ghana",
+    "Airbnb Ghana",
+    "short stay Ho",
+    "construction services",
+    "luxury homes Ghana",
     "commercial buildings",
     "investment properties",
-    "architectural design",
     "property development",
   ],
   authors: [{ name: "Dwell Chronicles" }],
@@ -22,17 +25,17 @@ export const metadata: Metadata = {
     icon: "/logo.jpg",
   },
   openGraph: {
-    title: "Dwell Chronicles — Premium Property Listings & Construction Solutions",
+    title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
     description:
-      "Find your dream property and build your future with Dwell Chronicles. Premium property listings, construction solutions, real estate insights & investment opportunities.",
+      "Find your dream property and build your future with Dwell Chronicles. Premium property listings, land sales, short-stay rentals, construction solutions & investment opportunities in Ghana.",
     siteName: "Dwell Chronicles",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dwell Chronicles",
+    title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
     description:
-      "Premium Property Listings & Construction Solutions",
+      "Property Listings, Land Sales, Rentals & Construction Services in Ghana",
   },
 };
 
