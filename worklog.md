@@ -25,3 +25,26 @@ Stage Summary:
 - Full Airbnb-quality short-stay booking experience with WhatsApp integration
 - Admin can manage apartments, availability dates, and enquiries
 - Footer now has 5 columns: Quick Links, Services, Resources, Admin, Connect
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Deploy Dwell Chronicles to live server (dwellchroniclesgh.com)
+
+Work Log:
+- Diagnosed nginx 404: Webuzo-managed nginx, vhost config in conf.d/
+- Created custom nginx location block at /var/webuzo-data/nginx/custom/domains/dwellchroniclesgh.com.conf
+- Discovered port 3000 occupied by another bun process (user clipe233)
+- Scanned all ports, chose port 3003 (free)
+- Installed bun, PM2 on VPS (CentOS-based, no apt-get)
+- Used bun install to avoid npm dependency conflicts
+- Pinned Prisma to v6 (project version), avoided v7 breaking changes
+- Discovered Next.js 16 standalone binds to public IP by default, not 127.0.0.1
+- Fixed with HOSTNAME=0.0.0.0 env var in PM2 ecosystem config
+- PM2 + systemd startup configured for auto-restart on reboot
+- Site confirmed live: curl returns full HTML on port 3003
+
+Stage Summary:
+- Live at https://dwellchroniclesgh.com
+- Port: 3003, PM2 ecosystem config at /root/dwellchronicles/ecosystem.config.js
+- Update: cd /root/dwellchronicles && git pull && bun install && bunx prisma generate && bun run build && pm2 restart dwellchronicles
