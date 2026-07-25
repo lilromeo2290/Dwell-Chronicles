@@ -372,7 +372,25 @@ export default function FeaturedProperties() {
 
   const activeCount = [filters.city, filters.type, filters.status, filters.bedrooms, filters.priceRange, filters.landSize, filters.search].filter(Boolean).length;
 
+  const filterBtnClass = showFilters || activeCount > 0
+    ? 'flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all sm:px-6 border-[#5F8768] bg-green-100 text-[#5F8768]'
+    : 'flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all sm:px-6 border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768]';
+
   const clearFilters = () => setFilters({ search: '', city: '', type: '', bedrooms: '', priceRange: '', landSize: '', status: '' });
+
+  const propertyLink = (id: string) => '/property/' + id;
+  const whatsappLink = (phone: string, title: string, propId: string, price: string) => {
+    return 'https://wa.me/' + phone + '?text=' + encodeURIComponent('Hi, I\'m interested in ' + title + ' (' + propId + ') - ' + price);
+  };
+  const telLink = (phone: string) => 'tel:+' + phone;
+  const statusBadgeClass = (status: string) => {
+    const base = 'absolute top-3 left-3 text-white text-xs font-medium px-3 py-1 rounded-full ';
+    if (status === 'For Sale') return base + 'bg-[#5F8768]';
+    if (status === 'For Rent' || status === 'Available') return base + 'bg-amber-500';
+    if (status === 'Rented' || status === 'Sold') return base + 'bg-red-500';
+    return base + 'bg-gray-500';
+  };
+  const heartClass = (id: string) => favorites.has(id) ? 'w-4 h-4 fill-red-500 text-red-500' : 'w-4 h-4 text-[#2F3A33]';
 
   const SelectField = ({ label, value, onChange, children, className = '' }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode; className?: string }) => (
     <div className={className}>
@@ -381,7 +399,7 @@ export default function FeaturedProperties() {
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none rounded-xl border border-[#E5E3DC] bg-white py-2.5 pl-3 pr-8 text-sm text-[#2F3A33] focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]/30"
+          className="w-full appearance-none rounded-xl border border-[#E5E3DC] bg-white py-2.5 pl-3 pr-8 text-sm text-[#2F3A33] focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]"
         >
           {children}
         </select>
@@ -414,13 +432,12 @@ export default function FeaturedProperties() {
                 placeholder="Search by name, location, or keyword..."
                 value={filters.search}
                 onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-                className="w-full rounded-xl border border-[#E5E3DC] bg-[#F8F7F3] py-2.5 pl-10 pr-4 text-sm text-[#2F3A33] placeholder:text-[#6B7A6F]/60 focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]/30"
+                className="w-full rounded-xl border border-[#E5E3DC] bg-[#F8F7F3] py-2.5 pl-10 pr-4 text-sm text-[#2F3A33] placeholder:text-[#9ca3af] focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all sm:px-6 ${showFilters || activeCount > 0 ? 'border-[#5F8768] bg-[#5F8768]/10 text-[#5F8768]' : 'border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768]'}
-              }
+              className={filterBtnClass}
             >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
@@ -484,7 +501,7 @@ export default function FeaturedProperties() {
                 </div>
 
                 {activeCount > 0 && (
-                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#E5E3DC]/60">
+                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#E5E3DC]">
                     <span className="text-sm text-[#6B7A6F]">{filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''} found</span>
                     <button
                       onClick={clearFilters}
@@ -528,7 +545,7 @@ export default function FeaturedProperties() {
                 className="property-card rounded-2xl overflow-hidden bg-white shadow-sm"
               >
                 {/* Image */}
-                <Link href={`/property/${property.id}`}>
+                <Link href={propertyLink(property.id)}>
                   <div className="relative h-56 cursor-pointer">
                     <img
                       src={property.img}
@@ -537,27 +554,19 @@ export default function FeaturedProperties() {
                       loading="lazy"
                     />
                     <span
-                      className={`absolute top-3 left-3 text-white text-xs font-medium px-3 py-1 rounded-full ${
-                        property.status === 'For Sale'
-                          ? 'bg-[#5F8768]'
-                          : property.status === 'For Rent' || property.status === 'Available'
-                          ? 'bg-amber-500'
-                          : property.status === 'Rented' || property.status === 'Sold'
-                          ? 'bg-red-500'
-                          : 'bg-gray-500'
-                      }`}
+                      className={statusBadgeClass(property.status)}
                     >
                       {property.status}
                     </span>
                     <button
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(property.id); }}
-                      className="absolute top-3 right-3 bg-white/90 rounded-full p-2 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-red-50 transition-colors cursor-pointer"
                       aria-label="Toggle favorite"
                     >
-                      <Heart className={`w-4 h-4 ${favorites.has(property.id) ? 'fill-red-500 text-red-500' : 'text-[#2F3A33]'}`} />
+                      <Heart className={heartClass(property.id)} />
                     </button>
                     {/* Photo count */}
-                    <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="absolute bottom-3 right-3 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full">
                       {property.images.length} photos
                     </span>
                   </div>
@@ -594,12 +603,12 @@ export default function FeaturedProperties() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-5">
-                    <Link href={`/property/${property.id}`} className="flex-1 bg-[#5F8768] text-white text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-[#4A6B52] transition-colors flex items-center justify-center gap-1.5">
+                    <Link href={propertyLink(property.id)} className="flex-1 bg-[#5F8768] text-white text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-[#4A6B52] transition-colors flex items-center justify-center gap-1.5">
                       <Eye className="w-4 h-4" />
                       View Details
                     </Link>
                     <a
-                      href={`https://wa.me/${property.agentPhone}?text=${encodeURIComponent(`Hi, I'm interested in ${property.title} (${property.propertyId}) - ${property.price}`)}`}
+                      href={whatsappLink(property.agentPhone, property.title, property.propertyId, property.price)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2.5 rounded-xl border border-[#E5E3DC] text-[#2F3A33] hover:border-[#25D366] hover:text-[#25D366] transition-colors"
@@ -608,7 +617,7 @@ export default function FeaturedProperties() {
                       <MessageCircle className="w-4 h-4" />
                     </a>
                     <a
-                      href={`tel:+${property.agentPhone}`}
+                      href={telLink(property.agentPhone)}
                       className="p-2.5 rounded-xl border border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768] hover:text-[#5F8768] transition-colors"
                       aria-label="Call agent"
                     >
