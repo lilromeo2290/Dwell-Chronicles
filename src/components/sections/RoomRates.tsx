@@ -99,6 +99,10 @@ export default function RoomRates() {
                 </div>
                 <p className="text-2xl font-bold text-[#2F3A33]">{rate.price}</p>
                 <p className="text-xs text-[#6B7A6F] mt-2">{rate.rooms}</p>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-medium text-green-600">Available</span>
+                </div>
               </div>
             ))}
           </div>
