@@ -102,10 +102,10 @@ export default function ConstructionServices() {
           className="mb-14 text-center md:mb-16"
         >
           <h2 className="text-3xl font-bold text-[#2F3A33] md:text-4xl">
-            Our Construction Services
+            Building Construction & Development Services
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[#6B7A6F]">
-            From concept to completion, we deliver excellence in every project
+            Expert building construction across Ghana — from residential homes to commercial projects, delivered on time and on budget.
           </p>
         </motion.div>
 

@@ -37,9 +37,7 @@ export default function CTABanner() {
           transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
           className="mt-6 text-lg text-white/80 max-w-2xl mx-auto leading-relaxed"
         >
-          Whether you&apos;re buying your first home, investing in commercial
-          property, or starting a construction project — we&apos;re here to make
-          it happen.
+          Whether you are searching for property in Ghana, looking for apartments for rent, or planning a building construction project in Ho, Volta Region — Dwell Chronicles Ghana is here to make it happen.
         </motion.p>
 
         <motion.div
