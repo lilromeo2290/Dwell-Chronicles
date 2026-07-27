@@ -458,6 +458,7 @@ function MobileMenuItem({
   link: NavLink;
   isScrolled: boolean;
   onAction: (action: string) => void;
+  onHashClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
   isAdmin?: boolean;
   adminAuthenticated?: boolean;
   onAdminClick?: (href: string) => void;
@@ -585,6 +586,7 @@ function MobileMenuItem({
       ) : (
         <a
           href={link.href}
+          onClick={(e) => onHashClick(e, link.href!)}
           className="group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
         >
           <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
@@ -647,6 +649,20 @@ export default function Navigation() {
     }
   }, [adminUsername, adminPassword, pendingAdminHref]);
 
+  const handleHashClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith('#')) return;
+    e.preventDefault();
+    const id = href.slice(1);
+    const el = document.getElementById(id);
+    if (el) {
+      const offset = 80;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    } else {
+      window.location.href = '/' + href;
+    }
+  }, []);
+
   const handleAction = useCallback((action: string) => {
     setModalAction(action);
   }, []);
@@ -679,6 +695,7 @@ export default function Navigation() {
           {/* ---- Logo ---- */}
           <a
             href="#home"
+            onClick={(e) => handleHashClick(e, '#home')}
             className="flex items-center gap-2.5 transition-colors duration-300"
           >
             <img
@@ -736,6 +753,7 @@ export default function Navigation() {
                 <li key={link.label}>
                   <a
                     href={link.href}
+                    onClick={(e) => handleHashClick(e, link.href!)}
                     className={cn(
                       'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
                       textColor,
@@ -826,6 +844,7 @@ export default function Navigation() {
                                 link={link}
                                 isScrolled={isScrolled}
                                 onAction={handleAction}
+                                onHashClick={handleHashClick}
                                 isAdmin={link.label === 'Admin'}
                                 adminAuthenticated={adminAuth}
                                 onAdminClick={handleAdminClick}

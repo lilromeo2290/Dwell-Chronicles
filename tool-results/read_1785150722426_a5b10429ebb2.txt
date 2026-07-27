@@ -1,0 +1,945 @@
+     1→'use client';
+     2→
+     3→import { useState, useEffect, useCallback, useRef } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import Link from 'next/link';
+     6→import {
+     7→  Home,
+     8→  Building2,
+     9→  Key,
+    10→  Warehouse,
+    11→  HardHat,
+    12→  FolderOpen,
+    13→  BookOpen,
+    14→  Play,
+    15→  Info,
+    16→  Phone,
+    17→  Menu,
+    18→  ChevronDown,
+    19→  KeyRound,
+    20→  ClipboardList,
+    21→  Users,
+    22→  MapPin,
+    23→  FileCheck,
+    24→  Hotel,
+    25→  ShieldCheck,
+    26→} from 'lucide-react';
+    27→import { Button } from '@/components/ui/button';
+    28→import {
+    29→  Sheet,
+    30→  SheetTrigger,
+    31→  SheetContent,
+    32→  SheetHeader,
+    33→  SheetTitle,
+    34→  SheetClose,
+    35→} from '@/components/ui/sheet';
+    36→import { cn } from '@/lib/utils';
+    37→import LandRegistrationModal from './LandRegistrationModal';
+    38→import BuyingSellingLandsModal from './BuyingSellingLandsModal';
+    39→import AgentServicesModal from './AgentServicesModal';
+    40→import PropertyManagementModal from './PropertyManagementModal';
+    41→import BuildingConstructionModal from './BuildingConstructionModal';
+    42→import ProjectManagementModal from './ProjectManagementModal';
+    43→import PropertyRentalsModal from './PropertyRentalsModal';
+    44→import AboutModal from './AboutModal';
+    45→import RentModal from './RentModal';
+    46→import {
+    47→  AlertDialog,
+    48→  AlertDialogAction,
+    49→  AlertDialogCancel,
+    50→  AlertDialogContent,
+    51→  AlertDialogDescription,
+    52→  AlertDialogFooter,
+    53→  AlertDialogHeader,
+    54→  AlertDialogTitle,
+    55→} from '@/components/ui/alert-dialog';
+    56→import { Label } from '@/components/ui/label';
+    57→import { Input } from '@/components/ui/input';
+    58→
+    59→/* ------------------------------------------------------------------ */
+    60→/*  Data                                                               */
+    61→/* ------------------------------------------------------------------ */
+    62→
+    63→interface SubMenuItem {
+    64→  label: string;
+    65→  href?: string;
+    66→  action?: string;
+    67→  icon: React.ReactNode;
+    68→}
+    69→
+    70→interface NavLink {
+    71→  label: string;
+    72→  href?: string;
+    73→  action?: string;
+    74→  icon: React.ReactNode;
+    75→  children?: SubMenuItem[];
+    76→  isLink?: boolean;
+    77→}
+    78→
+    79→const ADMIN_SUBMENU = [
+    80→  { label: 'Rental Properties', href: '/admin/rentals', icon: <KeyRound className="size-4" /> },
+    81→  { label: 'Apartment Bookings', href: '/admin/airbnb', icon: <Hotel className="size-4" /> },
+    82→];
+    83→
+    84→const PROPERTIES_SUBMENU = [
+    85→  { label: 'Property Rentals', action: 'property-rentals', icon: <KeyRound className="size-4" /> },
+    86→  { label: 'Project Management', action: 'project-management', icon: <ClipboardList className="size-4" /> },
+    87→  { label: 'Building Construction', action: 'building-construction', icon: <HardHat className="size-4" /> },
+    88→  { label: 'Property Management', action: 'property-management', icon: <Building2 className="size-4" /> },
+    89→  { label: 'Agent Services', action: 'agent-services', icon: <Users className="size-4" /> },
+    90→  { label: 'Buying & Selling of Lands', action: 'buying-selling', icon: <MapPin className="size-4" /> },
+    91→  { label: 'Land Registration & Consultancy', action: 'land-registration', icon: <FileCheck className="size-4" /> },
+    92→];
+    93→
+    94→const NAV_LINKS: NavLink[] = [
+    95→  { label: 'Home', href: '#home', icon: <Home className="size-[18px]" /> },
+    96→  { label: 'About', action: 'about', icon: <Info className="size-[18px]" /> },
+    97→  { label: 'Properties', href: '#properties', icon: <Building2 className="size-[18px]" />, children: PROPERTIES_SUBMENU },
+    98→  { label: 'Rent', action: 'rent', icon: <Key className="size-[18px]" /> },
+    99→  { label: 'Airbnb', href: '/airbnb', icon: <Hotel className="size-[18px]" />, isLink: true },
+   100→  { label: 'Construction', href: '#construction', icon: <HardHat className="size-[18px]" /> },
+   101→  { label: 'Projects', href: '#projects', icon: <FolderOpen className="size-[18px]" /> },
+   102→  { label: 'Blog', href: '#blog', icon: <BookOpen className="size-[18px]" /> },
+   103→  { label: 'Videos', href: '#videos', icon: <Play className="size-[18px]" /> },
+   104→  { label: 'Admin', href: '#admin', icon: <ShieldCheck className="size-[18px]" />, children: ADMIN_SUBMENU },
+   105→];
+   106→
+   107→const SCROLL_THRESHOLD = 80;
+   108→
+   109→/* ------------------------------------------------------------------ */
+   110→/*  Desktop Properties Dropdown                                         */
+   111→/* ------------------------------------------------------------------ */
+   112→
+   113→function PropertiesDropdown({ isScrolled, onAction }: { isScrolled: boolean; onAction: (action: string) => void }) {
+   114→  const [open, setOpen] = useState(false);
+   115→  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+   116→  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+   117→
+   118→  const handleEnter = useCallback(() => {
+   119→    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   120→    setOpen(true);
+   121→  }, []);
+   122→
+   123→  const handleLeave = useCallback(() => {
+   124→    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+   125→  }, []);
+   126→
+   127→  useEffect(() => {
+   128→    return () => {
+   129→      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   130→    };
+   131→  }, []);
+   132→
+   133→  return (
+   134→    <li
+   135→      className="relative"
+   136→      onMouseEnter={handleEnter}
+   137→      onMouseLeave={handleLeave}
+   138→    >
+   139→      <button
+   140→        className={cn(
+   141→          'inline-flex items-center gap-1 px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+   142→          textColor,
+   143→          isScrolled
+   144→            ? 'hover:bg-white/15 hover:text-white'
+   145→            : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   146→        )}
+   147→        onClick={() => setOpen((prev) => !prev)}
+   148→        aria-expanded={open}
+   149→        aria-haspopup="true"
+   150→      >
+   151→        Properties
+   152→        <ChevronDown
+   153→          className={cn(
+   154→            'size-3.5 transition-transform duration-200',
+   155→            open && 'rotate-180'
+   156→          )}
+   157→        />
+   158→      </button>
+   159→
+   160→      <AnimatePresence>
+   161→        {open && (
+   162→          <motion.div
+   163→            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+   164→            animate={{ opacity: 1, y: 0, scale: 1 }}
+   165→            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+   166→            transition={{ duration: 0.2, ease: 'easeOut' }}
+   167→            className={cn(
+   168→              'absolute top-full left-0 mt-1 w-64 rounded-xl border shadow-xl p-2 z-50',
+   169→              isScrolled
+   170→                ? 'bg-[#5F8768] border-[#5F8768]/60 shadow-[#2F3A33]/20'
+   171→                : 'bg-white border-[#E5E3DC] shadow-[#2F3A33]/10'
+   172→            )}
+   173→            onMouseEnter={handleEnter}
+   174→            onMouseLeave={handleLeave}
+   175→          >
+   176→            {PROPERTIES_SUBMENU.map((sub) => (
+   177→              sub.action ? (
+   178→                <button
+   179→                  key={sub.label}
+   180→                  type="button"
+   181→                  onClick={() => { setOpen(false); onAction(sub.action!); }}
+   182→                  className={cn(
+   183→                    'flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 text-left',
+   184→                    isScrolled
+   185→                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+   186→                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   187→                  )}
+   188→                >
+   189→                  <span
+   190→                    className={cn(
+   191→                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+   192→                      isScrolled
+   193→                        ? 'bg-white/15 text-white'
+   194→                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+   195→                    )}
+   196→                  >
+   197→                    {sub.icon}
+   198→                  </span>
+   199→                  {sub.label}
+   200→                </button>
+   201→              ) : (
+   202→                <a
+   203→                  key={sub.label}
+   204→                  href={sub.href}
+   205→                  onClick={() => setOpen(false)}
+   206→                  className={cn(
+   207→                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+   208→                    isScrolled
+   209→                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+   210→                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   211→                  )}
+   212→                >
+   213→                  <span
+   214→                    className={cn(
+   215→                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+   216→                      isScrolled
+   217→                        ? 'bg-white/15 text-white'
+   218→                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+   219→                    )}
+   220→                  >
+   221→                    {sub.icon}
+   222→                  </span>
+   223→                  {sub.label}
+   224→                </a>
+   225→              )
+   226→            ))}
+   227→          </motion.div>
+   228→        )}
+   229→      </AnimatePresence>
+   230→    </li>
+   231→  );
+   232→}
+   233→
+   234→/* ------------------------------------------------------------------ */
+   235→/*  Admin Password Gate                                                   */
+   236→/* ------------------------------------------------------------------ */
+   237→
+   238→const ADMIN_CREDS = { username: 'airbnb', password: 'Airbnb/Clipeconsult' };
+   239→
+   240→function AdminPasswordGate({
+   241→  isScrolled,
+   242→  onSuccess,
+   243→  onCancel,
+   244→}: {
+   245→  isScrolled: boolean;
+   246→  onSuccess: () => void;
+   247→  onCancel: () => void;
+   248→}) {
+   249→  const [username, setUsername] = useState('');
+   250→  const [password, setPassword] = useState('');
+   251→  const [error, setError] = useState('');
+   252→  const inputRef = useRef<HTMLInputElement>(null);
+   253→
+   254→  useEffect(() => {
+   255→    inputRef.current?.focus();
+   256→  }, []);
+   257→
+   258→  const handleSubmit = (e: React.FormEvent) => {
+   259→    e.preventDefault();
+   260→    if (username === ADMIN_CREDS.username && password === ADMIN_CREDS.password) {
+   261→      sessionStorage.setItem('dc_admin_auth', '1');
+   262→      onSuccess();
+   263→    } else {
+   264→      setError('Invalid credentials');
+   265→      setPassword('');
+   266→    }
+   267→  };
+   268→
+   269→  return (
+   270→    <div className="p-3">
+   271→      <p className={cn('text-xs font-medium mb-3', isScrolled ? 'text-white/70' : 'text-gray-500')}>
+   272→        Enter admin credentials
+   273→      </p>
+   274→      <form onSubmit={handleSubmit} className="space-y-2">
+   275→        <input
+   276→          ref={inputRef}
+   277→          type="text"
+   278→          placeholder="Username"
+   279→          value={username}
+   280→          onChange={(e) => { setUsername(e.target.value); setError(''); }}
+   281→          className={cn(
+   282→            'w-full rounded-lg border px-3 py-1.5 text-xs outline-none transition-colors',
+   283→            isScrolled
+   284→              ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+   285→              : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#5F8768]'
+   286→          )}
+   287→        />
+   288→        <input
+   289→          type="password"
+   290→          placeholder="Password"
+   291→          value={password}
+   292→          onChange={(e) => { setPassword(e.target.value); setError(''); }}
+   293→          className={cn(
+   294→            'w-full rounded-lg border px-3 py-1.5 text-xs outline-none transition-colors',
+   295→            isScrolled
+   296→              ? 'bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50'
+   297→              : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#5F8768]'
+   298→          )}
+   299→        />
+   300→        {error && (
+   301→          <p className="text-xs text-red-400">{error}</p>
+   302→        )}
+   303→        <div className="flex gap-2 pt-1">
+   304→          <button
+   305→            type="submit"
+   306→            className={cn(
+   307→              'flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+   308→              isScrolled
+   309→                ? 'bg-white text-[#5F8768] hover:bg-white/90'
+   310→                : 'bg-[#5F8768] text-white hover:bg-[#5F8768]/90'
+   311→            )}
+   312→          >
+   313→            Sign In
+   314→          </button>
+   315→          <button
+   316→            type="button"
+   317→            onClick={onCancel}
+   318→            className={cn(
+   319→              'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+   320→              isScrolled
+   321→                ? 'text-white/70 hover:text-white'
+   322→                : 'text-gray-500 hover:text-gray-700'
+   323→            )}
+   324→          >
+   325→            Cancel
+   326→          </button>
+   327→        </div>
+   328→      </form>
+   329→    </div>
+   330→  );
+   331→}
+   332→
+   333→/* ------------------------------------------------------------------ */
+   334→/*  Desktop Admin Dropdown                                               */
+   335→/* ------------------------------------------------------------------ */
+   336→
+   337→function AdminDropdown({ isScrolled }: { isScrolled: boolean }) {
+   338→  const [open, setOpen] = useState(false);
+   339→  const [authenticated, setAuthenticated] = useState(false);
+   340→  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+   341→  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+   342→
+   343→  useEffect(() => {
+   344→    setAuthenticated(sessionStorage.getItem('dc_admin_auth') === '1');
+   345→  }, []);
+   346→
+   347→  const handleEnter = useCallback(() => {
+   348→    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   349→    setOpen(true);
+   350→  }, []);
+   351→
+   352→  const handleLeave = useCallback(() => {
+   353→    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+   354→  }, []);
+   355→
+   356→  useEffect(() => {
+   357→    return () => {
+   358→      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+   359→    };
+   360→  }, []);
+   361→
+   362→  return (
+   363→    <li
+   364→      className="relative"
+   365→      onMouseEnter={handleEnter}
+   366→      onMouseLeave={handleLeave}
+   367→    >
+   368→      <button
+   369→        className={cn(
+   370→          'inline-flex items-center gap-1 px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+   371→          textColor,
+   372→          isScrolled
+   373→            ? 'hover:bg-white/15 hover:text-white'
+   374→            : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   375→        )}
+   376→        onClick={() => setOpen((prev) => !prev)}
+   377→        aria-expanded={open}
+   378→        aria-haspopup="true"
+   379→      >
+   380→        <ShieldCheck className="size-[15px]" />
+   381→        Admin
+   382→        <ChevronDown
+   383→          className={cn(
+   384→            'size-3.5 transition-transform duration-200',
+   385→            open && 'rotate-180'
+   386→          )}
+   387→        />
+   388→      </button>
+   389→
+   390→      <AnimatePresence>
+   391→        {open && (
+   392→          <motion.div
+   393→            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+   394→            animate={{ opacity: 1, y: 0, scale: 1 }}
+   395→            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+   396→            transition={{ duration: 0.2, ease: 'easeOut' }}
+   397→            className={cn(
+   398→              'absolute top-full right-0 mt-1 w-60 rounded-xl border shadow-xl p-2 z-50',
+   399→              isScrolled
+   400→                ? 'bg-[#5F8768] border-[#5F8768]/60 shadow-[#2F3A33]/20'
+   401→                : 'bg-white border-[#E5E3DC] shadow-[#2F3A33]/10'
+   402→            )}
+   403→            onMouseEnter={handleEnter}
+   404→            onMouseLeave={handleLeave}
+   405→          >
+   406→            {authenticated ? (
+   407→              ADMIN_SUBMENU.map((sub) => (
+   408→                <Link
+   409→                  key={sub.label}
+   410→                  href={sub.href}
+   411→                  onClick={() => setOpen(false)}
+   412→                  className={cn(
+   413→                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
+   414→                    isScrolled
+   415→                      ? 'text-white/90 hover:bg-white/15 hover:text-white'
+   416→                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   417→                  )}
+   418→                >
+   419→                  <span
+   420→                    className={cn(
+   421→                      'flex size-8 shrink-0 items-center justify-center rounded-md',
+   422→                      isScrolled
+   423→                        ? 'bg-white/15 text-white'
+   424→                        : 'bg-[#5F8768]/10 text-[#5F8768]'
+   425→                    )}
+   426→                  >
+   427→                    {sub.icon}
+   428→                  </span>
+   429→                  {sub.label}
+   430→                </Link>
+   431→              ))
+   432→            ) : (
+   433→              <AdminPasswordGate
+   434→                isScrolled={isScrolled}
+   435→                onSuccess={() => setAuthenticated(true)}
+   436→                onCancel={() => setOpen(false)}
+   437→              />
+   438→            )}
+   439→          </motion.div>
+   440→        )}
+   441→      </AnimatePresence>
+   442→    </li>
+   443→  );
+   444→}
+   445→
+   446→/* ------------------------------------------------------------------ */
+   447→/*  Mobile Menu Item                                                    */
+   448→/* ------------------------------------------------------------------ */
+   449→
+   450→function MobileMenuItem({
+   451→  link,
+   452→  isScrolled,
+   453→  onAction,
+   454→  isAdmin,
+   455→  adminAuthenticated,
+   456→  onAdminClick,
+   457→}: {
+   458→  link: NavLink;
+   459→  isScrolled: boolean;
+   460→  onAction: (action: string) => void;
+   461→  isAdmin?: boolean;
+   462→  adminAuthenticated?: boolean;
+   463→  onAdminClick?: (href: string) => void;
+   464→}) {
+   465→  const [expanded, setExpanded] = useState(false);
+   466→  const hasChildren = link.children && link.children.length > 0;
+   467→
+   468→  if (hasChildren) {
+   469→    return (
+   470→      <div>
+   471→        <button
+   472→          onClick={() => setExpanded((prev) => !prev)}
+   473→          className="group flex w-full items-center justify-between rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10"
+   474→        >
+   475→          <span className="flex items-center gap-3.5">
+   476→            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768]">
+   477→              {link.icon}
+   478→            </span>
+   479→            {link.label}
+   480→          </span>
+   481→          <ChevronDown
+   482→            className={cn(
+   483→              'size-4 text-[#6B7A6F] transition-transform duration-200',
+   484→              expanded && 'rotate-180'
+   485→            )}
+   486→          />
+   487→        </button>
+   488→        <AnimatePresence>
+   489→          {expanded && (
+   490→            <motion.div
+   491→              initial={{ height: 0, opacity: 0 }}
+   492→              animate={{ height: 'auto', opacity: 1 }}
+   493→              exit={{ height: 0, opacity: 0 }}
+   494→              transition={{ duration: 0.2, ease: 'easeOut' }}
+   495→              className="overflow-hidden ml-6 border-l-2 border-[#5F8768]/20 pl-4"
+   496→            >
+   497→              {link.children!.map((sub) =>
+   498→                isAdmin && !adminAuthenticated ? (
+   499→                  <button
+   500→                    key={sub.label}
+   501→                    type="button"
+   502→                    onClick={(e) => {
+   503→                      e.preventDefault();
+   504→                      onAdminClick?.(sub.href!);
+   505→                    }}
+   506→                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5 text-left"
+   507→                  >
+   508→                    <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+   509→                      {sub.icon}
+   510→                    </span>
+   511→                    <span className="flex items-center gap-1.5">
+   512→                      {sub.label}
+   513→                      <span className="text-[10px] text-gray-400 font-normal">🔒</span>
+   514→                    </span>
+   515→                  </button>
+   516→                ) : sub.href && !sub.action ? (
+   517→                  <SheetClose asChild key={sub.label}>
+   518→                    <Link
+   519→                      href={sub.href}
+   520→                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
+   521→                    >
+   522→                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+   523→                        {sub.icon}
+   524→                      </span>
+   525→                      {sub.label}
+   526→                    </Link>
+   527→                  </SheetClose>
+   528→                ) : sub.action ? (
+   529→                  <SheetClose asChild key={sub.label}>
+   530→                    <button
+   531→                      type="button"
+   532→                      onClick={() => onAction(sub.action!)}
+   533→                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5 text-left"
+   534→                    >
+   535→                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+   536→                        {sub.icon}
+   537→                      </span>
+   538→                      {sub.label}
+   539→                    </button>
+   540→                  </SheetClose>
+   541→                ) : (
+   542→                  <SheetClose asChild key={sub.label}>
+   543→                    <a
+   544→                      href={sub.href}
+   545→                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] text-[#6B7A6F] transition-colors duration-150 hover:text-[#5F8768] hover:bg-[#5F8768]/5"
+   546→                    >
+   547→                      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/5">
+   548→                        {sub.icon}
+   549→                      </span>
+   550→                      {sub.label}
+   551→                    </a>
+   552→                  </SheetClose>
+   553→                )
+   554→              )}
+   555→            </motion.div>
+   556→          )}
+   557→        </AnimatePresence>
+   558→      </div>
+   559→    );
+   560→  }
+   561→
+   562→  return (
+   563→    <SheetClose asChild>
+   564→      {link.isLink ? (
+   565→        <Link
+   566→          href={link.href!}
+   567→          className="group flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+   568→        >
+   569→          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+   570→            {link.icon}
+   571→          </span>
+   572→          {link.label}
+   573→        </Link>
+   574→      ) : link.action ? (
+   575→        <button
+   576→          type="button"
+   577→          onClick={() => onAction(link.action!)}
+   578→          className="group flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+   579→        >
+   580→          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+   581→            {link.icon}
+   582→          </span>
+   583→          {link.label}
+   584→        </button>
+   585→      ) : (
+   586→        <a
+   587→          href={link.href}
+   588→          className="group flex items-center gap-3.5 rounded-lg px-3 py-3 text-[15px] font-medium text-[#2F3A33] transition-colors duration-200 hover:bg-[#5F8768]/10 hover:text-[#5F8768]"
+   589→        >
+   590→          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-[#5F8768]/10 text-[#5F8768] group-hover:bg-[#5F8768] group-hover:text-white transition-colors duration-200">
+   591→            {link.icon}
+   592→          </span>
+   593→          {link.label}
+   594→        </a>
+   595→      )}
+   596→    </SheetClose>
+   597→  );
+   598→}
+   599→
+   600→/* ------------------------------------------------------------------ */
+   601→/*  Navigation Component                                                */
+   602→/* ------------------------------------------------------------------ */
+   603→
+   604→export default function Navigation() {
+   605→  const [isScrolled, setIsScrolled] = useState(() => {
+   606→    if (typeof window !== 'undefined') {
+   607→      return window.scrollY > SCROLL_THRESHOLD;
+   608→    }
+   609→    return false;
+   610→  });
+   611→  const [mobileOpen, setMobileOpen] = useState(false);
+   612→  const [modalAction, setModalAction] = useState<string | null>(null);
+   613→  const [adminAuth, setAdminAuth] = useState(false);
+   614→  const [adminModalOpen, setAdminModalOpen] = useState(false);
+   615→  const [pendingAdminHref, setPendingAdminHref] = useState<string | null>(null);
+   616→  const [adminUsername, setAdminUsername] = useState('');
+   617→  const [adminPassword, setAdminPassword] = useState('');
+   618→  const [adminError, setAdminError] = useState('');
+   619→
+   620→  useEffect(() => {
+   621→    setAdminAuth(sessionStorage.getItem('dc_admin_auth') === '1');
+   622→  }, []);
+   623→
+   624→  const handleAdminClick = useCallback((href: string) => {
+   625→    if (adminAuth) {
+   626→      return; // already authenticated, link will navigate normally
+   627→    }
+   628→    setPendingAdminHref(href);
+   629→    setAdminUsername('');
+   630→    setAdminPassword('');
+   631→    setAdminError('');
+   632→    setAdminModalOpen(true);
+   633→  }, [adminAuth]);
+   634→
+   635→  const handleAdminLogin = useCallback((e: React.FormEvent) => {
+   636→    e.preventDefault();
+   637→    if (adminUsername === ADMIN_CREDS.username && adminPassword === ADMIN_CREDS.password) {
+   638→      sessionStorage.setItem('dc_admin_auth', '1');
+   639→      setAdminAuth(true);
+   640→      setAdminModalOpen(false);
+   641→      if (pendingAdminHref) {
+   642→        window.location.href = pendingAdminHref;
+   643→      }
+   644→    } else {
+   645→      setAdminError('Invalid credentials');
+   646→      setAdminPassword('');
+   647→    }
+   648→  }, [adminUsername, adminPassword, pendingAdminHref]);
+   649→
+   650→  const handleAction = useCallback((action: string) => {
+   651→    setModalAction(action);
+   652→  }, []);
+   653→
+   654→  const handleScroll = useCallback(() => {
+   655→    setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
+   656→  }, []);
+   657→
+   658→  useEffect(() => {
+   659→    window.addEventListener('scroll', handleScroll, { passive: true });
+   660→    return () => window.removeEventListener('scroll', handleScroll);
+   661→  }, [handleScroll]);
+   662→
+   663→  const textColor = isScrolled ? 'text-white' : 'text-[#2F3A33]';
+   664→
+   665→  return (
+   666→    <>
+   667→      <header
+   668→        className={cn(
+   669→          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+   670→          isScrolled
+   671→            ? 'bg-[#5F8768] shadow-lg shadow-[#5F8768]/15'
+   672→            : 'bg-white/60 backdrop-blur-xl border-b border-[#D8D5CC]/50'
+   673→        )}
+   674→      >
+   675→        <nav
+   676→          className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between px-5 lg:px-10"
+   677→          aria-label="Main navigation"
+   678→        >
+   679→          {/* ---- Logo ---- */}
+   680→          <a
+   681→            href="#home"
+   682→            className="flex items-center gap-2.5 transition-colors duration-300"
+   683→          >
+   684→            <img
+   685→              src="/logo.jpg"
+   686→              alt="Dwell Chronicles"
+   687→              className="h-10 w-auto object-contain rounded-lg"
+   688→            />
+   689→          </a>
+   690→
+   691→          {/* ---- Desktop Links ---- */}
+   692→          <ul className="hidden xl:flex items-center gap-1">
+   693→            {NAV_LINKS.map((link) =>
+   694→              link.label === 'Admin' && link.children ? (
+   695→                <AdminDropdown
+   696→                  key={link.label}
+   697→                  isScrolled={isScrolled}
+   698→                />
+   699→              ) : link.children ? (
+   700→                <PropertiesDropdown
+   701→                  key={link.label}
+   702→                  isScrolled={isScrolled}
+   703→                  onAction={handleAction}
+   704→                />
+   705→              ) : link.isLink ? (
+   706→                <li key={link.label}>
+   707→                  <Link
+   708→                    href={link.href!}
+   709→                    className={cn(
+   710→                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+   711→                      textColor,
+   712→                      isScrolled
+   713→                        ? 'hover:bg-white/15 hover:text-white'
+   714→                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   715→                    )}
+   716→                  >
+   717→                    {link.label}
+   718→                  </Link>
+   719→                </li>
+   720→              ) : link.action ? (
+   721→                <li key={link.label}>
+   722→                  <button
+   723→                    onClick={() => handleAction(link.action!)}
+   724→                    className={cn(
+   725→                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+   726→                      textColor,
+   727→                      isScrolled
+   728→                        ? 'hover:bg-white/15 hover:text-white'
+   729→                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   730→                    )}
+   731→                  >
+   732→                    {link.label}
+   733→                  </button>
+   734→                </li>
+   735→              ) : (
+   736→                <li key={link.label}>
+   737→                  <a
+   738→                    href={link.href}
+   739→                    className={cn(
+   740→                      'inline-flex items-center px-3 py-2 text-[13.5px] font-medium tracking-wide rounded-md transition-colors duration-200',
+   741→                      textColor,
+   742→                      isScrolled
+   743→                        ? 'hover:bg-white/15 hover:text-white'
+   744→                        : 'hover:bg-[#5F8768]/10 hover:text-[#5F8768]'
+   745→                    )}
+   746→                  >
+   747→                    {link.label}
+   748→                  </a>
+   749→                </li>
+   750→              )
+   751→            )}
+   752→          </ul>
+   753→
+   754→          {/* ---- Right Actions ---- */}
+   755→          <div className="flex items-center gap-3">
+   756→            <Button
+   757→              asChild
+   758→              className={cn(
+   759→                'hidden md:inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-300 shadow-sm',
+   760→                isScrolled
+   761→                  ? 'bg-white text-[#5F8768] hover:bg-white/90 hover:shadow-md'
+   762→                  : 'bg-[#5F8768] text-white hover:bg-[#5F8768]/90 hover:shadow-md'
+   763→              )}
+   764→              size="sm"
+   765→            >
+   766→              <a href="#contact">
+   767→                <Phone className="size-3.5" />
+   768→                Get in Touch
+   769→              </a>
+   770→            </Button>
+   771→
+   772→            {/* Mobile Hamburger */}
+   773→            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+   774→              <SheetTrigger asChild>
+   775→                <button
+   776→                  className={cn(
+   777→                    'inline-flex xl:hidden items-center justify-center size-10 rounded-lg transition-colors duration-200',
+   778→                    isScrolled
+   779→                      ? 'text-white hover:bg-white/15'
+   780→                      : 'text-[#2F3A33] hover:bg-[#5F8768]/10'
+   781→                  )}
+   782→                  aria-label="Open menu"
+   783→                >
+   784→                  <Menu className="size-5" />
+   785→                </button>
+   786→              </SheetTrigger>
+   787→
+   788→              <SheetContent
+   789→                side="right"
+   790→                className="w-[320px] bg-[#F8F7F3] p-0"
+   791→              >
+   792→                <div className="flex h-full flex-col">
+   793→                  <SheetHeader className="border-b border-[#D8D5CC] px-5 py-4">
+   794→                    <SheetTitle className="flex items-center gap-2.5 text-[#2F3A33]">
+   795→                      <img
+   796→                        src="/logo.jpg"
+   797→                        alt="Dwell Chronicles"
+   798→                        className="h-8 w-auto object-contain"
+   799→                      />
+   800→                    </SheetTitle>
+   801→                  </SheetHeader>
+   802→
+   803→                  <div className="flex-1 overflow-y-auto px-3 py-4">
+   804→                    <AnimatePresence mode="wait">
+   805→                      {mobileOpen && (
+   806→                        <motion.div
+   807→                          key="mobile-nav-links"
+   808→                          initial={{ opacity: 0, y: 12 }}
+   809→                          animate={{ opacity: 1, y: 0 }}
+   810→                          exit={{ opacity: 0, y: -8 }}
+   811→                          transition={{ duration: 0.25, ease: 'easeOut' }}
+   812→                          className="flex flex-col gap-0.5"
+   813→                        >
+   814→                          {NAV_LINKS.map((link, i) => (
+   815→                            <motion.div
+   816→                              key={link.label}
+   817→                              initial={{ opacity: 0, x: 20 }}
+   818→                              animate={{ opacity: 1, x: 0 }}
+   819→                              transition={{
+   820→                                duration: 0.2,
+   821→                                delay: 0.04 * i,
+   822→                                ease: 'easeOut',
+   823→                              }}
+   824→                            >
+   825→                              <MobileMenuItem
+   826→                                link={link}
+   827→                                isScrolled={isScrolled}
+   828→                                onAction={handleAction}
+   829→                                isAdmin={link.label === 'Admin'}
+   830→                                adminAuthenticated={adminAuth}
+   831→                                onAdminClick={handleAdminClick}
+   832→                              />
+   833→                            </motion.div>
+   834→                          ))}
+   835→                        </motion.div>
+   836→                      )}
+   837→                    </AnimatePresence>
+   838→                  </div>
+   839→
+   840→                  <div className="border-t border-[#D8D5CC] p-4">
+   841→                    <SheetClose asChild>
+   842→                      <Button
+   843→                        asChild
+   844→                        className="flex w-full items-center justify-center gap-2 rounded-full py-3 bg-[#5F8768] text-white text-[14px] font-semibold tracking-wide hover:bg-[#5F8768]/90 transition-colors duration-200 shadow-sm"
+   845→                      >
+   846→                        <a href="#contact">
+   847→                          <Phone className="size-4" />
+   848→                          Get in Touch
+   849→                        </a>
+   850→                      </Button>
+   851→                    </SheetClose>
+   852→                  </div>
+   853→                </div>
+   854→              </SheetContent>
+   855→            </Sheet>
+   856→          </div>
+   857→        </nav>
+   858→      </header>
+   859→      <LandRegistrationModal
+   860→        open={modalAction === 'land-registration'}
+   861→        onClose={() => setModalAction(null)}
+   862→      />
+   863→      <BuyingSellingLandsModal
+   864→        open={modalAction === 'buying-selling'}
+   865→        onClose={() => setModalAction(null)}
+   866→      />
+   867→      <AgentServicesModal
+   868→        open={modalAction === 'agent-services'}
+   869→        onClose={() => setModalAction(null)}
+   870→      />
+   871→      <PropertyManagementModal
+   872→        open={modalAction === 'property-management'}
+   873→        onClose={() => setModalAction(null)}
+   874→      />
+   875→      <BuildingConstructionModal
+   876→        open={modalAction === 'building-construction'}
+   877→        onClose={() => setModalAction(null)}
+   878→      />
+   879→      <ProjectManagementModal
+   880→        open={modalAction === 'project-management'}
+   881→        onClose={() => setModalAction(null)}
+   882→      />
+   883→      <PropertyRentalsModal
+   884→        open={modalAction === 'property-rentals'}
+   885→        onClose={() => setModalAction(null)}
+   886→      />
+   887→      <AboutModal
+   888→        open={modalAction === 'about'}
+   889→        onClose={() => setModalAction(null)}
+   890→      />
+   891→      <RentModal
+   892→        open={modalAction === 'rent'}
+   893→        onClose={() => setModalAction(null)}
+   894→      />
+   895→
+   896→      {/* ── Admin Password Dialog (Mobile) ── */}
+   897→      <AlertDialog open={adminModalOpen} onOpenChange={setAdminModalOpen}>
+   898→        <AlertDialogContent className="sm:max-w-sm">
+   899→          <AlertDialogHeader>
+   900→            <AlertDialogTitle className="flex items-center gap-2">
+   901→              <ShieldCheck className="h-5 w-5 text-[#5F8768]" />
+   902→              Admin Access
+   903→            </AlertDialogTitle>
+   904→            <AlertDialogDescription>
+   905→              Enter your credentials to access the admin panel.
+   906→            </AlertDialogDescription>
+   907→          </AlertDialogHeader>
+   908→          <form onSubmit={handleAdminLogin} className="space-y-3 py-2">
+   909→            <div>
+   910→              <Label className="text-xs">Username</Label>
+   911→              <Input
+   912→                value={adminUsername}
+   913→                onChange={(e) => { setAdminUsername(e.target.value); setAdminError(''); }}
+   914→                placeholder="Username"
+   915→                className="mt-1"
+   916→                autoFocus
+   917→              />
+   918→            </div>
+   919→            <div>
+   920→              <Label className="text-xs">Password</Label>
+   921→              <Input
+   922→                type="password"
+   923→                value={adminPassword}
+   924→                onChange={(e) => { setAdminPassword(e.target.value); setAdminError(''); }}
+   925→                placeholder="Password"
+   926→                className="mt-1"
+   927→              />
+   928→            </div>
+   929→            {adminError && (
+   930→              <p className="text-xs text-red-500">{adminError}</p>
+   931→            )}
+   932→            <div className="flex gap-2 pt-1">
+   933→              <AlertDialogCancel asChild>
+   934→                <Button type="button" variant="outline" className="flex-1">Cancel</Button>
+   935→              </AlertDialogCancel>
+   936→              <Button type="submit" className="flex-1 bg-[#5F8768] text-white hover:bg-[#5F8768]/90">
+   937→                Sign In
+   938→              </Button>
+   939→            </div>
+   940→          </form>
+   941→        </AlertDialogContent>
+   942→      </AlertDialog>
+   943→    </>
+   944→  );
+   945→}
