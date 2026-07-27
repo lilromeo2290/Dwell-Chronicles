@@ -59,71 +59,11 @@ const articles: BlogArticle[] = [
       'Reach out today via info@dwellchroniclesgh.com or on WhatsApp +233204700023, and let us turn your real estate dreams into reality!',
     ].join('\n\n'),
   },
-  {
-    title: 'Top 10 Investment Hotspots in West Africa 2026',
-    category: 'Investment',
-    readTime: '8 min read',
-    date: 'Jul 15, 2026',
-    img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80',
-    excerpt:
-      'Discover the most promising locations for property investment with the highest projected returns across the region.',
-  },
-  {
-    title: 'Sustainable Building Materials for Modern Homes',
-    category: 'Construction Tips',
-    readTime: '6 min read',
-    date: 'Jul 10, 2026',
-    img: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80',
-    excerpt:
-      'Explore eco-friendly materials that reduce costs and environmental impact without compromising quality.',
-  },
-  {
-    title: 'Property Market Forecast: What to Expect',
-    category: 'Market News',
-    readTime: '10 min read',
-    date: 'Jul 5, 2026',
-    img: 'https://images.unsplash.com/photo-1560520031-3a4dc4e9de0c?w=600&q=80',
-    excerpt:
-      'Expert analysis of property market trends, pricing forecasts, and economic factors shaping real estate.',
-  },
-  {
-    title: 'Complete Guide to Home Renovation',
-    category: 'Home Improvement',
-    readTime: '12 min read',
-    date: 'Jun 28, 2026',
-    img: 'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=600&q=80',
-    excerpt:
-      'Everything you need to know about planning, budgeting, and executing a successful home renovation.',
-  },
-  {
-    title: "First-Time Home Buyer's Essential Checklist",
-    category: 'Buying Guides',
-    readTime: '7 min read',
-    date: 'Jun 22, 2026',
-    img: 'https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=600&q=80',
-    excerpt:
-      'A comprehensive checklist to guide first-time buyers through the entire property purchase process.',
-  },
-  {
-    title: "How to Maximize Your Property's Selling Price",
-    category: 'Selling Guides',
-    readTime: '9 min read',
-    date: 'Jun 15, 2026',
-    img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80',
-    excerpt:
-      'Proven strategies and expert tips to increase your property value and attract serious buyers.',
-  },
 ];
 
 const categories = [
   'All',
   'Real Estate',
-  'Investment',
-  'Construction Tips',
-  'Market News',
-  'Home Improvement',
-  'Buying Guides',
-  'Selling Guides',
 ];
 
 const containerVariants = {
