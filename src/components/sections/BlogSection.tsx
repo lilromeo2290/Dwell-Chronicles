@@ -221,6 +221,33 @@ const articles: BlogArticle[] = [
       'If you are unsure where to start, consult with local experts or building consultants like us to guide you through the process. Whether you decide to build or buy, Ghana is ready to welcome you home!',
     ].join('\n\n'),
   },
+  {
+    title: 'Hidden Roofs: An Affordable Modern Roofing Solution for Ghanaian Homes',
+    category: 'Building Tips',
+    readTime: '4 min read',
+    date: 'Jul 27, 2026',
+    img: '/blog-hiddenroof1.jpg',
+    excerpt:
+      'The hidden roof is a contemporary roofing option combining aesthetic appeal with cost-efficiency. Learn why it is trending in Ghanaian homes.',
+    images: ['/blog-hiddenroof1.jpg', '/blog-hiddenroof2.jpg'],
+    content: [
+      'The hidden or secret roof has emerged as a contemporary roofing option in Ghana, particularly in urban and upscale residential areas. This architectural style combines aesthetic appeal with practical considerations, making it a compelling choice for modern homeowners.',
+      'Understanding Hidden Roofs',
+      'A hidden roof is characterized by a low pitch, typically below 10 degrees, concealed by short perimeter walls. This design creates a sleek, flat appearance while preserving the essential functionality of a sloped roof. Often favoured in luxury apartments and modern homes, hidden roofs offer a distinctive architectural statement.',
+      'Advantages of Hidden Roofs',
+      'Aesthetic Appeal: The minimalist design of hidden roofs aligns with contemporary architectural trends, providing a clean and modern look to homes.',
+      'Cost-Efficiency: In many cases, hidden roofs can be more economical to install compared to traditional pitched roofs, due to reduced material requirements and simpler construction.',
+      'Ease of Installation: The relatively flat surface of hidden roofs often allows for quicker and more straightforward installation compared to steeper roof designs.',
+      'Maintenance Accessibility: The flat roof surface generally provides easier access for routine inspections and maintenance.',
+      'Challenges and Considerations',
+      'Water Management: Effective water drainage is crucial for hidden roofs. A well-designed drainage system is essential to prevent water accumulation and potential damage.',
+      'Maintenance Requirements: Regular cleaning and inspections are necessary to remove debris and maintain optimal roof performance.',
+      'Lifespan: While hidden roofs can offer durability, their lifespan may be shorter compared to some traditional roofing materials. Proper maintenance and timely repairs are essential.',
+      'Conclusion',
+      'The hidden roof presents a compelling option for Ghanaian homeowners seeking a modern and visually appealing roofing solution. While offering several advantages, careful consideration of water management and maintenance is crucial for long-term performance. By understanding the benefits and challenges, homeowners can make informed decisions about incorporating hidden roofs into their building projects.',
+      'Contact Dwell Chronicles to Learn More or Expert Hiring: Call +233(0)547293193 or WhatsApp +233204700023',
+    ].join('\n\n'),
+  },
 ];
 
 const categories = [
