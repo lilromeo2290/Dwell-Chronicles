@@ -1,0 +1,481 @@
+     1→'use client';
+     2→
+     3→import { useState } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  Calendar,
+     7→  Clock,
+     8→  Share2,
+     9→  Bookmark,
+    10→  ArrowRight,
+    11→  X,
+    12→  MapPin,
+    13→  ChevronLeft,
+    14→  ChevronRight,
+    15→} from 'lucide-react';
+    16→
+    17→interface BlogArticle {
+    18→  title: string;
+    19→  category: string;
+    20→  readTime: string;
+    21→  date: string;
+    22→  img: string;
+    23→  excerpt: string;
+    24→  content?: string;
+    25→  images?: string[];
+    26→}
+    27→
+    28→const articles: BlogArticle[] = [
+    29→  {
+    30→    title: 'Why Ho, Volta Region is Ghana\'s Next Big Real Estate Hotspot',
+    31→    category: 'Real Estate',
+    32→    readTime: '7 min read',
+    33→    date: 'Jul 27, 2026',
+    34→    img: '/blog-ho1.jpg',
+    35→    excerpt:
+    36→      'Discover why Ho is fast becoming Ghana\'s hidden gem for real estate investment, from affordable land to booming commercial opportunities.',
+    37→    images: ['/blog-ho1.jpg', '/blog-ho2.jpg'],
+    38→    content: [
+    39→      'Imagine this: You are driving through a serene town nestled between lush green hills and stunning landscapes, where the air is fresh, the roads are less crowded, and opportunities are ripe. This is not a far-off dream. This is Ho, the capital of the Volta Region, and it is fast becoming Ghana\'s hidden gem for real estate investment. Ho could be your ticket to growth and long-term value if you are a first-time home builder, investor or someone from the diaspora looking for a place to invest or settle.',
+    40→      'Why Ho? Why Now?',
+    41→      'For many years, the spotlight has been on Accra, Kumasi, and Takoradi as Ghana\'s real estate hubs. But here is the thing: Now a metropolis, Ho is quietly transforming. As more people realize the untapped potential of this charming city, it is becoming a hotspot for both residential and commercial real estate.',
+    42→      'Ho has evolved into a metropolitan city with everything from quality education to healthcare and leisure spots. The local economy is thriving with new businesses, shopping centres, restaurants, and even an airport which is to be transformed into a pilot training school. With a mix of modern amenities and natural beauty, it is no wonder people from the diaspora are eyeing Ho for real estate opportunities.',
+    43→      'A Buyer\'s Market: Affordability Meets Opportunity',
+    44→      'Compared to Accra, where property prices are skyrocketing, Ho offers a more affordable alternative without compromising on growth potential. Whether you are looking to build a first home or set up a commercial property, the cost of land and development is significantly lower. For first-time home builders, this is a golden opportunity. You can stretch your budget further in Ho, allowing you to invest in higher-quality materials or build a larger home without breaking the bank.',
+    45→      'Moreover, Ho has a relatively lower cost of living compared to Accra making it attractive to people looking for a peaceful, affordable place to live while still maintaining easy access to major urban areas.',
+    46→      'Why African Americans and Expats Should Choose Ho Over Accra',
+    47→      'For African Americans and expats considering relocating to Ghana, the question often revolves around where to invest, whether in Accra or elsewhere. While Accra\'s appeal as the nation\'s capital is undeniable, Ho presents a compelling alternative, particularly for those seeking a more easy-going and authentic lifestyle.',
+    48→      'In Ho, you are not just buying property; you are investing in a quieter, natural and more culturally immersive experience. The town offers a slower pace of life that many expats find appealing. Unlike Accra, where the hustle and bustle can sometimes feel overwhelming, Ho gives you the space to breathe, reflect, and truly integrate into the Ghanaian way of life. Additionally, Ho\'s emerging infrastructure, combined with its relatively untapped market, means you are getting in early, potentially reaping greater returns as the area develops.',
+    49→      'The town is also more community-focused, allowing you to connect with locals and be part of a tight-knit environment. This sense of community makes it easier for expats to adjust and feel at home, which is something Accra cannot always offer with its fast-paced urban culture.',
+    50→      'Growing Appeal for the Diaspora',
+    51→      'For Ghanaians in the diaspora, there is always that dream of returning home, investing in property, and reconnecting with your roots. Ho offers a unique blend of tranquillity, culture, and development, making it an ideal place to consider. The influx of people returning home from abroad has led to a growing demand for modern homes and apartments, creating a thriving real estate market that is still in its early stages of growth.',
+    52→      'More importantly, the community in Ho is welcoming and tightly knit, giving you a real sense of belonging. It is the perfect environment to raise a family, build a retirement home, or set up a business that taps into both local and international markets.',
+    53→      'Ho is Booming: Commercial and Residential Growth',
+    54→      'What makes Ho even more attractive is the balance between residential and commercial investment opportunities. From cozy three-bedroom homes to luxury apartments, the options are diverse for people at all stages of life. The presence of universities, like the Ho Technical University, University of Health and Allied Sciences, ensures a steady demand for rental properties from students and staff.',
+    55→      'On the commercial side, Ho is experiencing a boom in hospitality, retail, and services, making it a prime location for businesses. Imagine owning a piece of prime commercial real estate in a town where the demand is growing, but competition is still relatively low compared to Accra.',
+    56→      'The Future is Bright',
+    57→      'With ongoing infrastructure projects, such as road developments and the construction of more modern amenities, the value of properties in Ho is set to increase. Real estate in Ho is more than just an investment for today, it is a long-term growth opportunity that could yield significant returns in the coming years.',
+    58→      'Ready to Invest in Ho?',
+    59→      'Whether you are a first-time home builder or a seasoned real estate investor in the diaspora or home, now is the perfect time to explore Ho\'s growing real estate market. You do not have to navigate this journey alone. Let us help you find the perfect property, guide you through the legal processes, and ensure you make the best investment decisions.',
+    60→      'Contact Dwell Chronicles for expert consultation and support in finding your dream property in Ho. Our team understands the market dynamics and can offer you the personalized advice you need to make your investment a success.',
+    61→      'Reach out today via info@dwellchroniclesgh.com or on WhatsApp +233204700023, and let us turn your real estate dreams into reality!',
+    62→    ].join('\n\n'),
+    63→  },
+    64→  {
+    65→    title: 'Why You Need a Gutter System in Your Building Maintenance',
+    66→    category: 'Building Tips',
+    67→    readTime: '5 min read',
+    68→    date: 'Jul 27, 2026',
+    69→    img: '/blog-gutter1.jpg',
+    70→    excerpt:
+    71→      'Gutters protect your building from water damage, erosion, and pest infestation. Learn why a gutter system is essential for property maintenance in Ghana.',
+    72→    images: ['/blog-gutter1.jpg', '/blog-gutter2.jpg'],
+    73→    content: [
+    74→      'When it comes to maintaining a building\'s structural integrity, one often overlooked yet crucial component is the gutter system. Gutters are essential for directing rainwater and debris away from a building\'s foundation, which helps prevent various forms of damage. In this blog post, we will explore the importance of gutter systems, the potential problems caused by the absence of gutters, and tips for maintaining an effective gutter system.',
+    75→      'WHAT IS A GUTTER SYSTEM?',
+    76→      'A gutter system is installed along the edge of a roof, typically at the eaves. It collects rainwater and channels it away from the building. This simple mechanism plays a significant role in protecting your property from water-related damage, especially in Ghana\'s rainy seasons.',
+    77→      'THE PROBLEMS CAUSED BY MISSING GUTTER SYSTEMS',
+    78→      'The absence of a gutter system can lead to numerous issues, including:',
+    79→      '1. Water Damage: Without gutters, rainwater can seep into the walls and foundation, causing damage to walls, ceilings, and insulation. Over time, this can lead to mold growth and structural deterioration.',
+    80→      '2. Erosion: Water accumulating around the foundation can erode the soil, causing the foundation to settle or shift. This can result in structural issues that compromise the building\'s stability.',
+    81→      '3. Pest Infestation: Stagnant water around the foundation is an attractive breeding ground for pests such as mosquitoes, rodents, snakes, and insects. These pests can infiltrate the building, causing further issues.',
+    82→      '4. Foundation Problems: Accumulated water around the foundation can cause cracks and shifts, leading to significant structural problems that can be expensive to repair or impossible to repair.',
+    83→      '5. Aesthetic Damage: When water splashes back onto the building, it can lead to ugly stains and peeling paint, taking away from the beauty of the building\'s exterior. This not only diminishes the property\'s beauty but also may require frequent repainting.',
+    84→      'TIPS FOR GUTTER MAINTENANCE',
+    85→      'To ensure your gutter system functions effectively, regular maintenance is essential. Here are some tips for keeping your gutters in top condition:',
+    86→      '- Regular Inspections: Check your gutters at least twice a year, especially before and after the rainy season, to ensure they are clear of debris, have no cracks and functioning correctly.',
+    87→      '- Clean Debris: Remove leaves, twigs, grass and other debris that can block the flow of water in your gutters.',
+    88→      '- Check for Leaks and Damage: Inspect for any leaks, holes, or damage to the gutters and downspouts, and repair them promptly.',
+    89→      '- Ensure Proper Slope: Make sure your gutters are sloped correctly to facilitate water flow towards the downspouts. This depends on the artisan for the job, get a qualified and experienced artisan.',
+    90→      '- Install Gutter Guards: Consider installing gutter guards to prevent debris from accumulating in the gutters.',
+    91→      'In conclusion, a well-installed and maintained gutter system is vital for protecting your building from water-related damage. By taking the time to inspect and maintain your gutters, you can save yourself from costly repairs and ensure your property remains in excellent condition.',
+    92→      'By incorporating a reliable gutter system, you safeguard your property against the damaging effects of water and protect your investment for years to come. Remember, prevention is always better than cure when it comes to building maintenance.',
+    93→      'Contact Dwell Chronicles to Learn More or Expert Hiring: Call +233(0)547293193 or WhatsApp +233204700023',
+    94→    ].join('\n\n'),
+    95→  },
+    96→  {
+    97→    title: 'The Importance of a Damp Proof Course (DPC) in Building Construction',
+    98→    category: 'Building Tips',
+    99→    readTime: '6 min read',
+   100→    date: 'Jul 27, 2026',
+   101→    img: '/blog-dpc1.jpg',
+   102→    excerpt:
+   103→      'Are you experiencing damp issues in your home? Learn how a Damp Proof Course prevents rising damp, mold, and structural damage during construction.',
+   104→    images: ['/blog-dpc1.jpg', '/blog-dpc2.jpg'],
+   105→    content: [
+   106→      'Are you experiencing damp issues in your home? You might be dealing with a common problem known as Rising Damp. This issue often arises due to the absence of a Damp Proof Membrane (DPM) during construction, a cost-effective solution. However, the main culprit is often ignorance about its importance. Addressing the problem post-construction can cost millions, making it crucial to understand and implement this preventative measure during the building phase.',
+   107→      'What is a Damp Proof Course (DPC)?',
+   108→      'A Damp Proof Course is a horizontal barrier installed within a building\'s structure to prevent moisture from rising from the ground into the walls and floors. This simple yet essential component helps maintain the building\'s integrity and prevent many problems associated with dampness.',
+   109→      'Problems Caused by the Absence of a DPC',
+   110→      'Failing to install or maintain a DPC can lead to numerous issues, including:',
+   111→      '1. Mold and Mildew Growth: Moisture creates an ideal environment for mold and mildew, leading to health problems, unpleasant odours, and ugly stains.',
+   112→      '2. Water Damage: Without a DPC, water can penetrate walls and floors, damaging insulation, plaster, and other building materials. This often results in costly repairs and potential structural issues.',
+   113→      '3. Rising Damp: This phenomenon occurs when water rises from the ground, causing damage to walls and floors, which can compromise the building\'s structural integrity.',
+   114→      '4. Condensation: Excessive moisture buildup on walls and windows can lead to condensation, worsening mold and mildew growth.',
+   115→      '5. Timber Decay: Moisture can penetrate the building\'s timber frame, leading to rot and decay, resulting in structural failures.',
+   116→      '6. Health Risks: Dampness and mold can worsen respiratory issues, such as asthma, and trigger allergic reactions.',
+   117→      '7. Reduced Property Value: Properties with damp or water damage can be challenging to sell or rent, potentially lowering their value.',
+   118→      '8. Crevices and Cracks: Without a DPC, moisture can cause gaps and cracks in walls and floors, providing entry points for pests and rodents.',
+   119→      '9. Structural Issues: In severe cases, neglecting a DPC can lead to significant structural problems, such as bowed walls or ceilings, compromising the building\'s safety.',
+   120→      'The Solution: Proper Installation and Maintenance of a DPC',
+   121→      'To avoid these problems, ensuring your building has a properly installed and maintained DPC is crucial. Here are some steps to consider:',
+   122→      '- Engage Professionals: Hire experienced builders or contractors who understand the importance of installing a DPC during construction.',
+   123→      '- Use Quality Materials: Invest in high-quality materials for your DPC to ensure long-lasting protection against moisture.',
+   124→      '- Regular Inspections: Conduct regular inspections of your DPC and address any signs of damage or wear immediately.',
+   125→      '- Educate Yourself: Understanding the role of a DPC in building construction can help you make informed decisions and prevent costly issues in the future.',
+   126→      'In conclusion, investing in a Damp Proof Course is a small price to pay for peace of mind and long-term protection against rising dampness and related issues. Don\'t let ignorance cost you more in the future. Prioritize the installation and maintenance of a DPC in your building projects.',
+   127→      'Contact Dwell Chronicles to Learn More or Expert Hiring: Call +233(0)547293193 or WhatsApp +233204700023',
+   128→    ].join('\n\n'),
+   129→  },
+   130→];
+   131→
+   132→const categories = [
+   133→  'All',
+   134→  'Real Estate',
+   135→  'Building Tips',
+   136→];
+   137→
+   138→const containerVariants = {
+   139→  hidden: { opacity: 0 },
+   140→  visible: {
+   141→    opacity: 1,
+   142→    transition: {
+   143→      staggerChildren: 0.1,
+   144→    },
+   145→  },
+   146→};
+   147→
+   148→const cardVariants = {
+   149→  hidden: { opacity: 0, y: 40 },
+   150→  visible: {
+   151→    opacity: 1,
+   152→    y: 0,
+   153→    transition: {
+   154→      duration: 0.5,
+   155→      ease: [0.4, 0, 0.2, 1],
+   156→    },
+   157→  },
+   158→};
+   159→
+   160→function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => void }) {
+   161→  const [slideIndex, setSlideIndex] = useState(0);
+   162→  const images = article.images || (article.img ? [article.img] : []);
+   163→  const totalSlides = images.length;
+   164→  const nextSlide = () => { setSlideIndex((prev) => (prev + 1) % totalSlides); };
+   165→  const prevSlide = () => { setSlideIndex((prev) => (prev - 1 + totalSlides) % totalSlides); };
+   166→
+   167→  const paragraphs = (article.content || '').split('\n\n').filter((p) => p.trim().length > 0);
+   168→  const isHeading = (p: string) => {
+   169→    const trimmed = p.trim();
+   170→    return trimmed.length < 80 && !trimmed.includes('.') && !trimmed.includes(',');
+   171→  };
+   172→
+   173→  return (
+   174→    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-800 p-4 pt-10 pb-10"
+   175→      onClick={onClose}
+   176→    >
+   177→      <motion.div
+   178→        initial={{ opacity: 0, y: 30, scale: 0.97 }}
+   179→        animate={{ opacity: 1, y: 0, scale: 1 }}
+   180→        exit={{ opacity: 0, y: 20, scale: 0.97 }}
+   181→        transition={{ duration: 0.3 }}
+   182→        className="relative w-full max-w-3xl bg-white rounded-2xl overflow-hidden shadow-2xl"
+   183→        onClick={(e) => e.stopPropagation()}
+   184→      >
+   185→        {/* Close button */}
+   186→        <button
+   187→          onClick={onClose}
+   188→          className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
+   189→          aria-label="Close"
+   190→        >
+   191→          <X className="w-5 h-5 text-[#2F3A33]" />
+   192→        </button>
+   193→
+   194→        {/* Image Slider */}
+   195→        {totalSlides > 0 && (
+   196→          <div className="relative h-64 md:h-80 overflow-hidden">
+   197→            <AnimatePresence mode="wait">
+   198→              <motion.img
+   199→                key={slideIndex}
+   200→                src={images[slideIndex]}
+   201→                alt={article.title}
+   202→                className="absolute inset-0 w-full h-full object-cover"
+   203→                initial={{ opacity: 0 }}
+   204→                animate={{ opacity: 1 }}
+   205→                exit={{ opacity: 0 }}
+   206→                transition={{ duration: 0.3 }}
+   207→              />
+   208→            </AnimatePresence>
+   209→            <div className="absolute inset-0 bg-gradient-to-t from-gray-700 to-transparent" />
+   210→            <div className="absolute bottom-4 left-6 right-16">
+   211→              <span className="inline-block bg-[#5F8768] text-white text-xs font-medium px-3 py-1 rounded-full mb-2">
+   212→                {article.category}
+   213→              </span>
+   214→              <h2 className="text-xl md:text-2xl font-bold text-white leading-snug">
+   215→                {article.title}
+   216→              </h2>
+   217→            </div>
+   218→            {totalSlides > 1 && (
+   219→              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-3 pointer-events-none">
+   220→                <button
+   221→                  onClick={prevSlide}
+   222→                  className="pointer-events-auto bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-colors cursor-pointer"
+   223→                  aria-label="Previous image"
+   224→                >
+   225→                  <ChevronLeft className="w-4 h-4 text-[#2F3A33]" />
+   226→                </button>
+   227→                <button
+   228→                  onClick={nextSlide}
+   229→                  className="pointer-events-auto bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-colors cursor-pointer"
+   230→                  aria-label="Next image"
+   231→                >
+   232→                  <ChevronRight className="w-4 h-4 text-[#2F3A33]" />
+   233→                </button>
+   234→              </div>
+   235→            )}
+   236→            {totalSlides > 1 && (
+   237→              <div className="absolute bottom-4 right-6 flex gap-1.5">
+   238→                {images.map((_, i) => (
+   239→                  <button
+   240→                    key={i}
+   241→                    onClick={() => setSlideIndex(i)}
+   242→                    className={slideIndex === i ? 'w-6 h-2 rounded-full bg-white' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-200 transition-all cursor-pointer'}
+   243→                    aria-label={'Go to image ' + (i + 1)}
+   244→                  />
+   245→                ))}
+   246→              </div>
+   247→            )}
+   248→          </div>
+   249→        )}
+   250→
+   251→        {/* Article Body */}
+   252→        <div className="p-6 md:p-8">
+   253→          {/* Meta */}
+   254→          <div className="flex items-center gap-4 text-sm text-[#6B7A6F] mb-6 pb-4 border-b border-[#E5E3DC]">
+   255→            <span className="flex items-center gap-1">
+   256→              <Calendar className="w-4 h-4" />
+   257→              {article.date}
+   258→            </span>
+   259→            <span className="flex items-center gap-1">
+   260→              <Clock className="w-4 h-4" />
+   261→              {article.readTime}
+   262→            </span>
+   263→            <span className="flex items-center gap-1">
+   264→              <MapPin className="w-4 h-4" />
+   265→              Ho, Volta Region
+   266→            </span>
+   267→          </div>
+   268→
+   269→          {/* Content paragraphs */}
+   270→          <div className="prose prose-lg max-w-none">
+   271→            {paragraphs.map((p, i) => {
+   272→              if (isHeading(p)) {
+   273→                return (
+   274→                  <h3 key={i} className="text-xl font-bold text-[#2F3A33] mt-8 mb-3">
+   275→                    {p.trim()}
+   276→                  </h3>
+   277→                );
+   278→              }
+   279→              return (
+   280→                <p key={i} className="text-[#2F3A33] leading-relaxed mb-4 text-[15px]">
+   281→                  {p.trim()}
+   282→                </p>
+   283→              );
+   284→            })}
+   285→          </div>
+   286→
+   287→
+   288→
+   289→          {/* CTA Footer */}
+   290→          <div className="mt-8 p-6 rounded-xl bg-[#F8F7F3] border border-[#E5E3DC]">
+   291→            <p className="text-sm font-semibold text-[#2F3A33] mb-2">Ready to invest in Ho?</p>
+   292→            <p className="text-sm text-[#6B7A6F] mb-3">
+   293→              Contact Dwell Chronicles for expert consultation and support in finding your dream property in Ho.
+   294→            </p>
+   295→            <a
+   296→              href="https://wa.me/233204700023"
+   297→              target="_blank"
+   298→              rel="noopener noreferrer"
+   299→              className="inline-flex items-center gap-2 bg-[#5F8768] text-white text-sm font-medium rounded-xl px-5 py-2.5 hover:bg-[#4A6B52] transition-colors"
+   300→            >
+   301→              <Share2 className="w-4 h-4" />
+   302→              Chat on WhatsApp
+   303→            </a>
+   304→          </div>
+   305→        </div>
+   306→      </motion.div>
+   307→    </div>
+   308→  );
+   309→}
+   310→
+   311→const badgeClass = (active: boolean) =>
+   312→  active
+   313→    ? 'px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer bg-[#5F8768] text-white'
+   314→    : 'px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer bg-[#F8F7F3] border border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768]';
+   315→
+   316→export default function BlogSection() {
+   317→  const [activeFilter, setActiveFilter] = useState('All');
+   318→  const [bookmarked, setBookmarked] = useState<Set<number>>(new Set());
+   319→  const [selectedArticle, setSelectedArticle] = useState<BlogArticle | null>(null);
+   320→
+   321→  const toggleBookmark = (index: number) => {
+   322→    setBookmarked((prev) => {
+   323→      const next = new Set(prev);
+   324→      if (next.has(index)) {
+   325→        next.delete(index);
+   326→      } else {
+   327→        next.add(index);
+   328→      }
+   329→      return next;
+   330→    });
+   331→  };
+   332→
+   333→  const filteredArticles = articles.filter((article) => {
+   334→    if (activeFilter === 'All') return true;
+   335→    return article.category === activeFilter;
+   336→  });
+   337→
+   338→  return (
+   339→    <section id="blog" className="bg-white py-20 md:py-28 px-4">
+   340→      <div className="max-w-7xl mx-auto">
+   341→        {/* Section Header */}
+   342→        <div className="text-center mb-10">
+   343→          <h2 className="text-3xl md:text-4xl font-bold text-[#2F3A33]">
+   344→            Insights &amp; Articles
+   345→          </h2>
+   346→          <p className="mt-3 text-[#6B7A6F] max-w-2xl mx-auto">
+   347→            Stay informed with the latest in real estate Ghana, property investment, and building construction insights
+   348→          </p>
+   349→        </div>
+   350→
+   351→        {/* Category Tabs */}
+   352→        <div className="flex flex-wrap gap-3 justify-center mb-10">
+   353→          {categories.map((category) => (
+   354→            <button
+   355→              key={category}
+   356→              onClick={() => setActiveFilter(category)}
+   357→              className={badgeClass(activeFilter === category)}
+   358→            >
+   359→              {category}
+   360→            </button>
+   361→          ))}
+   362→        </div>
+   363→
+   364→        {/* Blog Cards Grid */}
+   365→        <motion.div
+   366→          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+   367→          variants={containerVariants}
+   368→          initial="hidden"
+   369→          whileInView="visible"
+   370→          viewport={{ once: true, margin: '-50px' }}
+   371→          key={activeFilter}
+   372→        >
+   373→          {filteredArticles.map((article, index) => (
+   374→            <motion.div
+   375→              key={activeFilter + '-' + index}
+   376→              variants={cardVariants}
+   377→              className="property-card rounded-2xl overflow-hidden bg-[#F8F7F3]"
+   378→            >
+   379→              {/* Image */}
+   380→              <div className="h-48 overflow-hidden">
+   381→                <img
+   382→                  src={article.img}
+   383→                  alt={article.title}
+   384→                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+   385→                  loading="lazy"
+   386→                />
+   387→              </div>
+   388→
+   389→              {/* Content */}
+   390→              <div className="p-6">
+   391→                {/* Category Badge */}
+   392→                <span className="inline-block bg-green-100 text-[#5F8768] text-xs font-medium px-3 py-1 rounded-full">
+   393→                  {article.category}
+   394→                </span>
+   395→
+   396→                {/* Title */}
+   397→                <h3 className="text-lg font-semibold text-[#2F3A33] mt-3 mb-2 line-clamp-2">
+   398→                  {article.title}
+   399→                </h3>
+   400→
+   401→                {/* Excerpt */}
+   402→                <p className="text-sm text-[#6B7A6F] mb-4 line-clamp-2">
+   403→                  {article.excerpt}
+   404→                </p>
+   405→
+   406→                {/* Footer */}
+   407→                <div className="flex justify-between items-center text-xs text-[#6B7A6F]">
+   408→                  <div className="flex items-center gap-4">
+   409→                    <span className="flex items-center gap-1">
+   410→                      <Calendar className="w-3.5 h-3.5" />
+   411→                      {article.date}
+   412→                    </span>
+   413→                    <span className="flex items-center gap-1">
+   414→                      <Clock className="w-3.5 h-3.5" />
+   415→                      {article.readTime}
+   416→                    </span>
+   417→                  </div>
+   418→                  <div className="flex items-center gap-2">
+   419→                    <button
+   420→                      className="p-1.5 rounded-lg hover:bg-white transition-colors cursor-pointer"
+   421→                      aria-label="Share article"
+   422→                    >
+   423→                      <Share2 className="w-4 h-4" />
+   424→                    </button>
+   425→                    <button
+   426→                      onClick={() => toggleBookmark(index)}
+   427→                      className="p-1.5 rounded-lg hover:bg-white transition-colors cursor-pointer"
+   428→                      aria-label="Bookmark article"
+   429→                    >
+   430→                      <Bookmark
+   431→                        className={bookmarked.has(index) ? 'w-4 h-4 fill-[#5F8768] text-[#5F8768]' : 'w-4 h-4'}
+   432→                      />
+   433→                    </button>
+   434→                  </div>
+   435→                </div>
+   436→
+   437→                {/* Read Article Link */}
+   438→                {article.content ? (
+   439→                  <button
+   440→                    onClick={() => setSelectedArticle(article)}
+   441→                    className="inline-flex items-center gap-1 text-[#5F8768] font-medium text-sm mt-3 hover:gap-2 transition-all cursor-pointer"
+   442→                  >
+   443→                    Read Article
+   444→                    <ArrowRight className="w-4 h-4" />
+   445→                  </button>
+   446→                ) : (
+   447→                  <a
+   448→                    href="#"
+   449→                    className="inline-flex items-center gap-1 text-[#5F8768] font-medium text-sm mt-3 hover:gap-2 transition-all"
+   450→                  >
+   451→                    Coming Soon
+   452→                    <ArrowRight className="w-4 h-4" />
+   453→                  </a>
+   454→                )}
+   455→              </div>
+   456→            </motion.div>
+   457→          ))}
+   458→        </motion.div>
+   459→
+   460→        {/* View All Button */}
+   461→        <div className="text-center mt-12">
+   462→          <button className="border-2 border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white rounded-xl px-8 py-3 font-medium transition-all cursor-pointer flex items-center gap-2 mx-auto">
+   463→            View All Articles
+   464→            <ArrowRight className="w-4 h-4" />
+   465→          </button>
+   466→        </div>
+   467→      </div>
+   468→
+   469→      {/* Blog Modal */}
+   470→      <AnimatePresence>
+   471→        {selectedArticle && (
+   472→          <BlogModal
+   473→            article={selectedArticle}
+   474→            onClose={() => setSelectedArticle(null)}
+   475→          />
+   476→        )}
+   477→      </AnimatePresence>
+   478→    </section>
+   479→  );
+   480→}
+   481→
