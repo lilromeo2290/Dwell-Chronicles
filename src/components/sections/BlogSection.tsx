@@ -10,6 +10,8 @@ import {
   ArrowRight,
   X,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 interface BlogArticle {
@@ -156,6 +158,12 @@ const cardVariants = {
 };
 
 function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => void }) {
+  const [slideIndex, setSlideIndex] = useState(0);
+  const images = article.images || (article.img ? [article.img] : []);
+  const totalSlides = images.length;
+  const nextSlide = () => { setSlideIndex((prev) => (prev + 1) % totalSlides); };
+  const prevSlide = () => { setSlideIndex((prev) => (prev - 1 + totalSlides) % totalSlides); };
+
   const paragraphs = (article.content || '').split('\n\n').filter((p) => p.trim().length > 0);
   const isHeading = (p: string) => {
     const trimmed = p.trim();
@@ -183,14 +191,21 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
           <X className="w-5 h-5 text-[#2F3A33]" />
         </button>
 
-        {/* Hero Image */}
-        {article.images && article.images.length > 0 && (
-          <div className="relative h-64 md:h-80">
-            <img
-              src={article.images[0]}
-              alt={article.title}
-              className="w-full h-full object-cover"
-            />
+        {/* Image Slider */}
+        {totalSlides > 0 && (
+          <div className="relative h-64 md:h-80 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={slideIndex}
+                src={images[slideIndex]}
+                alt={article.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-gray-700 to-transparent" />
             <div className="absolute bottom-4 left-6 right-16">
               <span className="inline-block bg-[#5F8768] text-white text-xs font-medium px-3 py-1 rounded-full mb-2">
@@ -200,6 +215,36 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
                 {article.title}
               </h2>
             </div>
+            {totalSlides > 1 && (
+              <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-3 pointer-events-none">
+                <button
+                  onClick={prevSlide}
+                  className="pointer-events-auto bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-colors cursor-pointer"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-4 h-4 text-[#2F3A33]" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="pointer-events-auto bg-white rounded-full p-1.5 shadow-md hover:bg-gray-100 transition-colors cursor-pointer"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-4 h-4 text-[#2F3A33]" />
+                </button>
+              </div>
+            )}
+            {totalSlides > 1 && (
+              <div className="absolute bottom-4 right-6 flex gap-1.5">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSlideIndex(i)}
+                    className={slideIndex === i ? 'w-6 h-2 rounded-full bg-white' : 'w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-200 transition-all cursor-pointer'}
+                    aria-label={'Go to image ' + (i + 1)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -239,17 +284,7 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
             })}
           </div>
 
-          {/* Second image */}
-          {article.images && article.images.length > 1 && (
-            <div className="mt-8 rounded-xl overflow-hidden">
-              <img
-                src={article.images[1]}
-                alt="Ho Volta Region landscape"
-                className="w-full h-56 md:h-72 object-cover"
-              />
-              <p className="text-xs text-[#6B7A6F] mt-2 italic">Scenic views of Ho, Volta Region</p>
-            </div>
-          )}
+
 
           {/* CTA Footer */}
           <div className="mt-8 p-6 rounded-xl bg-[#F8F7F3] border border-[#E5E3DC]">
