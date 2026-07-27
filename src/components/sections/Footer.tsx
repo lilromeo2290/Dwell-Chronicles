@@ -209,12 +209,12 @@ export default function Footer() {
           <p className="text-sm text-white/50">
             Powered and Hosted by{' '}
             <a
-              href="https://clipe233eng.net/"
+              href="https://clipeconsult.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 hover:text-white font-medium transition-colors duration-200"
             >
-              CLIPE233 ENGINEERS
+              CLIPE CONSULT
             </a>
           </p>
         </div>
