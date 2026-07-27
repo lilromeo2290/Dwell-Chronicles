@@ -33,51 +33,31 @@ const articles: BlogArticle[] = [
     excerpt:
       'Discover why Ho is fast becoming Ghana\'s hidden gem for real estate investment, from affordable land to booming commercial opportunities.',
     images: ['/blog-ho1.jpg', '/blog-ho2.jpg'],
-    content: 'Imagine this: You are driving through a serene town nestled between lush green hills and stunning landscapes, where the air is fresh, the roads are less crowded, and opportunities are ripe. This is not a far-off dream. This is Ho, the capital of the Volta Region, and it is fast becoming Ghana\'s hidden gem for real estate investment. Ho could be your ticket to growth and long-term value if you are a first-time home builder, investor or someone from the diaspora looking for a place to invest or settle.
-
-\nWhy Ho? Why Now?
-
-For many years, the spotlight has been on Accra, Kumasi, and Takoradi as Ghana\'s real estate hubs. But here is the thing: Now a metropolis, Ho is quietly transforming. As more people realize the untapped potential of this charming city, it is becoming a hotspot for both residential and commercial real estate.
-
-Ho has evolved into a metropolitan city with everything from quality education to healthcare and leisure spots. The local economy is thriving with new businesses, shopping centres, restaurants, and even an airport which is to be transformed into a pilot training school. With a mix of modern amenities and natural beauty, it is no wonder people from the diaspora are eyeing Ho for real estate opportunities.
-
-\nA Buyer\'s Market: Affordability Meets Opportunity
-
-Compared to Accra, where property prices are skyrocketing, Ho offers a more affordable alternative without compromising on growth potential. Whether you are looking to build a first home or set up a commercial property, the cost of land and development is significantly lower. For first-time home builders, this is a golden opportunity. You can stretch your budget further in Ho, allowing you to invest in higher-quality materials or build a larger home without breaking the bank.
-
-Moreover, Ho has a relatively lower cost of living compared to Accra making it attractive to people looking for a peaceful, affordable place to live while still maintaining easy access to major urban areas.
-
-\nWhy African Americans and Expats Should Choose Ho Over Accra
-
-For African Americans and expats considering relocating to Ghana, the question often revolves around where to invest, whether in Accra or elsewhere. While Accra\'s appeal as the nation\'s capital is undeniable, Ho presents a compelling alternative, particularly for those seeking a more easy-going and authentic lifestyle.
-
-In Ho, you are not just buying property; you are investing in a quieter, natural and more culturally immersive experience. The town offers a slower pace of life that many expats find appealing. Unlike Accra, where the hustle and bustle can sometimes feel overwhelming, Ho gives you the space to breathe, reflect, and truly integrate into the Ghanaian way of life. Additionally, Ho\'s emerging infrastructure, combined with its relatively untapped market, means you are getting in early, potentially reaping greater returns as the area develops.
-
-The town is also more community-focused, allowing you to connect with locals and be part of a tight-knit environment. This sense of community makes it easier for expats to adjust and feel at home, which is something Accra cannot always offer with its fast-paced urban culture.
-
-\nGrowing Appeal for the Diaspora
-
-For Ghanaians in the diaspora, there is always that dream of returning home, investing in property, and reconnecting with your roots. Ho offers a unique blend of tranquillity, culture, and development, making it an ideal place to consider. The influx of people returning home from abroad has led to a growing demand for modern homes and apartments, creating a thriving real estate market that is still in its early stages of growth.
-
-More importantly, the community in Ho is welcoming and tightly knit, giving you a real sense of belonging. It is the perfect environment to raise a family, build a retirement home, or set up a business that taps into both local and international markets.
-
-\nHo is Booming: Commercial and Residential Growth
-
-What makes Ho even more attractive is the balance between residential and commercial investment opportunities. From cozy three-bedroom homes to luxury apartments, the options are diverse for people at all stages of life. The presence of universities, like the Ho Technical University, University of Health and Allied Sciences, ensures a steady demand for rental properties from students and staff.
-
-On the commercial side, Ho is experiencing a boom in hospitality, retail, and services, making it a prime location for businesses. Imagine owning a piece of prime commercial real estate in a town where the demand is growing, but competition is still relatively low compared to Accra.
-
-\nThe Future is Bright
-
-With ongoing infrastructure projects, such as road developments and the construction of more modern amenities, the value of properties in Ho is set to increase. Real estate in Ho is more than just an investment for today, it is a long-term growth opportunity that could yield significant returns in the coming years.
-
-\nReady to Invest in Ho?
-
-Whether you are a first-time home builder or a seasoned real estate investor in the diaspora or home, now is the perfect time to explore Ho\'s growing real estate market. You do not have to navigate this journey alone. Let us help you find the perfect property, guide you through the legal processes, and ensure you make the best investment decisions.
-
-Contact Dwell Chronicles for expert consultation and support in finding your dream property in Ho. Our team understands the market dynamics and can offer you the personalized advice you need to make your investment a success.
-
-Reach out today via info@dwellchroniclesgh.com or on WhatsApp +233204700023, and let us turn your real estate dreams into reality!',
+    content: [
+      'Imagine this: You are driving through a serene town nestled between lush green hills and stunning landscapes, where the air is fresh, the roads are less crowded, and opportunities are ripe. This is not a far-off dream. This is Ho, the capital of the Volta Region, and it is fast becoming Ghana\'s hidden gem for real estate investment. Ho could be your ticket to growth and long-term value if you are a first-time home builder, investor or someone from the diaspora looking for a place to invest or settle.',
+      'Why Ho? Why Now?',
+      'For many years, the spotlight has been on Accra, Kumasi, and Takoradi as Ghana\'s real estate hubs. But here is the thing: Now a metropolis, Ho is quietly transforming. As more people realize the untapped potential of this charming city, it is becoming a hotspot for both residential and commercial real estate.',
+      'Ho has evolved into a metropolitan city with everything from quality education to healthcare and leisure spots. The local economy is thriving with new businesses, shopping centres, restaurants, and even an airport which is to be transformed into a pilot training school. With a mix of modern amenities and natural beauty, it is no wonder people from the diaspora are eyeing Ho for real estate opportunities.',
+      'A Buyer\'s Market: Affordability Meets Opportunity',
+      'Compared to Accra, where property prices are skyrocketing, Ho offers a more affordable alternative without compromising on growth potential. Whether you are looking to build a first home or set up a commercial property, the cost of land and development is significantly lower. For first-time home builders, this is a golden opportunity. You can stretch your budget further in Ho, allowing you to invest in higher-quality materials or build a larger home without breaking the bank.',
+      'Moreover, Ho has a relatively lower cost of living compared to Accra making it attractive to people looking for a peaceful, affordable place to live while still maintaining easy access to major urban areas.',
+      'Why African Americans and Expats Should Choose Ho Over Accra',
+      'For African Americans and expats considering relocating to Ghana, the question often revolves around where to invest, whether in Accra or elsewhere. While Accra\'s appeal as the nation\'s capital is undeniable, Ho presents a compelling alternative, particularly for those seeking a more easy-going and authentic lifestyle.',
+      'In Ho, you are not just buying property; you are investing in a quieter, natural and more culturally immersive experience. The town offers a slower pace of life that many expats find appealing. Unlike Accra, where the hustle and bustle can sometimes feel overwhelming, Ho gives you the space to breathe, reflect, and truly integrate into the Ghanaian way of life. Additionally, Ho\'s emerging infrastructure, combined with its relatively untapped market, means you are getting in early, potentially reaping greater returns as the area develops.',
+      'The town is also more community-focused, allowing you to connect with locals and be part of a tight-knit environment. This sense of community makes it easier for expats to adjust and feel at home, which is something Accra cannot always offer with its fast-paced urban culture.',
+      'Growing Appeal for the Diaspora',
+      'For Ghanaians in the diaspora, there is always that dream of returning home, investing in property, and reconnecting with your roots. Ho offers a unique blend of tranquillity, culture, and development, making it an ideal place to consider. The influx of people returning home from abroad has led to a growing demand for modern homes and apartments, creating a thriving real estate market that is still in its early stages of growth.',
+      'More importantly, the community in Ho is welcoming and tightly knit, giving you a real sense of belonging. It is the perfect environment to raise a family, build a retirement home, or set up a business that taps into both local and international markets.',
+      'Ho is Booming: Commercial and Residential Growth',
+      'What makes Ho even more attractive is the balance between residential and commercial investment opportunities. From cozy three-bedroom homes to luxury apartments, the options are diverse for people at all stages of life. The presence of universities, like the Ho Technical University, University of Health and Allied Sciences, ensures a steady demand for rental properties from students and staff.',
+      'On the commercial side, Ho is experiencing a boom in hospitality, retail, and services, making it a prime location for businesses. Imagine owning a piece of prime commercial real estate in a town where the demand is growing, but competition is still relatively low compared to Accra.',
+      'The Future is Bright',
+      'With ongoing infrastructure projects, such as road developments and the construction of more modern amenities, the value of properties in Ho is set to increase. Real estate in Ho is more than just an investment for today, it is a long-term growth opportunity that could yield significant returns in the coming years.',
+      'Ready to Invest in Ho?',
+      'Whether you are a first-time home builder or a seasoned real estate investor in the diaspora or home, now is the perfect time to explore Ho\'s growing real estate market. You do not have to navigate this journey alone. Let us help you find the perfect property, guide you through the legal processes, and ensure you make the best investment decisions.',
+      'Contact Dwell Chronicles for expert consultation and support in finding your dream property in Ho. Our team understands the market dynamics and can offer you the personalized advice you need to make your investment a success.',
+      'Reach out today via info@dwellchroniclesgh.com or on WhatsApp +233204700023, and let us turn your real estate dreams into reality!',
+    ].join('\n\n'),
   },
   {
     title: 'Top 10 Investment Hotspots in West Africa 2026',
@@ -176,7 +156,7 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4 pt-10 pb-10"
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-800 p-4 pt-10 pb-10"
       onClick={onClose}
     >
       <motion.div
@@ -190,7 +170,7 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white/90 rounded-full p-2 hover:bg-white transition-colors cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 hover:bg-gray-50 transition-colors cursor-pointer shadow-sm"
           aria-label="Close"
         >
           <X className="w-5 h-5 text-[#2F3A33]" />
@@ -204,7 +184,7 @@ function BlogModal({ article, onClose }: { article: BlogArticle; onClose: () => 
               alt={article.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-700 to-transparent" />
             <div className="absolute bottom-4 left-6 right-16">
               <span className="inline-block bg-[#5F8768] text-white text-xs font-medium px-3 py-1 rounded-full mb-2">
                 {article.category}

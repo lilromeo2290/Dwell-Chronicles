@@ -4,6 +4,7 @@ import FeaturedProperties from '@/components/sections/FeaturedProperties';
 import ConstructionServices from '@/components/sections/ConstructionServices';
 import ProjectsGallery from '@/components/sections/ProjectsGallery';
 import VideoSection from '@/components/sections/VideoSection';
+import BlogSection from '@/components/sections/BlogSection';
 
 import CTABanner from '@/components/sections/CTABanner';
 import ContactSection from '@/components/sections/ContactSection';
@@ -20,6 +21,7 @@ export default function Home() {
         <ConstructionServices />
         <ProjectsGallery />
         <VideoSection />
+        <BlogSection />
         <CTABanner />
         <ContactSection />
       </main>
