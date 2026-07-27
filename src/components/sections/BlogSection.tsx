@@ -59,11 +59,44 @@ const articles: BlogArticle[] = [
       'Reach out today via info@dwellchroniclesgh.com or on WhatsApp +233204700023, and let us turn your real estate dreams into reality!',
     ].join('\n\n'),
   },
+  {
+    title: 'Why You Need a Gutter System in Your Building Maintenance',
+    category: 'Building Tips',
+    readTime: '5 min read',
+    date: 'Jul 27, 2026',
+    img: '/blog-gutter1.jpg',
+    excerpt:
+      'Gutters protect your building from water damage, erosion, and pest infestation. Learn why a gutter system is essential for property maintenance in Ghana.',
+    images: ['/blog-gutter1.jpg', '/blog-gutter2.jpg'],
+    content: [
+      'When it comes to maintaining a building\'s structural integrity, one often overlooked yet crucial component is the gutter system. Gutters are essential for directing rainwater and debris away from a building\'s foundation, which helps prevent various forms of damage. In this blog post, we will explore the importance of gutter systems, the potential problems caused by the absence of gutters, and tips for maintaining an effective gutter system.',
+      'WHAT IS A GUTTER SYSTEM?',
+      'A gutter system is installed along the edge of a roof, typically at the eaves. It collects rainwater and channels it away from the building. This simple mechanism plays a significant role in protecting your property from water-related damage, especially in Ghana\'s rainy seasons.',
+      'THE PROBLEMS CAUSED BY MISSING GUTTER SYSTEMS',
+      'The absence of a gutter system can lead to numerous issues, including:',
+      '1. Water Damage: Without gutters, rainwater can seep into the walls and foundation, causing damage to walls, ceilings, and insulation. Over time, this can lead to mold growth and structural deterioration.',
+      '2. Erosion: Water accumulating around the foundation can erode the soil, causing the foundation to settle or shift. This can result in structural issues that compromise the building\'s stability.',
+      '3. Pest Infestation: Stagnant water around the foundation is an attractive breeding ground for pests such as mosquitoes, rodents, snakes, and insects. These pests can infiltrate the building, causing further issues.',
+      '4. Foundation Problems: Accumulated water around the foundation can cause cracks and shifts, leading to significant structural problems that can be expensive to repair or impossible to repair.',
+      '5. Aesthetic Damage: When water splashes back onto the building, it can lead to ugly stains and peeling paint, taking away from the beauty of the building\'s exterior. This not only diminishes the property\'s beauty but also may require frequent repainting.',
+      'TIPS FOR GUTTER MAINTENANCE',
+      'To ensure your gutter system functions effectively, regular maintenance is essential. Here are some tips for keeping your gutters in top condition:',
+      '- Regular Inspections: Check your gutters at least twice a year, especially before and after the rainy season, to ensure they are clear of debris, have no cracks and functioning correctly.',
+      '- Clean Debris: Remove leaves, twigs, grass and other debris that can block the flow of water in your gutters.',
+      '- Check for Leaks and Damage: Inspect for any leaks, holes, or damage to the gutters and downspouts, and repair them promptly.',
+      '- Ensure Proper Slope: Make sure your gutters are sloped correctly to facilitate water flow towards the downspouts. This depends on the artisan for the job, get a qualified and experienced artisan.',
+      '- Install Gutter Guards: Consider installing gutter guards to prevent debris from accumulating in the gutters.',
+      'In conclusion, a well-installed and maintained gutter system is vital for protecting your building from water-related damage. By taking the time to inspect and maintain your gutters, you can save yourself from costly repairs and ensure your property remains in excellent condition.',
+      'By incorporating a reliable gutter system, you safeguard your property against the damaging effects of water and protect your investment for years to come. Remember, prevention is always better than cure when it comes to building maintenance.',
+      'Contact Dwell Chronicles to Learn More or Expert Hiring: Call +233(0)547293193 or WhatsApp +233204700023',
+    ].join('\n\n'),
+  },
 ];
 
 const categories = [
   'All',
   'Real Estate',
+  'Building Tips',
 ];
 
 const containerVariants = {
