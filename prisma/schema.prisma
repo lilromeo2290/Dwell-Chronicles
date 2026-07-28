@@ -92,3 +92,134 @@ model BookingEnquiry {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
+
+// ==================== MARKETING AUTOMATION ====================
+
+model SubscriberGroup {
+  id          String                @id @default(cuid())
+  name        String
+  description String?
+  color       String                @default("#5F8768")
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  members     SubscriberGroupMember[]
+}
+
+model Subscriber {
+  id                    String                @id @default(cuid())
+  fullName              String
+  phone                 String
+  whatsappNumber        String?
+  email                 String?
+  location              String?
+  preferredPropertyType String
+  preferredBudget       String
+  preferredRegion       String
+  preferredDistrict     String
+  preferredStatus       String
+  subscriptionDate      DateTime              @default(now())
+  active                Boolean               @default(true)
+  whatsappConsent       Boolean               @default(false)
+  lastNotificationDate  DateTime?
+  notes                 String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  groups                SubscriberGroupMember[]
+  notifications         NotificationHistory[]
+  queuedNotifications   NotificationQueue[]
+}
+
+model SubscriberGroupMember {
+  id           String         @id @default(cuid())
+  subscriberId String
+  groupId      String
+  subscriber   Subscriber      @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  group        SubscriberGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  joinedAt     DateTime       @default(now())
+
+  @@unique([subscriberId, groupId])
+}
+
+model NotificationHistory {
+  id              String      @id @default(cuid())
+  subscriberId    String?
+  subscriber      Subscriber?  @relation(fields: [subscriberId], references: [id])
+  type            String
+  title           String
+  recipientPhone  String
+  recipientName   String?
+  message         String
+  mediaUrl        String?
+  targetType      String?
+  targetId        String?
+  targetTitle     String?
+  status          String      @default("pending")
+  errorMessage    String?
+  retryCount      Int         @default(0)
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  readAt          DateTime?
+  createdAt       DateTime    @default(now())
+}
+
+model NotificationQueue {
+  id              String      @id @default(cuid())
+  subscriberId    String?
+  subscriber      Subscriber?  @relation(fields: [subscriberId], references: [id])
+  type            String
+  title           String
+  recipientPhone  String
+  message         String
+  mediaUrl        String?
+  status          String      @default("pending")
+  scheduledAt     DateTime?
+  retryCount      Int         @default(0)
+  maxRetries      Int         @default(3)
+  priority        Int         @default(0)
+  createdAt       DateTime    @default(now())
+  processedAt     DateTime?
+  error           String?
+}
+
+model WhatsAppTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  content     String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AutomationRule {
+  id          String   @id @default(cuid())
+  name        String
+  triggerType String
+  targetType  String
+  targetGroupId String?
+  templateId  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model TrackedVideo {
+  id          String    @id @default(cuid())
+  videoId     String    @unique
+  title       String
+  thumbnail   String
+  videoUrl    String
+  description String?
+  duration    String?
+  publishedAt DateTime?
+  notified    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}
