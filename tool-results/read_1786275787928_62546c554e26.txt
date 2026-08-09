@@ -1,0 +1,909 @@
+     1→'use client'
+     2→
+     3→import { useState, useMemo, useCallback } from 'react'
+     4→import Link from 'next/link'
+     5→import { motion, AnimatePresence } from 'framer-motion'
+     6→import {
+     7→  Plus,
+     8→  Edit,
+     9→  Trash2,
+    10→  Search,
+    11→  Home,
+    12→  MapPin,
+    13→  BedDouble,
+    14→  Building2,
+    15→  ToggleLeft,
+    16→  ToggleRight,
+    17→  Save,
+    18→  ArrowLeft,
+    19→  ChevronLeft,
+    20→} from 'lucide-react'
+    21→
+    22→import { Button } from '@/components/ui/button'
+    23→import { Input } from '@/components/ui/input'
+    24→import { Badge } from '@/components/ui/badge'
+    25→import { Label } from '@/components/ui/label'
+    26→import {
+    27→  Sheet,
+    28→  SheetContent,
+    29→  SheetHeader,
+    30→  SheetTitle,
+    31→  SheetDescription,
+    32→  SheetFooter,
+    33→} from '@/components/ui/sheet'
+    34→import {
+    35→  Select,
+    36→  SelectContent,
+    37→  SelectItem,
+    38→  SelectTrigger,
+    39→  SelectValue,
+    40→} from '@/components/ui/select'
+    41→import {
+    42→  Table,
+    43→  TableBody,
+    44→  TableCell,
+    45→  TableHead,
+    46→  TableHeader,
+    47→  TableRow,
+    48→} from '@/components/ui/table'
+    49→import { Switch } from '@/components/ui/switch'
+    50→import { useToast } from '@/hooks/use-toast'
+    51→
+    52→// ── Brand colours ──────────────────────────────────────────────────
+    53→const BRAND = {
+    54→  sage: '#5F8768',
+    55→  stone: '#D8D5CC',
+    56→  offWhite: '#F8F7F3',
+    57→  charcoal: '#2F3A33',
+    58→} as const
+    59→
+    60→// ── Types ──────────────────────────────────────────────────────────
+    61→interface RentalProperty {
+    62→  id: string
+    63→  name: string
+    64→  location: string
+    65→  type: string
+    66→  price: string
+    67→  priceNum: number
+    68→  bedrooms: number
+    69→  status: 'available' | 'taken'
+    70→}
+    71→
+    72→interface FormData {
+    73→  name: string
+    74→  location: string
+    75→  type: string
+    76→  price: string
+    77→  bedrooms: string
+    78→  status: 'available' | 'taken'
+    79→}
+    80→
+    81→const initialFormData: FormData = {
+    82→  name: '',
+    83→  location: '',
+    84→  type: '',
+    85→  price: '',
+    86→  bedrooms: '1',
+    87→  status: 'available',
+    88→}
+    89→
+    90→// ── Constants ──────────────────────────────────────────────────────
+    91→const LOCATIONS = [
+    92→  'Any Location',
+    93→  'Ho',
+    94→  'Hohoe',
+    95→  'Keta',
+    96→  'Akosombo',
+    97→  'Aflao',
+    98→  'Sogakope',
+    99→  'Kpando',
+   100→  'Denu',
+   101→]
+   102→
+   103→const PROPERTY_TYPES = [
+   104→  'All Types',
+   105→  'Apartment',
+   106→  'House',
+   107→  'Flat',
+   108→  'Studio',
+   109→  'Self-Contain',
+   110→  'Chamber & Hall',
+   111→  'Single Room',
+   112→]
+   113→
+   114→const PRICE_RANGES = [
+   115→  { label: 'Any Price', min: 0, max: Infinity },
+   116→  { label: 'Under GH₵ 300', min: 0, max: 299 },
+   117→  { label: 'GH₵ 300 - GH₵ 500', min: 300, max: 500 },
+   118→  { label: 'GH₵ 500 - GH₵ 1,000', min: 500, max: 1000 },
+   119→  { label: 'Over GH₵ 1,000', min: 1001, max: Infinity },
+   120→]
+   121→
+   122→const BEDROOM_OPTIONS = ['Any', '1', '2', '3', '4+']
+   123→
+   124→const SAMPLE_DATA: RentalProperty[] = [
+   125→  { id: '1', name: 'Two Bedroom Flat', location: 'Ho', type: 'Flat', price: 'GH₵ 800/month', priceNum: 800, bedrooms: 2, status: 'available' },
+   126→  { id: '2', name: 'Studio Apartment', location: 'Ho', type: 'Studio', price: 'GH₵ 400/month', priceNum: 400, bedrooms: 1, status: 'taken' },
+   127→  { id: '3', name: 'Self-Contain Room', location: 'Hohoe', type: 'Self-Contain', price: 'GH₵ 350/month', priceNum: 350, bedrooms: 1, status: 'available' },
+   128→  { id: '4', name: 'Three Bedroom House', location: 'Keta', type: 'House', price: 'GH₵ 1,500/month', priceNum: 1500, bedrooms: 3, status: 'available' },
+   129→  { id: '5', name: 'Chamber & Hall', location: 'Akosombo', type: 'Chamber & Hall', price: 'GH₵ 500/month', priceNum: 500, bedrooms: 1, status: 'taken' },
+   130→  { id: '6', name: 'Executive Apartment', location: 'Ho', type: 'Apartment', price: 'GH₵ 2,000/month', priceNum: 2000, bedrooms: 3, status: 'available' },
+   131→  { id: '7', name: 'Single Room', location: 'Aflao', type: 'Single Room', price: 'GH₵ 200/month', priceNum: 200, bedrooms: 1, status: 'available' },
+   132→  { id: '8', name: 'Two Bedroom House', location: 'Sogakope', type: 'House', price: 'GH₵ 1,200/month', priceNum: 1200, bedrooms: 2, status: 'taken' },
+   133→]
+   134→
+   135→// ── Helpers ────────────────────────────────────────────────────────
+   136→function parsePrice(str: string): number {
+   137→  const match = str.match(/[\d,]+/)
+   138→  if (!match) return 0
+   139→  return parseInt(match[0].replace(/,/g, ''), 10)
+   140→}
+   141→
+   142→function formatPrice(n: number): string {
+   143→  return `GH₵ ${n.toLocaleString()}/month`
+   144→}
+   145→
+   146→function getTypeBadgeColor(type: string) {
+   147→  switch (type) {
+   148→    case 'Apartment':
+   149→      return 'bg-[#5F8768]/15 text-[#2F3A33] border-[#5F8768]/30'
+   150→    case 'House':
+   151→      return 'bg-amber-100 text-amber-800 border-amber-200'
+   152→    case 'Flat':
+   153→      return 'bg-sky-100 text-sky-800 border-sky-200'
+   154→    case 'Studio':
+   155→      return 'bg-violet-100 text-violet-800 border-violet-200'
+   156→    case 'Self-Contain':
+   157→      return 'bg-emerald-100 text-emerald-800 border-emerald-200'
+   158→    case 'Chamber & Hall':
+   159→      return 'bg-rose-100 text-rose-800 border-rose-200'
+   160→    case 'Single Room':
+   161→      return 'bg-orange-100 text-orange-800 border-orange-200'
+   162→    default:
+   163→      return 'bg-gray-100 text-gray-800 border-gray-200'
+   164→  }
+   165→}
+   166→
+   167→// ── Animation variants ─────────────────────────────────────────────
+   168→const cardVariants = {
+   169→  hidden: { opacity: 0, y: 20 },
+   170→  visible: (i: number) => ({
+   171→    opacity: 1,
+   172→    y: 0,
+   173→    transition: { delay: i * 0.05, duration: 0.35, ease: 'easeOut' },
+   174→  }),
+   175→  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+   176→}
+   177→
+   178→// ══════════════════════════════════════════════════════════════════
+   179→// Page Component
+   180→// ══════════════════════════════════════════════════════════════════
+   181→export default function AdminRentalsPage() {
+   182→  const { toast } = useToast()
+   183→
+   184→  // ── State ──────────────────────────────────────────────────────
+   185→  const [properties, setProperties] = useState<RentalProperty[]>(SAMPLE_DATA)
+   186→  const [searchQuery, setSearchQuery] = useState('')
+   187→  const [filterLocation, setFilterLocation] = useState('Any Location')
+   188→  const [filterType, setFilterType] = useState('All Types')
+   189→  const [filterPrice, setFilterPrice] = useState('Any Price')
+   190→  const [filterBedrooms, setFilterBedrooms] = useState('Any')
+   191→
+   192→  const [sheetOpen, setSheetOpen] = useState(false)
+   193→  const [editingId, setEditingId] = useState<string | null>(null)
+   194→  const [formData, setFormData] = useState<FormData>(initialFormData)
+   195→  const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+   196→
+   197→  // ── Derived data ───────────────────────────────────────────────
+   198→  const priceRange = useMemo(
+   199→    () => PRICE_RANGES.find((r) => r.label === filterPrice) ?? PRICE_RANGES[0],
+   200→    [filterPrice],
+   201→  )
+   202→
+   203→  const filteredProperties = useMemo(() => {
+   204→    return properties.filter((p) => {
+   205→      // Search
+   206→      if (searchQuery) {
+   207→        const q = searchQuery.toLowerCase()
+   208→        if (
+   209→          !p.name.toLowerCase().includes(q) &&
+   210→          !p.location.toLowerCase().includes(q) &&
+   211→          !p.type.toLowerCase().includes(q)
+   212→        ) {
+   213→          return false
+   214→        }
+   215→      }
+   216→      // Location
+   217→      if (filterLocation !== 'Any Location' && p.location !== filterLocation) return false
+   218→      // Type
+   219→      if (filterType !== 'All Types' && p.type !== filterType) return false
+   220→      // Price
+   221→      if (p.priceNum < priceRange.min || p.priceNum > priceRange.max) return false
+   222→      // Bedrooms
+   223→      if (filterBedrooms !== 'Any') {
+   224→        if (filterBedrooms === '4+') {
+   225→          if (p.bedrooms < 4) return false
+   226→        } else if (p.bedrooms !== parseInt(filterBedrooms, 10)) return false
+   227→      }
+   228→      return true
+   229→    })
+   230→  }, [properties, searchQuery, filterLocation, filterType, filterPrice, filterBedrooms, priceRange])
+   231→
+   232→  const stats = useMemo(
+   233→    () => ({
+   234→      total: properties.length,
+   235→      available: properties.filter((p) => p.status === 'available').length,
+   236→      taken: properties.filter((p) => p.status === 'taken').length,
+   237→    }),
+   238→    [properties],
+   239→  )
+   240→
+   241→  // ── Actions ────────────────────────────────────────────────────
+   242→  const toggleStatus = useCallback(
+   243→    (id: string) => {
+   244→      setProperties((prev) =>
+   245→        prev.map((p) => {
+   246→          if (p.id !== id) return p
+   247→          const next = p.status === 'available' ? 'taken' : 'available'
+   248→          toast({
+   249→            title: `Status updated`,
+   250→            description: `"${p.name}" is now ${next}.`,
+   251→          })
+   252→          return { ...p, status: next }
+   253→        }),
+   254→      )
+   255→    },
+   256→    [toast],
+   257→  )
+   258→
+   259→  const deleteProperty = useCallback(
+   260→    (id: string) => {
+   261→      const p = properties.find((x) => x.id === id)
+   262→      setProperties((prev) => prev.filter((x) => x.id !== id))
+   263→      toast({
+   264→        title: 'Property deleted',
+   265→        description: p ? `"${p.name}" has been removed.` : 'Property has been removed.',
+   266→        variant: 'destructive',
+   267→      })
+   268→    },
+   269→    [properties, toast],
+   270→  )
+   271→
+   272→  const openAddSheet = () => {
+   273→    setEditingId(null)
+   274→    setFormData(initialFormData)
+   275→    setFormErrors({})
+   276→    setSheetOpen(true)
+   277→  }
+   278→
+   279→  const openEditSheet = (p: RentalProperty) => {
+   280→    setEditingId(p.id)
+   281→    setFormData({
+   282→      name: p.name,
+   283→      location: p.location,
+   284→      type: p.type,
+   285→      price: String(p.priceNum),
+   286→      bedrooms: String(p.bedrooms),
+   287→      status: p.status,
+   288→    })
+   289→    setFormErrors({})
+   290→    setSheetOpen(true)
+   291→  }
+   292→
+   293→  const validateForm = (): boolean => {
+   294→    const errors: Partial<Record<keyof FormData, string>> = {}
+   295→    if (!formData.name.trim()) errors.name = 'Name is required'
+   296→    if (!formData.location) errors.location = 'Location is required'
+   297→    if (!formData.type) errors.type = 'Property type is required'
+   298→    const priceNum = parseInt(formData.price, 10)
+   299→    if (!formData.price || isNaN(priceNum) || priceNum <= 0) errors.price = 'Enter a valid price'
+   300→    if (!formData.bedrooms || parseInt(formData.bedrooms, 10) < 1) errors.bedrooms = 'Bedrooms required'
+   301→    setFormErrors(errors)
+   302→    return Object.keys(errors).length === 0
+   303→  }
+   304→
+   305→  const handleSave = () => {
+   306→    if (!validateForm()) return
+   307→    const priceNum = parseInt(formData.price, 10)
+   308→
+   309→    if (editingId) {
+   310→      setProperties((prev) =>
+   311→        prev.map((p) =>
+   312→          p.id === editingId
+   313→            ? {
+   314→                ...p,
+   315→                name: formData.name.trim(),
+   316→                location: formData.location,
+   317→                type: formData.type,
+   318→                price: formatPrice(priceNum),
+   319→                priceNum,
+   320→                bedrooms: parseInt(formData.bedrooms, 10),
+   321→                status: formData.status,
+   322→              }
+   323→            : p,
+   324→        ),
+   325→      )
+   326→      toast({ title: 'Property updated', description: `"${formData.name}" has been updated.` })
+   327→    } else {
+   328→      const newProp: RentalProperty = {
+   329→        id: String(Date.now()),
+   330→        name: formData.name.trim(),
+   331→        location: formData.location,
+   332→        type: formData.type,
+   333→        price: formatPrice(priceNum),
+   334→        priceNum,
+   335→        bedrooms: parseInt(formData.bedrooms, 10),
+   336→        status: formData.status,
+   337→      }
+   338→      setProperties((prev) => [...prev, newProp])
+   339→      toast({ title: 'Property added', description: `"${formData.name}" has been added.` })
+   340→    }
+   341→    setSheetOpen(false)
+   342→  }
+   343→
+   344→  const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
+   345→    setFormData((prev) => ({ ...prev, [key]: value }))
+   346→    setFormErrors((prev) => {
+   347→      if (!prev[key]) return prev
+   348→      const next = { ...prev }
+   349→      delete next[key]
+   350→      return next
+   351→    })
+   352→  }
+   353→
+   354→  // ── Render ─────────────────────────────────────────────────────
+   355→  return (
+   356→    <div
+   357→      className="min-h-screen"
+   358→      style={{ backgroundColor: BRAND.offWhite }}
+   359→    >
+   360→      {/* ─── Top Bar ─── */}
+   361→      <header
+   362→        className="sticky top-0 z-40 border-b backdrop-blur-md"
+   363→        style={{
+   364→          backgroundColor: `${BRAND.charcoal}ee`,
+   365→          borderColor: `${BRAND.sage}30`,
+   366→        }}
+   367→      >
+   368→        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+   369→          <div className="flex items-center gap-3">
+   370→            <Building2 className="h-5 w-5" style={{ color: BRAND.sage }} />
+   371→            <h1 className="text-sm sm:text-base font-semibold text-white truncate">
+   372→              Dwell Chronicles Admin
+   373→            </h1>
+   374→          </div>
+   375→          <div className="flex items-center gap-1">
+   376→            <Link
+   377→              href="/admin/airbnb"
+   378→              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors text-gray-300 hover:text-white hover:bg-white/10"
+   379→            >
+   380→              Apartment Bookings
+   381→            </Link>
+   382→            <Link
+   383→              href="/admin/rentals"
+   384→              className="rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors bg-white/15 text-white"
+   385→            >
+   386→              Rental Properties
+   387→            </Link>
+   388→            <span className="mx-1 w-px h-5 bg-white/20" />
+   389→            <Link
+   390→              href="/"
+   391→              className="flex items-center gap-1 text-xs sm:text-sm text-gray-300 hover:text-white transition-colors"
+   392→            >
+   393→              <ChevronLeft className="h-3.5 w-3.5" />
+   394→              Site
+   395→            </Link>
+   396→          </div>
+   397→        </div>
+   398→      </header>
+   399→
+   400→      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+   401→        {/* ─── Page Header ─── */}
+   402→        <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+   403→          <div>
+   404→            <h1
+   405→              className="text-2xl font-bold tracking-tight sm:text-3xl"
+   406→              style={{ color: BRAND.charcoal }}
+   407→            >
+   408→              Rental Properties Management
+   409→            </h1>
+   410→            <p className="mt-1 text-sm text-muted-foreground">
+   411→              Manage rental property listings and their availability status
+   412→            </p>
+   413→          </div>
+   414→          <Button
+   415→            onClick={openAddSheet}
+   416→            className="mt-3 shrink-0 sm:mt-0"
+   417→            style={{ backgroundColor: BRAND.sage }}
+   418→          >
+   419→            <Plus className="size-4" />
+   420→            Add New Property
+   421→          </Button>
+   422→        </header>
+   423→
+   424→        {/* ─── Filter Section ─── */}
+   425→        <section
+   426→          className="mb-6 rounded-xl border p-4 sm:p-6"
+   427→          style={{ backgroundColor: '#fff', borderColor: BRAND.stone }}
+   428→        >
+   429→          <div className="mb-4 flex items-center gap-2">
+   430→            <Search className="size-4 text-muted-foreground" />
+   431→            <span className="text-sm font-semibold" style={{ color: BRAND.charcoal }}>
+   432→              Filter Properties
+   433→            </span>
+   434→          </div>
+   435→          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+   436→            {/* Search */}
+   437→            <div className="relative lg:col-span-1">
+   438→              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+   439→              <Input
+   440→                placeholder="Search properties..."
+   441→                value={searchQuery}
+   442→                onChange={(e) => setSearchQuery(e.target.value)}
+   443→                className="pl-9"
+   444→              />
+   445→            </div>
+   446→            {/* Location */}
+   447→            <Select value={filterLocation} onValueChange={setFilterLocation}>
+   448→              <SelectTrigger className="w-full">
+   449→                <SelectValue placeholder="Location" />
+   450→              </SelectTrigger>
+   451→              <SelectContent>
+   452→                {LOCATIONS.map((loc) => (
+   453→                  <SelectItem key={loc} value={loc}>
+   454→                    {loc}
+   455→                  </SelectItem>
+   456→                ))}
+   457→              </SelectContent>
+   458→            </Select>
+   459→            {/* Type */}
+   460→            <Select value={filterType} onValueChange={setFilterType}>
+   461→              <SelectTrigger className="w-full">
+   462→                <SelectValue placeholder="Property Type" />
+   463→              </SelectTrigger>
+   464→              <SelectContent>
+   465→                {PROPERTY_TYPES.map((t) => (
+   466→                  <SelectItem key={t} value={t}>
+   467→                    {t}
+   468→                  </SelectItem>
+   469→                ))}
+   470→              </SelectContent>
+   471→            </Select>
+   472→            {/* Price Range */}
+   473→            <Select value={filterPrice} onValueChange={setFilterPrice}>
+   474→              <SelectTrigger className="w-full">
+   475→                <SelectValue placeholder="Price Range" />
+   476→              </SelectTrigger>
+   477→              <SelectContent>
+   478→                {PRICE_RANGES.map((r) => (
+   479→                  <SelectItem key={r.label} value={r.label}>
+   480→                    {r.label}
+   481→                  </SelectItem>
+   482→                ))}
+   483→              </SelectContent>
+   484→            </Select>
+   485→            {/* Bedrooms */}
+   486→            <Select value={filterBedrooms} onValueChange={setFilterBedrooms}>
+   487→              <SelectTrigger className="w-full">
+   488→                <SelectValue placeholder="Bedrooms" />
+   489→              </SelectTrigger>
+   490→              <SelectContent>
+   491→                {BEDROOM_OPTIONS.map((b) => (
+   492→                  <SelectItem key={b} value={b}>
+   493→                    {b}
+   494→                  </SelectItem>
+   495→                ))}
+   496→              </SelectContent>
+   497→            </Select>
+   498→          </div>
+   499→        </section>
+   500→
+   501→        {/* ─── Stats Row ─── */}
+   502→        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+   503→          {[
+   504→            { label: 'Total Properties', value: stats.total, icon: Building2, color: BRAND.charcoal, bg: BRAND.stone },
+   505→            { label: 'Available', value: stats.available, icon: Home, color: '#15803d', bg: '#dcfce7' },
+   506→            { label: 'Taken', value: stats.taken, icon: MapPin, color: '#b91c1c', bg: '#fef2f2' },
+   507→          ].map((s) => (
+   508→            <motion.div
+   509→              key={s.label}
+   510→              initial={{ opacity: 0, y: 12 }}
+   511→              animate={{ opacity: 1, y: 0 }}
+   512→              transition={{ duration: 0.3 }}
+   513→              className="flex items-center gap-4 rounded-xl border p-4 sm:p-5"
+   514→              style={{ backgroundColor: '#fff', borderColor: BRAND.stone }}
+   515→            >
+   516→              <div
+   517→                className="flex size-12 shrink-0 items-center justify-center rounded-lg"
+   518→                style={{ backgroundColor: s.bg }}
+   519→              >
+   520→                <s.icon className="size-5" style={{ color: s.color }} />
+   521→              </div>
+   522→              <div>
+   523→                <p className="text-sm text-muted-foreground">{s.label}</p>
+   524→                <p className="text-2xl font-bold" style={{ color: s.color }}>
+   525→                  {s.value}
+   526→                </p>
+   527→              </div>
+   528→            </motion.div>
+   529→          ))}
+   530→        </section>
+   531→
+   532→        {/* ─── Properties (Desktop Table) ─── */}
+   533→        <section
+   534→          className="hidden rounded-xl border md:block"
+   535→          style={{ backgroundColor: '#fff', borderColor: BRAND.stone }}
+   536→        >
+   537→          <Table>
+   538→            <TableHeader>
+   539→              <TableRow style={{ borderBottomColor: BRAND.stone }}>
+   540→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Property</TableHead>
+   541→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Location</TableHead>
+   542→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Type</TableHead>
+   543→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Price</TableHead>
+   544→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Beds</TableHead>
+   545→                <TableHead className="font-semibold" style={{ color: BRAND.charcoal }}>Status</TableHead>
+   546→                <TableHead className="text-right font-semibold" style={{ color: BRAND.charcoal }}>Actions</TableHead>
+   547→              </TableRow>
+   548→            </TableHeader>
+   549→            <TableBody>
+   550→              <AnimatePresence mode="popLayout">
+   551→                {filteredProperties.map((p, i) => (
+   552→                  <motion.tr
+   553→                    key={p.id}
+   554→                    custom={i}
+   555→                    variants={cardVariants}
+   556→                    initial="hidden"
+   557→                    animate="visible"
+   558→                    exit="exit"
+   559→                    className="border-b transition-colors hover:bg-muted/50"
+   560→                    style={{ borderBottomColor: BRAND.stone }}
+   561→                  >
+   562→                    <TableCell className="font-medium" style={{ color: BRAND.charcoal }}>
+   563→                      <div className="flex items-center gap-2">
+   564→                        <Home className="size-4 shrink-0 text-muted-foreground" />
+   565→                        {p.name}
+   566→                      </div>
+   567→                    </TableCell>
+   568→                    <TableCell>
+   569→                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+   570→                        <MapPin className="size-3.5 shrink-0" />
+   571→                        {p.location}
+   572→                      </div>
+   573→                    </TableCell>
+   574→                    <TableCell>
+   575→                      <Badge variant="outline" className={getTypeBadgeColor(p.type)}>
+   576→                        <Building2 className="size-3" />
+   577→                        {p.type}
+   578→                      </Badge>
+   579→                    </TableCell>
+   580→                    <TableCell className="font-semibold" style={{ color: BRAND.charcoal }}>
+   581→                      {p.price}
+   582→                    </TableCell>
+   583→                    <TableCell>
+   584→                      <div className="flex items-center gap-1.5 text-sm">
+   585→                        <BedDouble className="size-3.5 text-muted-foreground" />
+   586→                        {p.bedrooms}
+   587→                      </div>
+   588→                    </TableCell>
+   589→                    <TableCell>
+   590→                      <button
+   591→                        onClick={() => toggleStatus(p.id)}
+   592→                        className="focus:outline-none"
+   593→                        aria-label={`Toggle status of ${p.name}`}
+   594→                      >
+   595→                        <Badge
+   596→                          className={`
+   597→                            cursor-pointer select-none px-3 py-1 text-xs font-semibold transition-all
+   598→                            ${
+   599→                              p.status === 'available'
+   600→                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-300 hover:bg-emerald-200'
+   601→                                : 'bg-red-100 text-red-700 border border-red-300 hover:bg-red-200'
+   602→                            }
+   603→                          `}
+   604→                        >
+   605→                          {p.status === 'available' ? (
+   606→                            <ToggleRight className="size-3.5" />
+   607→                          ) : (
+   608→                            <ToggleLeft className="size-3.5" />
+   609→                          )}
+   610→                          {p.status === 'available' ? 'Available' : 'Taken'}
+   611→                        </Badge>
+   612→                      </button>
+   613→                    </TableCell>
+   614→                    <TableCell className="text-right">
+   615→                      <div className="flex items-center justify-end gap-1">
+   616→                        <Button
+   617→                          variant="ghost"
+   618→                          size="icon"
+   619→                          className="size-8"
+   620→                          onClick={() => openEditSheet(p)}
+   621→                          aria-label={`Edit ${p.name}`}
+   622→                        >
+   623→                          <Edit className="size-4" style={{ color: BRAND.sage }} />
+   624→                        </Button>
+   625→                        <Button
+   626→                          variant="ghost"
+   627→                          size="icon"
+   628→                          className="size-8 hover:bg-red-50"
+   629→                          onClick={() => deleteProperty(p.id)}
+   630→                          aria-label={`Delete ${p.name}`}
+   631→                        >
+   632→                          <Trash2 className="size-4 text-red-500" />
+   633→                        </Button>
+   634→                      </div>
+   635→                    </TableCell>
+   636→                  </motion.tr>
+   637→                ))}
+   638→              </AnimatePresence>
+   639→              {filteredProperties.length === 0 && (
+   640→                <TableRow>
+   641→                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+   642→                    No properties match your filters.
+   643→                  </TableCell>
+   644→                </TableRow>
+   645→              )}
+   646→            </TableBody>
+   647→          </Table>
+   648→        </section>
+   649→
+   650→        {/* ─── Properties (Mobile Cards) ─── */}
+   651→        <section className="flex flex-col gap-4 md:hidden">
+   652→          <AnimatePresence mode="popLayout">
+   653→            {filteredProperties.map((p, i) => (
+   654→              <motion.div
+   655→                key={p.id}
+   656→                custom={i}
+   657→                variants={cardVariants}
+   658→                initial="hidden"
+   659→                animate="visible"
+   660→                exit="exit"
+   661→                className="rounded-xl border p-4"
+   662→                style={{ backgroundColor: '#fff', borderColor: BRAND.stone }}
+   663→              >
+   664→                {/* Card Header */}
+   665→                <div className="mb-3 flex items-start justify-between">
+   666→                  <div className="flex items-center gap-2">
+   667→                    <div
+   668→                      className="flex size-9 items-center justify-center rounded-lg"
+   669→                      style={{ backgroundColor: `${BRAND.sage}15` }}
+   670→                    >
+   671→                      <Home className="size-4" style={{ color: BRAND.sage }} />
+   672→                    </div>
+   673→                    <div>
+   674→                      <h3 className="font-semibold" style={{ color: BRAND.charcoal }}>
+   675→                        {p.name}
+   676→                      </h3>
+   677→                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+   678→                        <MapPin className="size-3" />
+   679→                        {p.location}
+   680→                      </div>
+   681→                    </div>
+   682→                  </div>
+   683→                  <button
+   684→                    onClick={() => toggleStatus(p.id)}
+   685→                    aria-label={`Toggle status of ${p.name}`}
+   686→                  >
+   687→                    <Badge
+   688→                      className={`
+   689→                        cursor-pointer select-none text-[11px] font-semibold transition-all
+   690→                        ${
+   691→                          p.status === 'available'
+   692→                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+   693→                            : 'bg-red-100 text-red-700 border border-red-300'
+   694→                        }
+   695→                      `}
+   696→                    >
+   697→                      {p.status === 'available' ? (
+   698→                        <ToggleRight className="size-3.5" />
+   699→                      ) : (
+   700→                        <ToggleLeft className="size-3.5" />
+   701→                      )}
+   702→                      {p.status === 'available' ? 'Available' : 'Taken'}
+   703→                    </Badge>
+   704→                  </button>
+   705→                </div>
+   706→
+   707→                {/* Card Details */}
+   708→                <div className="mb-3 flex flex-wrap items-center gap-3">
+   709→                  <Badge variant="outline" className={`text-[11px] ${getTypeBadgeColor(p.type)}`}>
+   710→                    <Building2 className="size-3" />
+   711→                    {p.type}
+   712→                  </Badge>
+   713→                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+   714→                    <BedDouble className="size-3" />
+   715→                    {p.bedrooms} Bed{p.bedrooms > 1 ? 's' : ''}
+   716→                  </span>
+   717→                  <span className="ml-auto text-sm font-bold" style={{ color: BRAND.sage }}>
+   718→                    {p.price}
+   719→                  </span>
+   720→                </div>
+   721→
+   722→                {/* Card Actions */}
+   723→                <div className="flex items-center gap-2 border-t pt-3" style={{ borderColor: BRAND.stone }}>
+   724→                  <Button
+   725→                    variant="outline"
+   726→                    size="sm"
+   727→                    className="flex-1 text-xs"
+   728→                    onClick={() => openEditSheet(p)}
+   729→                  >
+   730→                    <Edit className="size-3.5" />
+   731→                    Edit
+   732→                  </Button>
+   733→                  <Button
+   734→                    variant="outline"
+   735→                    size="sm"
+   736→                    className="flex-1 border-red-200 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
+   737→                    onClick={() => deleteProperty(p.id)}
+   738→                  >
+   739→                    <Trash2 className="size-3.5" />
+   740→                    Delete
+   741→                  </Button>
+   742→                </div>
+   743→              </motion.div>
+   744→            ))}
+   745→          </AnimatePresence>
+   746→          {filteredProperties.length === 0 && (
+   747→            <div className="rounded-xl border p-8 text-center text-muted-foreground" style={{ borderColor: BRAND.stone, backgroundColor: '#fff' }}>
+   748→              No properties match your filters.
+   749→            </div>
+   750→          )}
+   751→        </section>
+   752→      </main>
+   753→
+   754→      {/* ─── Add / Edit Sheet ─── */}
+   755→      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+   756→        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+   757→          <SheetHeader className="mb-2">
+   758→            <SheetTitle style={{ color: BRAND.charcoal }}>
+   759→              {editingId ? 'Edit Property' : 'Add New Property'}
+   760→            </SheetTitle>
+   761→            <SheetDescription>
+   762→              {editingId
+   763→                ? 'Update the property details below.'
+   764→                : 'Fill in the details to add a new rental property.'}
+   765→            </SheetDescription>
+   766→          </SheetHeader>
+   767→
+   768→          <div className="flex flex-col gap-5 px-4 pb-4">
+   769→            {/* Name */}
+   770→            <div className="space-y-1.5">
+   771→              <Label htmlFor="prop-name">Property Name</Label>
+   772→              <Input
+   773→                id="prop-name"
+   774→                placeholder="e.g. Two Bedroom Flat"
+   775→                value={formData.name}
+   776→                onChange={(e) => updateField('name', e.target.value)}
+   777→                aria-invalid={!!formErrors.name}
+   778→              />
+   779→              {formErrors.name && (
+   780→                <p className="text-xs text-red-500">{formErrors.name}</p>
+   781→              )}
+   782→            </div>
+   783→
+   784→            {/* Location */}
+   785→            <div className="space-y-1.5">
+   786→              <Label>Location</Label>
+   787→              <Select
+   788→                value={formData.location}
+   789→                onValueChange={(v) => updateField('location', v)}
+   790→              >
+   791→                <SelectTrigger className="w-full" aria-invalid={!!formErrors.location}>
+   792→                  <SelectValue placeholder="Select location" />
+   793→                </SelectTrigger>
+   794→                <SelectContent>
+   795→                  {LOCATIONS.filter((l) => l !== 'Any Location').map((loc) => (
+   796→                    <SelectItem key={loc} value={loc}>
+   797→                      {loc}
+   798→                    </SelectItem>
+   799→                  ))}
+   800→                </SelectContent>
+   801→              </Select>
+   802→              {formErrors.location && (
+   803→                <p className="text-xs text-red-500">{formErrors.location}</p>
+   804→              )}
+   805→            </div>
+   806→
+   807→            {/* Property Type */}
+   808→            <div className="space-y-1.5">
+   809→              <Label>Property Type</Label>
+   810→              <Select
+   811→                value={formData.type}
+   812→                onValueChange={(v) => updateField('type', v)}
+   813→              >
+   814→                <SelectTrigger className="w-full" aria-invalid={!!formErrors.type}>
+   815→                  <SelectValue placeholder="Select type" />
+   816→                </SelectTrigger>
+   817→                <SelectContent>
+   818→                  {PROPERTY_TYPES.filter((t) => t !== 'All Types').map((t) => (
+   819→                    <SelectItem key={t} value={t}>
+   820→                      {t}
+   821→                    </SelectItem>
+   822→                  ))}
+   823→                </SelectContent>
+   824→              </Select>
+   825→              {formErrors.type && (
+   826→                <p className="text-xs text-red-500">{formErrors.type}</p>
+   827→              )}
+   828→            </div>
+   829→
+   830→            {/* Price */}
+   831→            <div className="space-y-1.5">
+   832→              <Label htmlFor="prop-price">Price (GH₵/month)</Label>
+   833→              <Input
+   834→                id="prop-price"
+   835→                type="number"
+   836→                placeholder="e.g. 800"
+   837→                min={1}
+   838→                value={formData.price}
+   839→                onChange={(e) => updateField('price', e.target.value)}
+   840→                aria-invalid={!!formErrors.price}
+   841→              />
+   842→              {formErrors.price && (
+   843→                <p className="text-xs text-red-500">{formErrors.price}</p>
+   844→              )}
+   845→            </div>
+   846→
+   847→            {/* Bedrooms */}
+   848→            <div className="space-y-1.5">
+   849→              <Label>Bedrooms</Label>
+   850→              <Select
+   851→                value={formData.bedrooms}
+   852→                onValueChange={(v) => updateField('bedrooms', v)}
+   853→              >
+   854→                <SelectTrigger className="w-full" aria-invalid={!!formErrors.bedrooms}>
+   855→                  <SelectValue placeholder="Select bedrooms" />
+   856→                </SelectTrigger>
+   857→                <SelectContent>
+   858→                  {['1', '2', '3', '4', '5', '6', '7', '8'].map((b) => (
+   859→                    <SelectItem key={b} value={b}>
+   860→                      {b} Bedroom{parseInt(b, 10) > 1 ? 's' : ''}
+   861→                    </SelectItem>
+   862→                  ))}
+   863→                </SelectContent>
+   864→              </Select>
+   865→              {formErrors.bedrooms && (
+   866→                <p className="text-xs text-red-500">{formErrors.bedrooms}</p>
+   867→              )}
+   868→            </div>
+   869→
+   870→            {/* Status Toggle */}
+   871→            <div className="flex items-center justify-between rounded-lg border p-3" style={{ borderColor: BRAND.stone }}>
+   872→              <div className="space-y-0.5">
+   873→                <Label className="text-sm font-medium">Availability Status</Label>
+   874→                <p className="text-xs text-muted-foreground">
+   875→                  {formData.status === 'available' ? 'Property is available for rent' : 'Property is currently taken'}
+   876→                </p>
+   877→              </div>
+   878→              <Switch
+   879→                checked={formData.status === 'available'}
+   880→                onCheckedChange={(checked) =>
+   881→                  updateField('status', checked ? 'available' : 'taken')
+   882→                }
+   883→                className="data-[state=checked]:bg-[#5F8768]"
+   884→              />
+   885→            </div>
+   886→          </div>
+   887→
+   888→          <SheetFooter className="border-t px-4" style={{ borderColor: BRAND.stone }}>
+   889→            <Button
+   890→              variant="outline"
+   891→              className="flex-1"
+   892→              onClick={() => setSheetOpen(false)}
+   893→            >
+   894→              Cancel
+   895→            </Button>
+   896→            <Button
+   897→              className="flex-1"
+   898→              style={{ backgroundColor: BRAND.sage }}
+   899→              onClick={handleSave}
+   900→            >
+   901→              <Save className="size-4" />
+   902→              {editingId ? 'Update Property' : 'Add Property'}
+   903→            </Button>
+   904→          </SheetFooter>
+   905→        </SheetContent>
+   906→      </Sheet>
+   907→    </div>
+   908→  )
+   909→}

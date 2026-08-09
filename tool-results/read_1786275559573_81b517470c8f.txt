@@ -1,0 +1,1686 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+     4→import { useParams, useRouter } from 'next/navigation';
+     5→import Link from 'next/link';
+     6→import { motion, AnimatePresence } from 'framer-motion';
+     7→import { useForm } from 'react-hook-form';
+     8→import { z } from 'zod/v4';
+     9→import { zodResolver } from '@hookform/resolvers/zod';
+    10→import {
+    11→  format,
+    12→  addMonths,
+    13→  subMonths,
+    14→  startOfMonth,
+    15→  endOfMonth,
+    16→  eachDayOfInterval,
+    17→  getDay,
+    18→  isSameMonth,
+    19→  isBefore,
+    20→  isToday,
+    21→  parseISO,
+    22→  differenceInDays,
+    23→  isAfter,
+    24→  startOfDay,
+    25→} from 'date-fns';
+    26→import {
+    27→  ArrowLeft,
+    28→  MapPin,
+    29→  Star,
+    30→  BedDouble,
+    31→  Bath,
+    32→  Users,
+    33→  Wifi,
+    34→  Tv,
+    35→  Snowflake,
+    36→  CookingPot,
+    37→  Refrigerator,
+    38→  Shirt,
+    39→  Droplets,
+    40→  Car,
+    41→  Sun,
+    42→  Waves,
+    43→  ShieldCheck,
+    44→  Zap,
+    45→  Laptop,
+    46→  ChevronLeft,
+    47→  ChevronRight,
+    48→  X,
+    49→  MessageCircle,
+    50→  Send,
+    51→  Check,
+    52→  AlertCircle,
+    53→  CalendarDays,
+    54→  Image as ImageIcon,
+    55→  Phone,
+    56→  Mail,
+    57→  User,
+    58→  Loader2,
+    59→  ChevronDown,
+    60→  ChevronUp,
+    61→} from 'lucide-react';
+    62→import { Button } from '@/components/ui/button';
+    63→import { Input } from '@/components/ui/input';
+    64→import { Label } from '@/components/ui/label';
+    65→import { Textarea } from '@/components/ui/textarea';
+    66→import { Badge } from '@/components/ui/badge';
+    67→import { Separator } from '@/components/ui/separator';
+    68→import { Skeleton } from '@/components/ui/skeleton';
+    69→import { useToast } from '@/hooks/use-toast';
+    70→import { useIsMobile } from '@/hooks/use-mobile';
+    71→import {
+    72→  Tooltip,
+    73→  TooltipContent,
+    74→  TooltipProvider,
+    75→  TooltipTrigger,
+    76→} from '@/components/ui/tooltip';
+    77→
+    78→// ─── Types ───────────────────────────────────────────────────────────────────
+    79→
+    80→interface ApartmentImage {
+    81→  id: string;
+    82→  url: string;
+    83→  alt: string | null;
+    84→  sortOrder: number;
+    85→}
+    86→
+    87→interface AvailabilityDate {
+    88→  id: string;
+    89→  apartmentId: string;
+    90→  date: string;
+    91→  status: string;
+    92→}
+    93→
+    94→interface Apartment {
+    95→  id: string;
+    96→  name: string;
+    97→  code: string;
+    98→  description: string;
+    99→  address: string;
+   100→  city: string;
+   101→  area: string;
+   102→  latitude: string | null;
+   103→  longitude: string | null;
+   104→  pricePerNight: number;
+   105→  weeklyPrice: number | null;
+   106→  monthlyPrice: number | null;
+   107→  cleaningFee: number | null;
+   108→  securityDeposit: number | null;
+   109→  bedrooms: number;
+   110→  bathrooms: number;
+   111→  maxGuests: number;
+   112→  rating: number;
+   113→  status: string;
+   114→  category: string;
+   115→  featured: boolean;
+   116→  newlyAdded: boolean;
+   117→  amenities: string;
+   118→  whatsappNumber: string;
+   119→  images: ApartmentImage[];
+   120→  availabilityDates: AvailabilityDate[];
+   121→}
+   122→
+   123→interface RelatedApartment {
+   124→  id: string;
+   125→  name: string;
+   126→  city: string;
+   127→  area: string;
+   128→  pricePerNight: number;
+   129→  bedrooms: number;
+   130→  bathrooms: number;
+   131→  maxGuests: number;
+   132→  rating: number;
+   133→  status: string;
+   134→  category: string;
+   135→  images: ApartmentImage[];
+   136→}
+   137→
+   138→// ─── Constants ───────────────────────────────────────────────────────────────
+   139→
+   140→const WHATSAPP_NUMBER = '233204700023';
+   141→
+   142→const AMENITY_ICON_MAP: Record<string, React.ElementType> = {
+   143→  'Wi-Fi': Wifi,
+   144→  'Smart TV': Tv,
+   145→  'Air Conditioning': Snowflake,
+   146→  'Kitchen': CookingPot,
+   147→  'Refrigerator': Refrigerator,
+   148→  'Microwave': Zap,
+   149→  'Washing Machine': Shirt,
+   150→  'Hot Water': Droplets,
+   151→  'Parking': Car,
+   152→  'Balcony': Sun,
+   153→  'Swimming Pool': Waves,
+   154→  'Security': ShieldCheck,
+   155→  'Generator': Zap,
+   156→  'Workspace': Laptop,
+   157→};
+   158→
+   159→const LANDMARKS = [
+   160→  { name: 'Ho Central Market', distance: '0.5 km' },
+   161→  { name: 'Volta Regional Hospital', distance: '1.2 km' },
+   162→  { name: 'Ho Airport', distance: '3.0 km' },
+   163→  { name: 'University of Health & Allied Sciences', distance: '2.8 km' },
+   164→];
+   165→
+   166→const CATEGORY_COLORS: Record<string, string> = {
+   167→  luxury: 'bg-amber-100 text-amber-800 border-amber-200',
+   168→  executive: 'bg-purple-100 text-purple-800 border-purple-200',
+   169→  standard: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+   170→  budget: 'bg-blue-100 text-blue-800 border-blue-200',
+   171→};
+   172→
+   173→const STATUS_COLORS: Record<string, string> = {
+   174→  available: 'bg-emerald-100 text-emerald-800',
+   175→  reserved: 'bg-amber-100 text-amber-800',
+   176→  booked: 'bg-red-100 text-red-800',
+   177→  maintenance: 'bg-gray-100 text-gray-500',
+   178→};
+   179→
+   180→const STATUS_CALENDAR_COLORS: Record<string, string> = {
+   181→  available: 'bg-white text-[#2F3A33] hover:bg-emerald-50',
+   182→  booked: 'bg-red-100 text-red-800 line-through',
+   183→  reserved: 'bg-amber-100 text-amber-800',
+   184→  maintenance: 'bg-gray-100 text-gray-400',
+   185→};
+   186→
+   187→const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+   188→const MONTH_NAMES = [
+   189→  'January', 'February', 'March', 'April', 'May', 'June',
+   190→  'July', 'August', 'September', 'October', 'November', 'December',
+   191→];
+   192→
+   193→// ─── Zod Schema ──────────────────────────────────────────────────────────────
+   194→
+   195→const enquirySchema = z.object({
+   196→  fullName: z.string().min(2, 'Full name is required (at least 2 characters)'),
+   197→  phoneNumber: z.string().min(8, 'Phone number must be at least 8 digits'),
+   198→  email: z.email('Please enter a valid email address'),
+   199→  checkIn: z.string().min(1, 'Check-in date is required'),
+   200→  checkOut: z.string().min(1, 'Check-out date is required'),
+   201→  guests: z.coerce.number().min(1, 'At least 1 guest is required'),
+   202→  specialRequests: z.string().optional(),
+   203→});
+   204→
+   205→type EnquiryFormData = z.infer<typeof enquirySchema>;
+   206→
+   207→// ─── Helpers ─────────────────────────────────────────────────────────────────
+   208→
+   209→function formatDateLong(dateStr: string): string {
+   210→  try {
+   211→    const d = parseISO(dateStr);
+   212→    return format(d, 'd MMMM yyyy');
+   213→  } catch {
+   214→    return dateStr;
+   215→  }
+   216→}
+   217→
+   218→function formatCurrency(amount: number): string {
+   219→  return `GH₵ ${amount.toLocaleString()}`;
+   220→}
+   221→
+   222→function getAmenityIcon(name: string): React.ElementType {
+   223→  return AMENITY_ICON_MAP[name] || Zap;
+   224→}
+   225→
+   226→function getStatusLabel(status: string): string {
+   227→  const labels: Record<string, string> = {
+   228→    available: 'Available',
+   229→    reserved: 'Reserved',
+   230→    booked: 'Booked',
+   231→    maintenance: 'Maintenance',
+   232→  };
+   233→  return labels[status] || status;
+   234→}
+   235→
+   236→function getCategoryLabel(category: string): string {
+   237→  const labels: Record<string, string> = {
+   238→    luxury: 'Luxury',
+   239→    executive: 'Executive',
+   240→    standard: 'Standard',
+   241→    budget: 'Budget',
+   242→  };
+   243→  return labels[category] || category;
+   244→}
+   245→
+   246→function getDayOfWeekMondayBased(date: Date): number {
+   247→  const day = getDay(date); // 0=Sun, 1=Mon, ..., 6=Sat
+   248→  return day === 0 ? 6 : day - 1;
+   249→}
+   250→
+   251→// ─── Sub-components ──────────────────────────────────────────────────────────
+   252→
+   253→function LoadingSkeleton() {
+   254→  return (
+   255→    <div className="min-h-screen bg-[#F8F7F3]">
+   256→      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+   257→        <Skeleton className="h-6 w-48 mb-6" />
+   258→        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+   259→          <div className="lg:col-span-2">
+   260→            <Skeleton className="aspect-[16/9] w-full rounded-2xl mb-4" />
+   261→            <div className="flex gap-2 mb-8">
+   262→              {[...Array(5)].map((_, i) => (
+   263→                <Skeleton key={i} className="h-20 w-20 rounded-lg flex-shrink-0" />
+   264→              ))}
+   265→            </div>
+   266→            <Skeleton className="h-8 w-64 mb-2" />
+   267→            <Skeleton className="h-4 w-32 mb-4" />
+   268→            <Skeleton className="h-4 w-48 mb-6" />
+   269→            <div className="space-y-3 mb-8">
+   270→              <Skeleton className="h-4 w-full" />
+   271→              <Skeleton className="h-4 w-full" />
+   272→              <Skeleton className="h-4 w-3/4" />
+   273→            </div>
+   274→          </div>
+   275→          <div>
+   276→            <Skeleton className="h-[500px] w-full rounded-2xl" />
+   277→          </div>
+   278→        </div>
+   279→      </div>
+   280→    </div>
+   281→  );
+   282→}
+   283→
+   284→function NotFoundState() {
+   285→  return (
+   286→    <div className="min-h-screen bg-[#F8F7F3] flex items-center justify-center">
+   287→      <motion.div
+   288→        initial={{ opacity: 0, y: 20 }}
+   289→        animate={{ opacity: 1, y: 0 }}
+   290→        className="text-center p-8"
+   291→      >
+   292→        <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+   293→          <AlertCircle className="w-12 h-12 text-red-500" />
+   294→        </div>
+   295→        <h1 className="text-2xl font-bold text-[#2F3A33] mb-2">Apartment Not Found</h1>
+   296→        <p className="text-gray-500 mb-6">
+   297→          The apartment you&apos;re looking for doesn&apos;t exist or has been removed.
+   298→        </p>
+   299→        <Link href="/airbnb">
+   300→          <Button className="bg-[#5F8768] hover:bg-[#4A6B52] text-white">
+   301→            <ArrowLeft className="w-4 h-4 mr-2" />
+   302→            Back to Apartments
+   303→          </Button>
+   304→        </Link>
+   305→      </motion.div>
+   306→    </div>
+   307→  );
+   308→}
+   309→
+   310→// ─── Custom Calendar Component ───────────────────────────────────────────────
+   311→
+   312→function CustomCalendar({
+   313→  availabilityDates,
+   314→  checkIn,
+   315→  checkOut,
+   316→  onSelectDate,
+   317→  onMonthChange,
+   318→}: {
+   319→  availabilityDates: AvailabilityDate[];
+   320→  checkIn: Date | null;
+   321→  checkOut: Date | null;
+   322→  onSelectDate: (date: Date) => void;
+   323→  onMonthChange: (monthStr: string) => void;
+   324→}) {
+   325→  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+   326→  const isMobile = useIsMobile();
+   327→
+   328→  // Notify parent of month changes for data fetching
+   329→  const handleMonthChange = (newMonth: Date) => {
+   330→    setCurrentMonth(newMonth);
+   331→    onMonthChange(format(newMonth, 'yyyy-MM'));
+   332→  };
+   333→
+   334→  const prevMonth = () => handleMonthChange(subMonths(currentMonth, 1));
+   335→  const nextMonth = () => handleMonthChange(addMonths(currentMonth, 1));
+   336→
+   337→  const availabilityMap = useMemo(() => {
+   338→    const map = new Map<string, string>();
+   339→    availabilityDates.forEach((d) => map.set(d.date, d.status));
+   340→    return map;
+   341→  }, [availabilityDates]);
+   342→
+   343→  const daysInMonth = eachDayOfInterval({
+   344→    start: startOfMonth(currentMonth),
+   345→    end: endOfMonth(currentMonth),
+   346→  });
+   347→
+   348→  const firstDayOffset = getDayOfWeekMondayBased(startOfMonth(currentMonth));
+   349→
+   350→
+   351→
+   352→  const isDateInRange = (date: Date) => {
+   353→    if (!checkIn || !checkOut) return false;
+   354→    const d = startOfDay(date);
+   355→    const ci = startOfDay(checkIn);
+   356→    const co = startOfDay(checkOut);
+   357→    return (d > ci && d < co);
+   358→  };
+   359→
+   360→  const isCheckInDate = (date: Date) => {
+   361→    if (!checkIn) return false;
+   362→    return date.toDateString() === checkIn.toDateString();
+   363→  };
+   364→
+   365→  const isCheckOutDate = (date: Date) => {
+   366→    if (!checkOut) return false;
+   367→    return date.toDateString() === checkOut.toDateString();
+   368→  };
+   369→
+   370→  const handleDateClick = (date: Date) => {
+   371→    const dateStr = format(date, 'yyyy-MM-dd');
+   372→    const status = availabilityMap.get(dateStr) || 'available';
+   373→    if (status !== 'available') return;
+   374→    if (isBefore(startOfDay(date), startOfDay(new Date()))) return;
+   375→    onSelectDate(date);
+   376→  };
+   377→
+   378→  const isDateDisabled = (date: Date) => {
+   379→    const dateStr = format(date, 'yyyy-MM-dd');
+   380→    const status = availabilityMap.get(dateStr) || 'available';
+   381→    return status !== 'available' || isBefore(startOfDay(date), startOfDay(new Date()));
+   382→  };
+   383→
+   384→  return (
+   385→    <div className="w-full">
+   386→      {/* Calendar Header */}
+   387→      <div className="flex items-center justify-between mb-4">
+   388→        <button
+   389→          onClick={prevMonth}
+   390→          className="p-2 rounded-lg hover:bg-[#D8D5CC]/50 transition-colors"
+   391→          aria-label="Previous month"
+   392→        >
+   393→          <ChevronLeft className="w-5 h-5 text-[#2F3A33]" />
+   394→        </button>
+   395→        <h3 className="text-lg font-semibold text-[#2F3A33]">
+   396→          {MONTH_NAMES[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+   397→        </h3>
+   398→        <button
+   399→          onClick={nextMonth}
+   400→          className="p-2 rounded-lg hover:bg-[#D8D5CC]/50 transition-colors"
+   401→          aria-label="Next month"
+   402→        >
+   403→          <ChevronRight className="w-5 h-5 text-[#2F3A33]" />
+   404→        </button>
+   405→      </div>
+   406→
+   407→      {/* Day Names */}
+   408→      <div className="grid grid-cols-7 mb-1">
+   409→        {DAY_NAMES.map((day) => (
+   410→          <div
+   411→            key={day}
+   412→            className="text-center text-xs font-medium text-gray-400 py-2"
+   413→          >
+   414→            {isMobile ? day.charAt(0) : day}
+   415→          </div>
+   416→        ))}
+   417→      </div>
+   418→
+   419→      {/* Date Cells */}
+   420→      <div className="grid grid-cols-7 gap-0.5">
+   421→        {/* Empty cells for offset */}
+   422→        {Array.from({ length: firstDayOffset }).map((_, i) => (
+   423→          <div key={`empty-${i}`} className="aspect-square" />
+   424→        ))}
+   425→
+   426→        {/* Date cells */}
+   427→        {daysInMonth.map((date) => {
+   428→          const dateStr = format(date, 'yyyy-MM-dd');
+   429→          const status = availabilityMap.get(dateStr) || 'available';
+   430→          const disabled = isDateDisabled(date);
+   431→          const inRange = isDateInRange(date);
+   432→          const isCI = isCheckInDate(date);
+   433→          const isCO = isCheckOutDate(date);
+   434→          const today = isToday(date);
+   435→
+   436→          return (
+   437→            <button
+   438→              key={dateStr}
+   439→              onClick={() => handleDateClick(date)}
+   440→              disabled={disabled}
+   441→              className={`
+   442→                relative aspect-square flex items-center justify-center text-sm rounded-lg
+   443→                transition-all duration-150 font-medium
+   444→                ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
+   445→                ${isCI ? 'bg-[#5F8768] text-white rounded-lg font-bold shadow-md' : ''}
+   446→                ${isCO ? 'bg-[#5F8768] text-white rounded-lg font-bold shadow-md' : ''}
+   447→                ${inRange && !isCI && !isCO ? 'bg-[#5F8768]/15 text-[#2F3A33]' : ''}
+   448→                ${!disabled && !isCI && !isCO && !inRange ? STATUS_CALENDAR_COLORS[status] || 'bg-white' : ''}
+   449→                ${today && !isCI && !isCO ? 'ring-2 ring-[#5F8768] ring-offset-1' : ''}
+   450→                hover:scale-105
+   451→              `}
+   452→              aria-label={`${format(date, 'MMM d, yyyy')} - ${status}`}
+   453→            >
+   454→              {format(date, 'd')}
+   455→              {status === 'booked' && !isCI && !isCO && (
+   456→                <span className="absolute text-[8px] font-bold text-red-500">×</span>
+   457→              )}
+   458→            </button>
+   459→          );
+   460→        })}
+   461→      </div>
+   462→
+   463→      {/* Legend */}
+   464→      <div className="flex flex-wrap gap-4 mt-4 text-xs text-gray-500">
+   465→        <div className="flex items-center gap-1.5">
+   466→          <div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-200" />
+   467→          Available
+   468→        </div>
+   469→        <div className="flex items-center gap-1.5">
+   470→          <div className="w-3 h-3 rounded bg-red-100 border border-red-200" />
+   471→          Booked
+   472→        </div>
+   473→        <div className="flex items-center gap-1.5">
+   474→          <div className="w-3 h-3 rounded bg-amber-100 border border-amber-200" />
+   475→          Reserved
+   476→        </div>
+   477→        <div className="flex items-center gap-1.5">
+   478→          <div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" />
+   479→          Maintenance
+   480→        </div>
+   481→      </div>
+   482→    </div>
+   483→  );
+   484→}
+   485→
+   486→// ─── Full Screen Gallery ─────────────────────────────────────────────────────
+   487→
+   488→function FullscreenGallery({
+   489→  images,
+   490→  currentIndex,
+   491→  onClose,
+   492→  onPrev,
+   493→  onNext,
+   494→}: {
+   495→  images: ApartmentImage[];
+   496→  currentIndex: number;
+   497→  onClose: () => void;
+   498→  onPrev: () => void;
+   499→  onNext: () => void;
+   500→}) {
+   501→  const touchStartX = useRef(0);
+   502→
+   503→  useEffect(() => {
+   504→    const handleKeyDown = (e: KeyboardEvent) => {
+   505→      if (e.key === 'Escape') onClose();
+   506→      if (e.key === 'ArrowLeft') onPrev();
+   507→      if (e.key === 'ArrowRight') onNext();
+   508→    };
+   509→    document.addEventListener('keydown', handleKeyDown);
+   510→    document.body.style.overflow = 'hidden';
+   511→    return () => {
+   512→      document.removeEventListener('keydown', handleKeyDown);
+   513→      document.body.style.overflow = '';
+   514→    };
+   515→  }, [onClose, onPrev, onNext]);
+   516→
+   517→  const handleTouchStart = (e: React.TouchEvent) => {
+   518→    touchStartX.current = e.touches[0].clientX;
+   519→  };
+   520→
+   521→  const handleTouchEnd = (e: React.TouchEvent) => {
+   522→    const diff = touchStartX.current - e.changedTouches[0].clientX;
+   523→    if (Math.abs(diff) > 50) {
+   524→      if (diff > 0) onNext();
+   525→      else onPrev();
+   526→    }
+   527→  };
+   528→
+   529→  return (
+   530→    <motion.div
+   531→      initial={{ opacity: 0 }}
+   532→      animate={{ opacity: 1 }}
+   533→      exit={{ opacity: 0 }}
+   534→      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+   535→      onClick={onClose}
+   536→    >
+   537→      {/* Close button */}
+   538→      <button
+   539→        onClick={onClose}
+   540→        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+   541→        aria-label="Close gallery"
+   542→      >
+   543→        <X className="w-6 h-6 text-white" />
+   544→      </button>
+   545→
+   546→      {/* Counter */}
+   547→      <div className="absolute top-4 left-4 z-10 text-white/80 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+   548→        {currentIndex + 1} / {images.length}
+   549→      </div>
+   550→
+   551→      {/* Navigation arrows - desktop */}
+   552→      <button
+   553→        onClick={(e) => { e.stopPropagation(); onPrev(); }}
+   554→        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+   555→        aria-label="Previous image"
+   556→      >
+   557→        <ChevronLeft className="w-6 h-6 text-white" />
+   558→      </button>
+   559→      <button
+   560→        onClick={(e) => { e.stopPropagation(); onNext(); }}
+   561→        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+   562→        aria-label="Next image"
+   563→      >
+   564→        <ChevronRight className="w-6 h-6 text-white" />
+   565→      </button>
+   566→
+   567→      {/* Image */}
+   568→      <motion.div
+   569→        key={currentIndex}
+   570→        initial={{ opacity: 0, scale: 0.95 }}
+   571→        animate={{ opacity: 1, scale: 1 }}
+   572→        exit={{ opacity: 0, scale: 0.95 }}
+   573→        transition={{ duration: 0.2 }}
+   574→        className="w-full h-full flex items-center justify-center p-8 md:p-16"
+   575→        onClick={(e) => e.stopPropagation()}
+   576→        onTouchStart={handleTouchStart}
+   577→        onTouchEnd={handleTouchEnd}
+   578→      >
+   579→        <img
+   580→          src={images[currentIndex]?.url}
+   581→          alt={images[currentIndex]?.alt || 'Apartment image'}
+   582→          className="max-w-full max-h-full object-contain rounded-lg"
+   583→        />
+   584→      </motion.div>
+   585→    </motion.div>
+   586→  );
+   587→}
+   588→
+   589→// ─── Main Page Component ─────────────────────────────────────────────────────
+   590→
+   591→export default function ApartmentDetailPage() {
+   592→  const params = useParams();
+   593→  const router = useRouter();
+   594→  const { toast } = useToast();
+   595→  const isMobile = useIsMobile();
+   596→  const id = params.id as string;
+   597→
+   598→  // State
+   599→  const [apartment, setApartment] = useState<Apartment | null>(null);
+   600→  const [relatedApartments, setRelatedApartments] = useState<RelatedApartment[]>([]);
+   601→  const [loading, setLoading] = useState(true);
+   602→  const [notFound, setNotFound] = useState(false);
+   603→  const [heroIndex, setHeroIndex] = useState(0);
+   604→  const [showGallery, setShowGallery] = useState(false);
+   605→  const [showDescription, setShowDescription] = useState(false);
+   606→  const [calendarAvailability, setCalendarAvailability] = useState<AvailabilityDate[]>([]);
+   607→  const [loadingAvailability, setLoadingAvailability] = useState(false);
+   608→  const [checkIn, setCheckIn] = useState<Date | null>(null);
+   609→  const [checkOut, setCheckOut] = useState<Date | null>(null);
+   610→  const [availabilityResult, setAvailabilityResult] = useState<{
+   611→    available: boolean;
+   612→    unavailableDates: string[];
+   613→    message: string;
+   614→  } | null>(null);
+   615→  const [checkingAvailability, setCheckingAvailability] = useState(false);
+   616→  const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+   617→
+   618→  // Fetch apartment data
+   619→  useEffect(() => {
+   620→    async function fetchApartment() {
+   621→      try {
+   622→        const res = await fetch(`/api/apartments/${id}`);
+   623→        if (!res.ok) {
+   624→          setNotFound(true);
+   625→          return;
+   626→        }
+   627→        const data = await res.json();
+   628→        setApartment(data);
+   629→        setCalendarAvailability(data.availabilityDates || []);
+   630→      } catch {
+   631→        setNotFound(true);
+   632→      } finally {
+   633→        setLoading(false);
+   634→      }
+   635→    }
+   636→    if (id) fetchApartment();
+   637→  }, [id]);
+   638→
+   639→  // Fetch related apartments
+   640→  useEffect(() => {
+   641→    if (!apartment) return;
+   642→    async function fetchRelated() {
+   643→      try {
+   644→        const res = await fetch(
+   645→          `/api/apartments?city=${encodeURIComponent(apartment.city)}&limit=3&excludeId=${id}`
+   646→        );
+   647→        if (res.ok) {
+   648→          const data = await res.json();
+   649→          setRelatedApartments(
+   650→            data.apartments.filter((a: RelatedApartment) => a.id !== id).slice(0, 3)
+   651→          );
+   652→        }
+   653→      } catch {
+   654→        // silently fail
+   655→      }
+   656→    }
+   657→    fetchRelated();
+   658→  }, [apartment, id]);
+   659→
+   660→  // Fetch calendar availability when month changes
+   661→  const [calendarMonth, setCalendarMonth] = useState(format(new Date(), 'yyyy-MM'));
+   662→  useEffect(() => {
+   663→    if (!apartment) return;
+   664→    async function fetchAvailability() {
+   665→      setLoadingAvailability(true);
+   666→      try {
+   667→        const res = await fetch(`/api/apartments/${id}/availability?month=${calendarMonth}`);
+   668→        if (res.ok) {
+   669→          const data = await res.json();
+   670→          setCalendarAvailability(data.dates || []);
+   671→        }
+   672→      } catch {
+   673→        // silently fail
+   674→      } finally {
+   675→        setLoadingAvailability(false);
+   676→      }
+   677→    }
+   678→    fetchAvailability();
+   679→  }, [apartment, id, calendarMonth]);
+   680→
+   681→  // Gallery navigation
+   682→  const nextImage = useCallback(() => {
+   683→    if (!apartment) return;
+   684→    setHeroIndex((i) => (i + 1) % apartment.images.length);
+   685→  }, [apartment]);
+   686→
+   687→  const prevImage = useCallback(() => {
+   688→    if (!apartment) return;
+   689→    setHeroIndex((i) => (i - 1 + apartment.images.length) % apartment.images.length);
+   690→  }, [apartment]);
+   691→
+   692→  // Calendar date selection
+   693→  const handleSelectDate = useCallback(
+   694→    (date: Date) => {
+   695→      if (!checkIn || (checkIn && checkOut)) {
+   696→        // Start new selection
+   697→        setCheckIn(date);
+   698→        setCheckOut(null);
+   699→        setAvailabilityResult(null);
+   700→      } else {
+   701→        // Set check-out
+   702→        if (isAfter(date, checkIn) || date.toDateString() === checkIn.toDateString()) {
+   703→          setCheckOut(date);
+   704→          setAvailabilityResult(null);
+   705→        } else {
+   706→          // If date is before check-in, reset
+   707→          setCheckIn(date);
+   708→          setCheckOut(null);
+   709→          setAvailabilityResult(null);
+   710→        }
+   711→      }
+   712→    },
+   713→    [checkIn, checkOut]
+   714→  );
+   715→
+   716→  // Check availability
+   717→  const checkAvailability = useCallback(async () => {
+   718→    if (!checkIn || !checkOut || !apartment) return;
+   719→    setCheckingAvailability(true);
+   720→    try {
+   721→      const res = await fetch(`/api/apartments/${id}/availability`, {
+   722→        method: 'POST',
+   723→        headers: { 'Content-Type': 'application/json' },
+   724→        body: JSON.stringify({
+   725→          checkIn: format(checkIn, 'yyyy-MM-dd'),
+   726→          checkOut: format(checkOut, 'yyyy-MM-dd'),
+   727→        }),
+   728→      });
+   729→      const data = await res.json();
+   730→      setAvailabilityResult(data);
+   731→    } catch {
+   732→      toast({
+   733→        title: 'Error',
+   734→        description: 'Failed to check availability. Please try again.',
+   735→        variant: 'destructive',
+   736→      });
+   737→    } finally {
+   738→      setCheckingAvailability(false);
+   739→    }
+   740→  }, [checkIn, checkOut, apartment, id, toast]);
+   741→
+   742→  // Auto-check availability when both dates selected
+   743→  useEffect(() => {
+   744→    if (checkIn && checkOut) {
+   745→      const timer = setTimeout(checkAvailability, 300);
+   746→      return () => clearTimeout(timer);
+   747→    }
+   748→  }, [checkIn, checkOut, checkAvailability]);
+   749→
+   750→  // Price calculation
+   751→  const priceCalc = useMemo(() => {
+   752→    if (!apartment || !checkIn || !checkOut) return null;
+   753→    const nights = differenceInDays(checkOut, checkIn);
+   754→    if (nights <= 0) return null;
+   755→    const baseTotal = nights * apartment.pricePerNight;
+   756→    let weeklyDiscount = 0;
+   757→    if (apartment.weeklyPrice && nights >= 7) {
+   758→      const fullWeeklyRate = apartment.weeklyPrice * Math.floor(nights / 7);
+   759→      const remainingNights = nights % 7;
+   760→      const remainingRate = remainingNights * apartment.pricePerNight;
+   761→      weeklyDiscount = baseTotal - (fullWeeklyRate + remainingRate);
+   762→    }
+   763→    return {
+   764→      nights,
+   765→      baseTotal,
+   766→      weeklyDiscount,
+   767→      finalTotal: baseTotal - weeklyDiscount,
+   768→      cleaningFee: apartment.cleaningFee || 0,
+   769→      securityDeposit: apartment.securityDeposit || 0,
+   770→      grandTotal: baseTotal - weeklyDiscount + (apartment.cleaningFee || 0) + (apartment.securityDeposit || 0),
+   771→    };
+   772→  }, [apartment, checkIn, checkOut]);
+   773→
+   774→  // WhatsApp URL construction
+   775→  const whatsappUrl = useMemo(() => {
+   776→    if (!apartment || !checkIn || !checkOut) return null;
+   777→    const message = `Hello Dwell Chronicles,
+   778→
+   779→I would like to book the following apartment:
+   780→
+   781→Apartment: ${apartment.name}
+   782→Location: ${apartment.city}, Volta Region
+   783→Check-in: ${formatDateLong(format(checkIn, 'yyyy-MM-dd'))}
+   784→Check-out: ${formatDateLong(format(checkOut, 'yyyy-MM-dd'))}
+   785→Guests: ${apartment.maxGuests}
+   786→
+   787→Kindly confirm if it is still available.
+   788→
+   789→Thank you.`;
+   790→    return `https://wa.me/${apartment.whatsappNumber || WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+   791→  }, [apartment, checkIn, checkOut]);
+   792→
+   793→  // Enquiry form
+   794→  const enquiryForm = useForm<EnquiryFormData>({
+   795→    resolver: zodResolver(enquirySchema),
+   796→    defaultValues: {
+   797→      fullName: '',
+   798→      phoneNumber: '',
+   799→      email: '',
+   800→      checkIn: '',
+   801→      checkOut: '',
+   802→      guests: apartment?.maxGuests || 1,
+   803→      specialRequests: '',
+   804→    },
+   805→  });
+   806→
+   807→  // Sync calendar dates to enquiry form
+   808→  useEffect(() => {
+   809→    if (checkIn) {
+   810→      enquiryForm.setValue('checkIn', format(checkIn, 'yyyy-MM-dd'));
+   811→    }
+   812→    if (checkOut) {
+   813→      enquiryForm.setValue('checkOut', format(checkOut, 'yyyy-MM-dd'));
+   814→    }
+   815→    if (apartment) {
+   816→      enquiryForm.setValue('guests', apartment.maxGuests);
+   817→    }
+   818→  }, [checkIn, checkOut, apartment, enquiryForm]);
+   819→
+   820→  const onEnquirySubmit = async (data: EnquiryFormData) => {
+   821→    if (!apartment) return;
+   822→    setSubmittingEnquiry(true);
+   823→    try {
+   824→      const res = await fetch('/api/enquiries', {
+   825→        method: 'POST',
+   826→        headers: { 'Content-Type': 'application/json' },
+   827→        body: JSON.stringify({ ...data, apartmentId: apartment.id }),
+   828→      });
+   829→      if (res.ok) {
+   830→        toast({
+   831→          title: 'Inquiry Sent!',
+   832→          description: 'We will get back to you shortly.',
+   833→        });
+   834→        enquiryForm.reset();
+   835→      } else {
+   836→        const err = await res.json();
+   837→        toast({
+   838→          title: 'Error',
+   839→          description: err.error || 'Failed to send inquiry.',
+   840→          variant: 'destructive',
+   841→        });
+   842→      }
+   843→    } catch {
+   844→      toast({
+   845→        title: 'Error',
+   846→        description: 'Something went wrong. Please try again.',
+   847→        variant: 'destructive',
+   848→      });
+   849→    } finally {
+   850→      setSubmittingEnquiry(false);
+   851→    }
+   852→  };
+   853→
+   854→  // Parse amenities
+   855→  const amenitiesList: string[] = useMemo(() => {
+   856→    if (!apartment) return [];
+   857→    try {
+   858→      const parsed = JSON.parse(apartment.amenities);
+   859→      return Array.isArray(parsed) ? parsed : [];
+   860→    } catch {
+   861→      return apartment.amenities.split(',').map((a) => a.trim());
+   862→    }
+   863→  }, [apartment]);
+   864→
+   865→  // ─── Render States ───────────────────────────────────────────────────────
+   866→
+   867→  if (loading) return <LoadingSkeleton />;
+   868→  if (notFound || !apartment) return <NotFoundState />;
+   869→  if (apartment.images.length === 0) {
+   870→    return (
+   871→      <div className="min-h-screen bg-[#F8F7F3] flex items-center justify-center">
+   872→        <div className="text-center p-8">
+   873→          <ImageIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+   874→          <h1 className="text-2xl font-bold text-[#2F3A33] mb-2">No Images Available</h1>
+   875→          <p className="text-gray-500 mb-6">This apartment has no photos yet.</p>
+   876→          <Link href="/airbnb">
+   877→            <Button className="bg-[#5F8768] hover:bg-[#4A6B52] text-white">
+   878→              <ArrowLeft className="w-4 h-4 mr-2" />
+   879→              Back to Apartments
+   880→            </Button>
+   881→          </Link>
+   882→        </div>
+   883→      </div>
+   884→    );
+   885→  }
+   886→
+   887→  const currentImage = apartment.images[heroIndex];
+   888→
+   889→  return (
+   890→    <div className="min-h-screen bg-[#F8F7F3]">
+   891→      <motion.div
+   892→        initial={{ opacity: 0 }}
+   893→        animate={{ opacity: 1 }}
+   894→        transition={{ duration: 0.4 }}
+   895→        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20"
+   896→      >
+   897→        {/* Back Button */}
+   898→        <motion.div
+   899→          initial={{ opacity: 0, x: -20 }}
+   900→          animate={{ opacity: 1, x: 0 }}
+   901→          transition={{ delay: 0.1 }}
+   902→        >
+   903→          <Link
+   904→            href="/airbnb"
+   905→            className="inline-flex items-center gap-2 text-sm text-[#5F8768] hover:text-[#4A6B52] transition-colors mb-6 group"
+   906→          >
+   907→            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+   908→            Back to Apartments
+   909→          </Link>
+   910→        </motion.div>
+   911→
+   912→        {/* ─── 1. Image Gallery Section ──────────────────────────────────── */}
+   913→        <motion.section
+   914→          initial={{ opacity: 0, y: 20 }}
+   915→          animate={{ opacity: 1, y: 0 }}
+   916→          transition={{ delay: 0.15 }}
+   917→          className="mb-8"
+   918→        >
+   919→          {/* Hero Image */}
+   920→          <div
+   921→            className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden cursor-pointer group"
+   922→            onClick={() => setShowGallery(true)}
+   923→            role="button"
+   924→            tabIndex={0}
+   925→            onKeyDown={(e) => e.key === 'Enter' && setShowGallery(true)}
+   926→            aria-label="Open full gallery"
+   927→          >
+   928→            <AnimatePresence mode="wait">
+   929→              <motion.img
+   930→                key={heroIndex}
+   931→                src={currentImage?.url}
+   932→                alt={currentImage?.alt || `${apartment.name} - Image ${heroIndex + 1}`}
+   933→                className="absolute inset-0 w-full h-full object-cover"
+   934→                initial={{ opacity: 0, scale: 1.02 }}
+   935→                animate={{ opacity: 1, scale: 1 }}
+   936→                exit={{ opacity: 0 }}
+   937→                transition={{ duration: 0.3 }}
+   938→              />
+   939→            </AnimatePresence>
+   940→            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+   941→            <div className="absolute bottom-4 right-4 bg-black/60 text-white text-sm px-3 py-1.5 rounded-full flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+   942→              <ImageIcon className="w-4 h-4" />
+   943→              {apartment.images.length} photos
+   944→            </div>
+   945→          </div>
+   946→
+   947→          {/* Thumbnails */}
+   948→          <div className="flex gap-2 mt-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+   949→            {apartment.images.map((img, idx) => (
+   950→              <button
+   951→                key={img.id}
+   952→                onClick={() => setHeroIndex(idx)}
+   953→                className={`
+   954→                  flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all duration-200
+   955→                  ${idx === heroIndex
+   956→                    ? 'ring-2 ring-[#5F8768] ring-offset-2 shadow-md'
+   957→                    : 'opacity-70 hover:opacity-100'
+   958→                  }
+   959→                `}
+   960→                aria-label={`View image ${idx + 1}`}
+   961→              >
+   962→                <img
+   963→                  src={img.url}
+   964→                  alt={img.alt || `Thumbnail ${idx + 1}`}
+   965→                  className="w-full h-full object-cover"
+   966→                />
+   967→              </button>
+   968→            ))}
+   969→          </div>
+   970→        </motion.section>
+   971→
+   972→        {/* ─── 2. Apartment Info Section ─────────────────────────────────── */}
+   973→        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+   974→          {/* Left Column */}
+   975→          <motion.div
+   976→            initial={{ opacity: 0, y: 20 }}
+   977→            animate={{ opacity: 1, y: 0 }}
+   978→            transition={{ delay: 0.2 }}
+   979→            className="lg:col-span-2 space-y-6"
+   980→          >
+   981→            {/* Badges + Title */}
+   982→            <div>
+   983→              <div className="flex flex-wrap items-center gap-2 mb-3">
+   984→                <Badge
+   985→                  className={`${CATEGORY_COLORS[apartment.category] || 'bg-gray-100 text-gray-600'} text-xs font-medium px-3 py-1 rounded-full border`}
+   986→                >
+   987→                  {getCategoryLabel(apartment.category)}
+   988→                </Badge>
+   989→                <Badge
+   990→                  className={`${STATUS_COLORS[apartment.status] || 'bg-gray-100 text-gray-600'} text-xs font-medium px-3 py-1 rounded-full`}
+   991→                >
+   992→                  {getStatusLabel(apartment.status)}
+   993→                </Badge>
+   994→              </div>
+   995→              <h1 className="text-2xl sm:text-3xl font-bold text-[#2F3A33] leading-tight">
+   996→                {apartment.name}
+   997→              </h1>
+   998→              <p className="text-sm text-gray-400 mt-1">Property ID: {apartment.code}</p>
+   999→              <div className="flex items-center gap-1.5 mt-2 text-gray-600">
+  1000→                <MapPin className="w-4 h-4 text-[#5F8768]" />
+  1001→                <span className="text-sm">
+  1002→                  {apartment.area}, {apartment.city}, Volta Region, Ghana
+  1003→                </span>
+  1004→              </div>
+  1005→            </div>
+  1006→
+  1007→            <Separator />
+  1008→
+  1009→            {/* Description */}
+  1010→            <div>
+  1011→              <h2 className="text-lg font-semibold text-[#2F3A33] mb-3">About this place</h2>
+  1012→              <div className="relative">
+  1013→                <p
+  1014→                  className={`text-gray-700 leading-relaxed whitespace-pre-line ${
+  1015→                    !showDescription && apartment.description.length > 300
+  1016→                      ? 'line-clamp-3'
+  1017→                      : ''
+  1018→                  }`}
+  1019→                >
+  1020→                  {apartment.description}
+  1021→                </p>
+  1022→                {apartment.description.length > 300 && (
+  1023→                  <button
+  1024→                    onClick={() => setShowDescription(!showDescription)}
+  1025→                    className="mt-2 text-[#5F8768] font-medium text-sm flex items-center gap-1 hover:underline"
+  1026→                  >
+  1027→                    {showDescription ? (
+  1028→                      <>
+  1029→                        Show Less <ChevronUp className="w-4 h-4" />
+  1030→                      </>
+  1031→                    ) : (
+  1032→                      <>
+  1033→                        Show More <ChevronDown className="w-4 h-4" />
+  1034→                      </>
+  1035→                    )}
+  1036→                  </button>
+  1037→                )}
+  1038→              </div>
+  1039→            </div>
+  1040→
+  1041→            {/* Address Details */}
+  1042→            <div className="space-y-2">
+  1043→              <div className="flex items-start gap-2 text-sm text-gray-600">
+  1044→                <MapPin className="w-4 h-4 mt-0.5 text-[#5F8768] flex-shrink-0" />
+  1045→                <span>{apartment.address}, {apartment.city}, Volta Region, Ghana</span>
+  1046→              </div>
+  1047→              <p className="text-sm text-gray-400 ml-6">
+  1048→                Approximately 2.5 km from city centre
+  1049→              </p>
+  1050→            </div>
+  1051→
+  1052→            {/* Google Maps Embed */}
+  1053→            {apartment.latitude && apartment.longitude && (
+  1054→              <div className="rounded-xl overflow-hidden border border-[#D8D5CC]">
+  1055→                <iframe
+  1056→                  src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d${apartment.longitude}!3d${apartment.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzYnMzYuMCJOIDDCsDI4JzEyLjAiRQ!5e0!3m2!1sen!2sgh!4v1234567890`}
+  1057→                  width="100%"
+  1058→                  height="400"
+  1059→                  style={{ border: 0 }}
+  1060→                  allowFullScreen
+  1061→                  loading="lazy"
+  1062→                  referrerPolicy="no-referrer-when-downgrade"
+  1063→                  title="Apartment Location"
+  1064→                  className="w-full"
+  1065→                />
+  1066→              </div>
+  1067→            )}
+  1068→
+  1069→            {/* Nearby Landmarks */}
+  1070→            <div>
+  1071→              <h3 className="text-lg font-semibold text-[#2F3A33] mb-3">Nearby Landmarks</h3>
+  1072→              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  1073→                {LANDMARKS.map((landmark) => (
+  1074→                  <div
+  1075→                    key={landmark.name}
+  1076→                    className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#D8D5CC]/60"
+  1077→                  >
+  1078→                    <div className="flex items-center gap-2.5">
+  1079→                      <div className="w-8 h-8 rounded-full bg-[#5F8768]/10 flex items-center justify-center">
+  1080→                        <MapPin className="w-4 h-4 text-[#5F8768]" />
+  1081→                      </div>
+  1082→                      <span className="text-sm font-medium text-[#2F3A33]">
+  1083→                        {landmark.name}
+  1084→                      </span>
+  1085→                    </div>
+  1086→                    <span className="text-xs font-medium text-[#5F8768] bg-[#5F8768]/10 px-2 py-1 rounded-full">
+  1087→                      {landmark.distance}
+  1088→                    </span>
+  1089→                  </div>
+  1090→                ))}
+  1091→              </div>
+  1092→            </div>
+  1093→
+  1094→            <Separator />
+  1095→
+  1096→            {/* ─── 5. Amenities Section ──────────────────────────────────── */}
+  1097→            <div>
+  1098→              <h2 className="text-lg font-semibold text-[#2F3A33] mb-4">Amenities</h2>
+  1099→              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+  1100→                {amenitiesList.map((amenity) => {
+  1101→                  const IconComponent = getAmenityIcon(amenity);
+  1102→                  return (
+  1103→                    <motion.div
+  1104→                      key={amenity}
+  1105→                      whileHover={{ y: -2 }}
+  1106→                      className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#D8D5CC]/60 hover:border-[#5F8768]/30 transition-colors"
+  1107→                    >
+  1108→                      <div className="w-9 h-9 rounded-lg bg-[#5F8768]/10 flex items-center justify-center flex-shrink-0">
+  1109→                        <IconComponent className="w-4.5 h-4.5 text-[#5F8768]" />
+  1110→                      </div>
+  1111→                      <span className="text-sm text-[#2F3A33] font-medium">{amenity}</span>
+  1112→                    </motion.div>
+  1113→                  );
+  1114→                })}
+  1115→              </div>
+  1116→            </div>
+  1117→
+  1118→            <Separator />
+  1119→
+  1120→            {/* ─── 3. Availability Calendar Section ──────────────────────── */}
+  1121→            <div>
+  1122→              <h2 className="text-lg font-semibold text-[#2F3A33] mb-4 flex items-center gap-2">
+  1123→                <CalendarDays className="w-5 h-5 text-[#5F8768]" />
+  1124→                Check Availability
+  1125→              </h2>
+  1126→
+  1127→              <div className="bg-white rounded-2xl border border-[#D8D5CC]/60 p-5 sm:p-6">
+  1128→                {loadingAvailability ? (
+  1129→                  <div className="flex items-center justify-center py-12">
+  1130→                    <Loader2 className="w-8 h-8 text-[#5F8768] animate-spin" />
+  1131→                  </div>
+  1132→                ) : (
+  1133→                  <CustomCalendar
+  1134→                    availabilityDates={calendarAvailability}
+  1135→                    checkIn={checkIn}
+  1136→                    checkOut={checkOut}
+  1137→                    onSelectDate={handleSelectDate}
+  1138→                    onMonthChange={setCalendarMonth}
+  1139→                  />
+  1140→                )}
+  1141→
+  1142→                {/* Selected dates display */}
+  1143→                <div className="mt-4 flex flex-wrap gap-3">
+  1144→                  <div className="flex-1 min-w-[140px]">
+  1145→                    <label className="text-xs text-gray-400 block mb-1">Check-in</label>
+  1146→                    <div className="text-sm font-medium text-[#2F3A33] bg-[#F8F7F3] rounded-lg px-3 py-2">
+  1147→                      {checkIn ? format(checkIn, 'dd MMM yyyy') : 'Select date'}
+  1148→                    </div>
+  1149→                  </div>
+  1150→                  <div className="flex-1 min-w-[140px]">
+  1151→                    <label className="text-xs text-gray-400 block mb-1">Check-out</label>
+  1152→                    <div className="text-sm font-medium text-[#2F3A33] bg-[#F8F7F3] rounded-lg px-3 py-2">
+  1153→                      {checkOut ? format(checkOut, 'dd MMM yyyy') : 'Select date'}
+  1154→                    </div>
+  1155→                  </div>
+  1156→                </div>
+  1157→
+  1158→                {/* Availability Result */}
+  1159→                {checkingAvailability && (
+  1160→                  <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+  1161→                    <Loader2 className="w-4 h-4 animate-spin" />
+  1162→                    Checking availability...
+  1163→                  </div>
+  1164→                )}
+  1165→
+  1166→                {availabilityResult && !checkingAvailability && (
+  1167→                  <motion.div
+  1168→                    initial={{ opacity: 0, y: 10 }}
+  1169→                    animate={{ opacity: 1, y: 0 }}
+  1170→                    className="mt-4"
+  1171→                  >
+  1172→                    {availabilityResult.available ? (
+  1173→                      <div className="flex items-start gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+  1174→                        <Check className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+  1175→                        <div>
+  1176→                          <p className="text-sm font-medium text-emerald-800">
+  1177→                            ✓ This apartment is available for your selected dates.
+  1178→                          </p>
+  1179→                          {priceCalc && (
+  1180→                            <div className="mt-2 text-sm text-emerald-700 space-y-1">
+  1181→                              <p>
+  1182→                                {priceCalc.nights} night{priceCalc.nights !== 1 ? 's' : ''} ×{' '}
+  1183→                                {formatCurrency(apartment.pricePerNight)} ={' '}
+  1184→                                <span className="font-semibold">
+  1185→                                  {formatCurrency(priceCalc.finalTotal)}
+  1186→                                </span>
+  1187→                              </p>
+  1188→                              {apartment.cleaningFee && (
+  1189→                                <p className="text-xs">
+  1190→                                  + Cleaning fee: {formatCurrency(apartment.cleaningFee)}
+  1191→                                </p>
+  1192→                              )}
+  1193→                              {apartment.securityDeposit && (
+  1194→                                <p className="text-xs">
+  1195→                                  + Security deposit: {formatCurrency(apartment.securityDeposit)}
+  1196→                                </p>
+  1197→                              )}
+  1198→                              <Separator className="my-2 !bg-emerald-200" />
+  1199→                              <p className="font-bold text-emerald-900">
+  1200→                                Total: {formatCurrency(priceCalc.grandTotal)}
+  1201→                              </p>
+  1202→                            </div>
+  1203→                          )}
+  1204→                        </div>
+  1205→                      </div>
+  1206→                    ) : (
+  1207→                      <div className="flex items-start gap-2 p-4 rounded-xl bg-red-50 border border-red-200">
+  1208→                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+  1209→                        <div>
+  1210→                          <p className="text-sm font-medium text-red-800">
+  1211→                            Sorry, this apartment is unavailable for the selected dates.
+  1212→                          </p>
+  1213→                          {availabilityResult.unavailableDates.length > 0 && (
+  1214→                            <div className="mt-2 flex flex-wrap gap-1.5">
+  1215→                              {availabilityResult.unavailableDates.map((d) => (
+  1216→                                <span
+  1217→                                  key={d}
+  1218→                                  className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full"
+  1219→                                >
+  1220→                                  {formatDateLong(d)}
+  1221→                                </span>
+  1222→                              ))}
+  1223→                            </div>
+  1224→                          )}
+  1225→                        </div>
+  1226→                      </div>
+  1227→                    )}
+  1228→                  </motion.div>
+  1229→                )}
+  1230→              </div>
+  1231→            </div>
+  1232→
+  1233→            <Separator />
+  1234→
+  1235→            {/* ─── 6. Inquiry Form Section ───────────────────────────────── */}
+  1236→            <div>
+  1237→              <h2 className="text-lg font-semibold text-[#2F3A33] mb-4">Send an Inquiry</h2>
+  1238→              <form
+  1239→                onSubmit={enquiryForm.handleSubmit(onEnquirySubmit)}
+  1240→                className="bg-white rounded-2xl border border-[#D8D5CC]/60 p-5 sm:p-6 space-y-4"
+  1241→              >
+  1242→                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  1243→                  {/* Full Name */}
+  1244→                  <div className="space-y-1.5">
+  1245→                    <Label htmlFor="fullName" className="text-sm text-[#2F3A33]">
+  1246→                      Full Name *
+  1247→                    </Label>
+  1248→                    <div className="relative">
+  1249→                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+  1250→                      <Input
+  1251→                        id="fullName"
+  1252→                        placeholder="John Doe"
+  1253→                        className="pl-9 border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1254→                        {...enquiryForm.register('fullName')}
+  1255→                      />
+  1256→                    </div>
+  1257→                    {enquiryForm.formState.errors.fullName && (
+  1258→                      <p className="text-xs text-red-500">
+  1259→                        {enquiryForm.formState.errors.fullName.message}
+  1260→                      </p>
+  1261→                    )}
+  1262→                  </div>
+  1263→
+  1264→                  {/* Phone Number */}
+  1265→                  <div className="space-y-1.5">
+  1266→                    <Label htmlFor="phoneNumber" className="text-sm text-[#2F3A33]">
+  1267→                      Phone Number *
+  1268→                    </Label>
+  1269→                    <div className="relative">
+  1270→                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+  1271→                      <Input
+  1272→                        id="phoneNumber"
+  1273→                        placeholder="+233 XXX XXX XXX"
+  1274→                        className="pl-9 border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1275→                        {...enquiryForm.register('phoneNumber')}
+  1276→                      />
+  1277→                    </div>
+  1278→                    {enquiryForm.formState.errors.phoneNumber && (
+  1279→                      <p className="text-xs text-red-500">
+  1280→                        {enquiryForm.formState.errors.phoneNumber.message}
+  1281→                      </p>
+  1282→                    )}
+  1283→                  </div>
+  1284→
+  1285→                  {/* Email */}
+  1286→                  <div className="space-y-1.5 sm:col-span-2">
+  1287→                    <Label htmlFor="email" className="text-sm text-[#2F3A33]">
+  1288→                      Email *
+  1289→                    </Label>
+  1290→                    <div className="relative">
+  1291→                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+  1292→                      <Input
+  1293→                        id="email"
+  1294→                        type="email"
+  1295→                        placeholder="you@example.com"
+  1296→                        className="pl-9 border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1297→                        {...enquiryForm.register('email')}
+  1298→                      />
+  1299→                    </div>
+  1300→                    {enquiryForm.formState.errors.email && (
+  1301→                      <p className="text-xs text-red-500">
+  1302→                        {enquiryForm.formState.errors.email.message}
+  1303→                      </p>
+  1304→                    )}
+  1305→                  </div>
+  1306→
+  1307→                  {/* Check-in */}
+  1308→                  <div className="space-y-1.5">
+  1309→                    <Label htmlFor="enquiry-checkin" className="text-sm text-[#2F3A33]">
+  1310→                      Check-in Date *
+  1311→                    </Label>
+  1312→                    <Input
+  1313→                      id="enquiry-checkin"
+  1314→                      type="date"
+  1315→                      className="border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1316→                      {...enquiryForm.register('checkIn')}
+  1317→                    />
+  1318→                    {enquiryForm.formState.errors.checkIn && (
+  1319→                      <p className="text-xs text-red-500">
+  1320→                        {enquiryForm.formState.errors.checkIn.message}
+  1321→                      </p>
+  1322→                    )}
+  1323→                  </div>
+  1324→
+  1325→                  {/* Check-out */}
+  1326→                  <div className="space-y-1.5">
+  1327→                    <Label htmlFor="enquiry-checkout" className="text-sm text-[#2F3A33]">
+  1328→                      Check-out Date *
+  1329→                    </Label>
+  1330→                    <Input
+  1331→                      id="enquiry-checkout"
+  1332→                      type="date"
+  1333→                      className="border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1334→                      {...enquiryForm.register('checkOut')}
+  1335→                    />
+  1336→                    {enquiryForm.formState.errors.checkOut && (
+  1337→                      <p className="text-xs text-red-500">
+  1338→                        {enquiryForm.formState.errors.checkOut.message}
+  1339→                      </p>
+  1340→                    )}
+  1341→                  </div>
+  1342→
+  1343→                  {/* Guests */}
+  1344→                  <div className="space-y-1.5">
+  1345→                    <Label htmlFor="guests" className="text-sm text-[#2F3A33]">
+  1346→                      Number of Guests *
+  1347→                    </Label>
+  1348→                    <div className="relative">
+  1349→                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+  1350→                      <Input
+  1351→                        id="guests"
+  1352→                        type="number"
+  1353→                        min={1}
+  1354→                        max={apartment.maxGuests}
+  1355→                        className="pl-9 border-[#D8D5CC] focus-visible:border-[#5F8768]"
+  1356→                        {...enquiryForm.register('guests')}
+  1357→                      />
+  1358→                    </div>
+  1359→                    {enquiryForm.formState.errors.guests && (
+  1360→                      <p className="text-xs text-red-500">
+  1361→                        {enquiryForm.formState.errors.guests.message}
+  1362→                      </p>
+  1363→                    )}
+  1364→                  </div>
+  1365→
+  1366→                  {/* Special Requests */}
+  1367→                  <div className="space-y-1.5 sm:col-span-2">
+  1368→                    <Label htmlFor="specialRequests" className="text-sm text-[#2F3A33]">
+  1369→                      Special Requests
+  1370→                    </Label>
+  1371→                    <Textarea
+  1372→                      id="specialRequests"
+  1373→                      placeholder="Any special requests or requirements..."
+  1374→                      rows={3}
+  1375→                      className="border-[#D8D5CC] focus-visible:border-[#5F8768] resize-none"
+  1376→                      {...enquiryForm.register('specialRequests')}
+  1377→                    />
+  1378→                  </div>
+  1379→                </div>
+  1380→
+  1381→                <Button
+  1382→                  type="submit"
+  1383→                  disabled={submittingEnquiry}
+  1384→                  className="w-full sm:w-auto bg-[#5F8768] hover:bg-[#4A6B52] text-white px-8"
+  1385→                >
+  1386→                  {submittingEnquiry ? (
+  1387→                    <>
+  1388→                      <Loader2 className="w-4 h-4 animate-spin" />
+  1389→                      Sending...
+  1390→                    </>
+  1391→                  ) : (
+  1392→                    <>
+  1393→                      <Send className="w-4 h-4" />
+  1394→                      Send Inquiry
+  1395→                    </>
+  1396→                  )}
+  1397→                </Button>
+  1398→              </form>
+  1399→            </div>
+  1400→
+  1401→            {/* ─── 7. Related Apartments ─────────────────────────────────── */}
+  1402→            {relatedApartments.length > 0 && (
+  1403→              <div>
+  1404→                <h2 className="text-lg font-semibold text-[#2F3A33] mb-4">Similar Properties</h2>
+  1405→                <div className="flex gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+  1406→                  {relatedApartments.map((apt) => (
+  1407→                    <Link
+  1408→                      key={apt.id}
+  1409→                      href={`/airbnb/${apt.id}`}
+  1410→                      className="flex-shrink-0 w-72 bg-white rounded-xl border border-[#D8D5CC]/60 overflow-hidden hover:shadow-lg transition-shadow group"
+  1411→                    >
+  1412→                      <div className="aspect-[16/10] overflow-hidden">
+  1413→                        {apt.images && apt.images.length > 0 ? (
+  1414→                          <img
+  1415→                            src={apt.images[0].url}
+  1416→                            alt={apt.name}
+  1417→                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+  1418→                          />
+  1419→                        ) : (
+  1420→                          <div className="w-full h-full bg-[#D8D5CC] flex items-center justify-center">
+  1421→                            <ImageIcon className="w-8 h-8 text-gray-400" />
+  1422→                          </div>
+  1423→                        )}
+  1424→                      </div>
+  1425→                      <div className="p-4">
+  1426→                        <h3 className="font-semibold text-sm text-[#2F3A33] truncate group-hover:text-[#5F8768] transition-colors">
+  1427→                          {apt.name}
+  1428→                        </h3>
+  1429→                        <p className="text-xs text-gray-400 mt-0.5">
+  1430→                          {apt.area}, {apt.city}
+  1431→                        </p>
+  1432→                        <div className="flex items-center justify-between mt-2">
+  1433→                          <span className="text-sm font-bold text-[#5F8768]">
+  1434→                            {formatCurrency(apt.pricePerNight)}{' '}
+  1435→                            <span className="font-normal text-xs text-gray-400">/ night</span>
+  1436→                          </span>
+  1437→                          <div className="flex items-center gap-1 text-xs text-gray-500">
+  1438→                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+  1439→                            {apt.rating}
+  1440→                          </div>
+  1441→                        </div>
+  1442→                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+  1443→                          <span className="flex items-center gap-1">
+  1444→                            <BedDouble className="w-3 h-3" /> {apt.bedrooms}
+  1445→                          </span>
+  1446→                          <span className="flex items-center gap-1">
+  1447→                            <Bath className="w-3 h-3" /> {apt.bathrooms}
+  1448→                          </span>
+  1449→                          <span className="flex items-center gap-1">
+  1450→                            <Users className="w-3 h-3" /> {apt.maxGuests}
+  1451→                          </span>
+  1452→                        </div>
+  1453→                      </div>
+  1454→                    </Link>
+  1455→                  ))}
+  1456→                </div>
+  1457→              </div>
+  1458→            )}
+  1459→          </motion.div>
+  1460→
+  1461→          {/* ─── Right Column (Pricing Card - Sticky) ─────────────────────── */}
+  1462→          <motion.div
+  1463→            initial={{ opacity: 0, y: 20 }}
+  1464→            animate={{ opacity: 1, y: 0 }}
+  1465→            transition={{ delay: 0.3 }}
+  1466→            className="lg:col-span-1"
+  1467→          >
+  1468→            <div className="lg:sticky lg:top-6 space-y-4">
+  1469→              {/* Pricing Card */}
+  1470→              <div className="bg-white rounded-2xl shadow-lg border border-[#D8D5CC]/60 p-6">
+  1471→                {/* Price */}
+  1472→                <div className="mb-4">
+  1473→                  <div className="flex items-baseline gap-1">
+  1474→                    <span className="text-2xl font-bold text-[#5F8768]">
+  1475→                      {formatCurrency(apartment.pricePerNight)}
+  1476→                    </span>
+  1477→                    <span className="text-gray-500">/ night</span>
+  1478→                  </div>
+  1479→                  {apartment.weeklyPrice && (
+  1480→                    <div className="flex items-center gap-2 mt-1">
+  1481→                      <span className="text-sm text-gray-400 line-through">
+  1482→                        {formatCurrency(apartment.pricePerNight * 7)} / week
+  1483→                      </span>
+  1484→                      <span className="text-sm font-medium text-[#5F8768]">
+  1485→                        {formatCurrency(apartment.weeklyPrice)} / week
+  1486→                      </span>
+  1487→                    </div>
+  1488→                  )}
+  1489→                  {apartment.monthlyPrice && (
+  1490→                    <p className="text-sm text-gray-500 mt-0.5">
+  1491→                      {formatCurrency(apartment.monthlyPrice)} / month
+  1492→                    </p>
+  1493→                  )}
+  1494→                </div>
+  1495→
+  1496→                {/* Extra Fees */}
+  1497→                {(apartment.cleaningFee || apartment.securityDeposit) && (
+  1498→                  <div className="space-y-1.5 mb-4">
+  1499→                    {apartment.cleaningFee && (
+  1500→                      <div className="flex justify-between text-sm">
+  1501→                        <span className="text-gray-500">Cleaning fee</span>
+  1502→                        <span className="text-[#2F3A33] font-medium">
+  1503→                          {formatCurrency(apartment.cleaningFee)} <span className="text-xs text-gray-400 font-normal">/ stay</span>
+  1504→                        </span>
+  1505→                      </div>
+  1506→                    )}
+  1507→                    {apartment.securityDeposit && (
+  1508→                      <div className="flex justify-between text-sm">
+  1509→                        <span className="text-gray-500">Security deposit</span>
+  1510→                        <span className="text-[#2F3A33] font-medium">
+  1511→                          {formatCurrency(apartment.securityDeposit)}
+  1512→                        </span>
+  1513→                      </div>
+  1514→                    )}
+  1515→                  </div>
+  1516→                )}
+  1517→
+  1518→                <Separator className="mb-4" />
+  1519→
+  1520→                {/* Rating */}
+  1521→                <div className="flex items-center gap-2 mb-4">
+  1522→                  <div className="flex items-center gap-1">
+  1523→                    {Array.from({ length: 5 }).map((_, i) => (
+  1524→                      <Star
+  1525→                        key={i}
+  1526→                        className={`w-4 h-4 ${
+  1527→                          i < Math.floor(apartment.rating)
+  1528→                            ? 'fill-amber-400 text-amber-400'
+  1529→                            : 'fill-gray-200 text-gray-200'
+  1530→                        }`}
+  1531→                      />
+  1532→                    ))}
+  1533→                  </div>
+  1534→                  <span className="text-sm font-semibold text-[#2F3A33]">{apartment.rating}</span>
+  1535→                  <span className="text-sm text-gray-400">({apartment.rating >= 4.5 ? 'excellent' : apartment.rating >= 4.0 ? 'very good' : 'good'})</span>
+  1536→                </div>
+  1537→
+  1538→                {/* Quick Stats */}
+  1539→                <div className="grid grid-cols-3 gap-3">
+  1540→                  <div className="text-center p-3 rounded-xl bg-[#F8F7F3]">
+  1541→                    <BedDouble className="w-5 h-5 mx-auto mb-1 text-[#5F8768]" />
+  1542→                    <p className="text-lg font-bold text-[#2F3A33]">{apartment.bedrooms}</p>
+  1543→                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Bedroom{apartment.bedrooms !== 1 ? 's' : ''}</p>
+  1544→                  </div>
+  1545→                  <div className="text-center p-3 rounded-xl bg-[#F8F7F3]">
+  1546→                    <Bath className="w-5 h-5 mx-auto mb-1 text-[#5F8768]" />
+  1547→                    <p className="text-lg font-bold text-[#2F3A33]">{apartment.bathrooms}</p>
+  1548→                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Bathroom{apartment.bathrooms !== 1 ? 's' : ''}</p>
+  1549→                  </div>
+  1550→                  <div className="text-center p-3 rounded-xl bg-[#F8F7F3]">
+  1551→                    <Users className="w-5 h-5 mx-auto mb-1 text-[#5F8768]" />
+  1552→                    <p className="text-lg font-bold text-[#2F3A33]">{apartment.maxGuests}</p>
+  1553→                    <p className="text-[10px] text-gray-400 uppercase tracking-wide">Guests</p>
+  1554→                  </div>
+  1555→                </div>
+  1556→
+  1557→                {/* Price Summary when dates selected */}
+  1558→                {priceCalc && (
+  1559→                  <motion.div
+  1560→                    initial={{ opacity: 0, height: 0 }}
+  1561→                    animate={{ opacity: 1, height: 'auto' }}
+  1562→                    className="mt-4 pt-4 border-t border-[#D8D5CC]/60"
+  1563→                  >
+  1564→                    <h4 className="text-sm font-semibold text-[#2F3A33] mb-2">Price Summary</h4>
+  1565→                    <div className="space-y-1.5">
+  1566→                      <div className="flex justify-between text-sm">
+  1567→                        <span className="text-gray-500">
+  1568→                          {formatCurrency(apartment.pricePerNight)} × {priceCalc.nights} night{priceCalc.nights !== 1 ? 's' : ''}
+  1569→                        </span>
+  1570→                        <span className="text-[#2F3A33]">{formatCurrency(priceCalc.baseTotal)}</span>
+  1571→                      </div>
+  1572→                      {priceCalc.weeklyDiscount > 0 && (
+  1573→                        <div className="flex justify-between text-sm">
+  1574→                          <span className="text-emerald-600">Weekly discount</span>
+  1575→                          <span className="text-emerald-600">-{formatCurrency(priceCalc.weeklyDiscount)}</span>
+  1576→                        </div>
+  1577→                      )}
+  1578→                      {priceCalc.cleaningFee > 0 && (
+  1579→                        <div className="flex justify-between text-sm">
+  1580→                          <span className="text-gray-500">Cleaning fee</span>
+  1581→                          <span className="text-[#2F3A33]">{formatCurrency(priceCalc.cleaningFee)}</span>
+  1582→                        </div>
+  1583→                      )}
+  1584→                      {priceCalc.securityDeposit > 0 && (
+  1585→                        <div className="flex justify-between text-sm">
+  1586→                          <span className="text-gray-500">Security deposit</span>
+  1587→                          <span className="text-[#2F3A33]">{formatCurrency(priceCalc.securityDeposit)}</span>
+  1588→                        </div>
+  1589→                      )}
+  1590→                      <Separator className="!bg-[#D8D5CC]/60" />
+  1591→                      <div className="flex justify-between font-bold">
+  1592→                        <span className="text-[#2F3A33]">Total</span>
+  1593→                        <span className="text-[#5F8768] text-lg">{formatCurrency(priceCalc.grandTotal)}</span>
+  1594→                      </div>
+  1595→                    </div>
+  1596→                  </motion.div>
+  1597→                )}
+  1598→              </div>
+  1599→
+  1600→              {/* ─── 4. WhatsApp Booking Button ───────────────────────────── */}
+  1601→              <TooltipProvider>
+  1602→                <Tooltip>
+  1603→                  <TooltipTrigger asChild>
+  1604→                    <div>
+  1605→                      <Button
+  1606→                        size="lg"
+  1607→                        className={`
+  1608→                          w-full rounded-xl py-4 text-lg font-semibold
+  1609→                          ${checkIn && checkOut
+  1610→                            ? 'bg-[#25D366] hover:bg-[#1FB855] text-white shadow-lg shadow-[#25D366]/25 cursor-pointer'
+  1611→                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+  1612→                          }
+  1613→                        `}
+  1614→                        disabled={!checkIn || !checkOut || !whatsappUrl}
+  1615→                        onClick={() => {
+  1616→                          if (whatsappUrl) window.open(whatsappUrl, '_blank');
+  1617→                        }}
+  1618→                      >
+  1619→                        <MessageCircle className="w-5 h-5" />
+  1620→                        {checkIn && checkOut ? 'Book via WhatsApp' : 'Select dates first'}
+  1621→                      </Button>
+  1622→                    </div>
+  1623→                  </TooltipTrigger>
+  1624→                  {(!checkIn || !checkOut) && (
+  1625→                    <TooltipContent>
+  1626→                      <p>Select check-in and check-out dates from the calendar above</p>
+  1627→                    </TooltipContent>
+  1628→                  )}
+  1629→                </Tooltip>
+  1630→              </TooltipProvider>
+  1631→
+  1632→              {checkIn && checkOut && (
+  1633→                <p className="text-center text-xs text-gray-400">
+  1634→                  {format(checkIn, 'dd MMM')} → {format(checkOut, 'dd MMM yyyy')} ({differenceInDays(checkOut, checkIn)} nights)
+  1635→                </p>
+  1636→              )}
+  1637→            </div>
+  1638→          </motion.div>
+  1639→        </div>
+  1640→      </motion.div>
+  1641→
+  1642→      {/* ─── Fullscreen Gallery Overlay ────────────────────────────────────── */}
+  1643→      <AnimatePresence>
+  1644→        {showGallery && (
+  1645→          <FullscreenGallery
+  1646→            images={apartment.images}
+  1647→            currentIndex={heroIndex}
+  1648→            onClose={() => setShowGallery(false)}
+  1649→            onPrev={prevImage}
+  1650→            onNext={nextImage}
+  1651→          />
+  1652→        )}
+  1653→      </AnimatePresence>
+  1654→
+  1655→      {/* Mobile WhatsApp sticky bar */}
+  1656→      <AnimatePresence>
+  1657→        {isMobile && checkIn && checkOut && whatsappUrl && (
+  1658→          <motion.div
+  1659→            initial={{ y: 100 }}
+  1660→            animate={{ y: 0 }}
+  1661→            exit={{ y: 100 }}
+  1662→            className="fixed bottom-0 left-0 right-0 z-40 p-4 bg-white/90 backdrop-blur-lg border-t border-[#D8D5CC]/60"
+  1663→          >
+  1664→            <div className="flex items-center gap-3">
+  1665→              <div className="flex-1">
+  1666→                <p className="text-sm font-bold text-[#5F8768]">
+  1667→                  {formatCurrency(priceCalc?.finalTotal || 0)}
+  1668→                </p>
+  1669→                <p className="text-xs text-gray-400">
+  1670→                  {priceCalc?.nights || 0} night{priceCalc?.nights !== 1 ? 's' : ''} total
+  1671→                </p>
+  1672→              </div>
+  1673→              <Button
+  1674→                onClick={() => window.open(whatsappUrl, '_blank')}
+  1675→                className="bg-[#25D366] hover:bg-[#1FB855] text-white rounded-xl px-6 shadow-lg shadow-[#25D366]/25"
+  1676→              >
+  1677→                <MessageCircle className="w-5 h-5" />
+  1678→                Book Now
+  1679→              </Button>
+  1680→            </div>
+  1681→          </motion.div>
+  1682→        )}
+  1683→      </AnimatePresence>
+  1684→    </div>
+  1685→  );
+  1686→}

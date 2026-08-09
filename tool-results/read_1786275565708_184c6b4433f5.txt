@@ -1,0 +1,645 @@
+     1→'use client';
+     2→
+     3→import { useState, useMemo } from 'react';
+     4→import { motion, AnimatePresence } from 'framer-motion';
+     5→import {
+     6→  Heart,
+     7→  MapPin,
+     8→  Bed,
+     9→  Bath,
+    10→  Maximize,
+    11→  Eye,
+    12→  Video,
+    13→  Phone,
+    14→  MessageCircle,
+    15→  Search,
+    16→  SlidersHorizontal,
+    17→  X,
+    18→  ChevronDown,
+    19→} from 'lucide-react';
+    20→import Link from 'next/link';
+    21→
+    22→interface Property {
+    23→  id: number;
+    24→  title: string;
+    25→  price: string;
+    26→  priceNum: number;
+    27→  location: string;
+    28→  city: string;
+    29→  beds: number;
+    30→  baths: number;
+    31→  land: string;
+    32→  landSqm: number;
+    33→  type: string;
+    34→  status: string;
+    35→  img: string;
+    36→  images: string[];
+    37→  videoUrl?: string;
+    38→  description: string;
+    39→  amenities: string[];
+    40→  nearbySchools: string[];
+    41→  nearbyHospitals: string[];
+    42→  nearbyBanks: string[];
+    43→  nearbyPolice: string[];
+    44→  agentName: string;
+    45→  agentPhone: string;
+    46→  agentImage: string;
+    47→  propertyId: string;
+    48→}
+    49→
+    50→const properties: Property[] = [
+    51→  {
+    52→    id: 1,
+    53→    title: 'Sage Manor Estate',
+    54→    price: 'GH\u20b5 15,500,000',
+    55→    priceNum: 15500000,
+    56→    location: 'Ikoyi, Lagos',
+    57→    city: 'Lagos',
+    58→    beds: 5,
+    59→    baths: 4,
+    60→    land: '1,200 sqm',
+    61→    landSqm: 1200,
+    62→    type: 'Detached House',
+    63→    status: 'For Sale',
+    64→    img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80',
+    65→    images: [
+    66→      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80',
+    67→      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80',
+    68→      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',
+    69→      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80',
+    70→      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80',
+    71→      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&q=80',
+    72→      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80',
+    73→      'https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=1200&q=80',
+    74→      'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200&q=80',
+    75→      'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=1200&q=80',
+    76→      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80',
+    77→      'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=1200&q=80',
+    78→    ],
+    79→    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    80→    description: 'A magnificent 5-bedroom detached house in the prestigious Ikoyi neighbourhood. This property features spacious living areas, a modern kitchen with high-end appliances, and a lush garden. Perfect for discerning families seeking luxury and comfort.',
+    81→    amenities: ['Swimming Pool', 'Garden', 'Security', 'Parking', 'Gym', 'Smart Home', 'Generator', 'Water Treatment'],
+    82→    nearbySchools: ['British International School (1.2km)', 'Lekki British School (2.5km)'],
+    83→    nearbyHospitals: ['Lagoon Hospitals (1.8km)', 'Reddington Hospital (3.1km)'],
+    84→    nearbyBanks: ['Access Bank Ikoyi (0.8km)', 'GTBank (1.5km)', 'Zenith Bank (2.0km)'],
+    85→    nearbyPolice: ['Ikoyi Police Station (1.0km)'],
+    86→    agentName: 'Kofi Mensah',
+    87→    agentPhone: '233547293193',
+    88→    agentImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+    89→    propertyId: 'DC-2024-001',
+    90→  },
+    91→  {
+    92→    id: 2,
+    93→    title: 'The Skyline Penthouse',
+    94→    price: 'GH\u20b5 10,500,000',
+    95→    priceNum: 10500000,
+    96→    location: 'Maitama, Abuja',
+    97→    city: 'Abuja',
+    98→    beds: 4,
+    99→    baths: 3,
+   100→    land: '450 sqm',
+   101→    landSqm: 450,
+   102→    type: 'Apartment',
+   103→    status: 'For Sale',
+   104→    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80',
+   105→    images: [
+   106→      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80',
+   107→      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80',
+   108→      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+   109→      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80',
+   110→      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80',
+   111→      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',
+   112→    ],
+   113→    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+   114→    description: 'An exquisite 4-bedroom penthouse with panoramic city views. Features floor-to-ceiling windows, a private terrace, and world-class finishes throughout.',
+   115→    amenities: ['Rooftop Terrace', 'Concierge', 'Gym', 'Pool', 'Parking', 'CCTV', 'Generator'],
+   116→    nearbySchools: ['American International School (2.0km)'],
+   117→    nearbyHospitals: ['Nigerian Turkish Hospital (1.5km)', 'Asokoro District Hospital (3.0km)'],
+   118→    nearbyBanks: ['UBA Maitama (0.5km)', 'First Bank (1.2km)'],
+   119→    nearbyPolice: ['Maitama Police Division (0.8km)'],
+   120→    agentName: 'Ama Adjei',
+   121→    agentPhone: '233547293193',
+   122→    agentImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+   123→    propertyId: 'DC-2024-002',
+   124→  },
+   125→  {
+   126→    id: 3,
+   127→    title: 'Harbour View Apartments',
+   128→    price: 'GH\u20b5 4,500/mo',
+   129→    priceNum: 4500,
+   130→    location: 'Lekki, Lagos',
+   131→    city: 'Lagos',
+   132→    beds: 3,
+   133→    baths: 2,
+   134→    land: '280 sqm',
+   135→    landSqm: 280,
+   136→    type: 'Apartment',
+   137→    status: 'For Rent',
+   138→    img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80',
+   139→    images: [
+   140→      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=80',
+   141→      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+   142→      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80',
+   143→      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80',
+   144→    ],
+   145→    description: 'A modern 3-bedroom apartment with stunning harbour views in the heart of Lekki. Fully furnished with contemporary finishes.',
+   146→    amenities: ['Furnished', 'AC', 'Parking', 'Security', 'Pool', 'Gym'],
+   147→    nearbySchools: ['Lekki British School (1.5km)'],
+   148→    nearbyHospitals: ['Lagoon Hospitals Lekki (2.0km)'],
+   149→    nearbyBanks: ['GTBank Lekki (0.8km)', 'Access Bank (1.5km)'],
+   150→    nearbyPolice: ['Lekki Police Post (1.0km)'],
+   151→    agentName: 'Kofi Mensah',
+   152→    agentPhone: '233547293193',
+   153→    agentImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+   154→    propertyId: 'DC-2024-003',
+   155→  },
+   156→  {
+   157→    id: 4,
+   158→    title: 'Palm Grove Business Park',
+   159→    price: 'GH\u20b5 35,000,000',
+   160→    priceNum: 35000000,
+   161→    location: 'Port Harcourt',
+   162→    city: 'Port Harcourt',
+   163→    beds: 0,
+   164→    baths: 4,
+   165→    land: '3,500 sqm',
+   166→    landSqm: 3500,
+   167→    type: 'Commercial',
+   168→    status: 'For Sale',
+   169→    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80',
+   170→    images: [
+   171→      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80',
+   172→      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80',
+   173→      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=1200&q=80',
+   174→    ],
+   175→    description: 'A prime commercial property ideal for offices, retail, or mixed-use development in the heart of Port Harcourt.',
+   176→    amenities: ['Elevator', 'Parking', 'CCTV', 'Fire System', 'Generator', 'Fibre Internet'],
+   177→    nearbySchools: [],
+   178→    nearbyHospitals: ['University of Port Harcourt Teaching Hospital (3.0km)'],
+   179→    nearbyBanks: ['First Bank PH (0.5km)', 'UBA (1.0km)'],
+   180→    nearbyPolice: ['PH Police Headquarters (1.2km)'],
+   181→    agentName: 'Ama Adjei',
+   182→    agentPhone: '233547293193',
+   183→    agentImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+   184→    propertyId: 'DC-2024-004',
+   185→  },
+   186→  {
+   187→    id: 5,
+   188→    title: 'Riverside Family Villa',
+   189→    price: 'GH\u20b5 8,400,000',
+   190→    priceNum: 8400000,
+   191→    location: 'East Legon, Accra',
+   192→    city: 'Accra',
+   193→    beds: 4,
+   194→    baths: 3,
+   195→    land: '800 sqm',
+   196→    landSqm: 800,
+   197→    type: 'Detached House',
+   198→    status: 'For Sale',
+   199→    img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80',
+   200→    images: [
+   201→      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80',
+   202→      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',
+   203→      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80',
+   204→      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&q=80',
+   205→      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80',
+   206→    ],
+   207→    description: 'A beautiful 4-bedroom family villa in the prestigious East Legon area. Spacious rooms, modern kitchen, and a private garden.',
+   208→    amenities: ['Garden', 'Parking', 'Security', 'Generator', 'Water Tank', 'Fenced'],
+   209→    nearbySchools: ['American International School (1.5km)', 'Ghana International School (2.0km)'],
+   210→    nearbyHospitals: ['Legon Hospital (2.5km)', 'University of Ghana Hospital (3.0km)'],
+   211→    nearbyBanks: ['ECOBANK East Legon (0.8km)', 'GCB Bank (1.2km)'],
+   212→    nearbyPolice: ['East Legon Police Station (1.0km)'],
+   213→    agentName: 'Kofi Mensah',
+   214→    agentPhone: '233547293193',
+   215→    agentImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+   216→    propertyId: 'DC-2024-005',
+   217→  },
+   218→  {
+   219→    id: 6,
+   220→    title: 'Greenfield Estate Plot',
+   221→    price: 'GH\u20b5 1,500,000',
+   222→    priceNum: 1500000,
+   223→    location: 'Guzape, Abuja',
+   224→    city: 'Abuja',
+   225→    beds: 0,
+   226→    baths: 0,
+   227→    land: '1,000 sqm',
+   228→    landSqm: 1000,
+   229→    type: 'Land',
+   230→    status: 'For Sale',
+   231→    img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80',
+   232→    images: [
+   233→      'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80',
+   234→      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80',
+   235→    ],
+   236→    description: 'A prime 1,000 sqm plot in the rapidly developing Guzape area. Perfect for residential or commercial development.',
+   237→    amenities: ['Fenced', 'Gated Community', 'Tarred Road', 'Electricity Available'],
+   238→    nearbySchools: [],
+   239→    nearbyHospitals: ['Asokoro District Hospital (2.5km)'],
+   240→    nearbyBanks: ['Zenith Bank Guzape (1.0km)'],
+   241→    nearbyPolice: ['Guzape Police Outpost (0.5km)'],
+   242→    agentName: 'Ama Adjei',
+   243→    agentPhone: '233547293193',
+   244→    agentImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+   245→    propertyId: 'DC-2024-006',
+   246→  },
+   247→  {
+   248→    id: 7,
+   249→    title: 'Ocean Breeze 3BR Apartment',
+   250→    price: 'GH\u20b5 3,200/mo',
+   251→    priceNum: 3200,
+   252→    location: 'Tema, Accra',
+   253→    city: 'Accra',
+   254→    beds: 3,
+   255→    baths: 2,
+   256→    land: '200 sqm',
+   257→    landSqm: 200,
+   258→    type: 'Apartment',
+   259→    status: 'Rented',
+   260→    img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=600&q=80',
+   261→    images: [
+   262→      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=80',
+   263→      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+   264→      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80',
+   265→    ],
+   266→    description: 'A well-furnished 3-bedroom apartment near the Tema coastline. Currently rented but available for waitlist.',
+   267→    amenities: ['Furnished', 'AC', 'Parking', 'Security', 'Pool'],
+   268→    nearbySchools: ['Tema International School (1.8km)'],
+   269→    nearbyHospitals: ['Tema General Hospital (2.0km)'],
+   270→    nearbyBanks: ['GCB Tema (0.5km)'],
+   271→    nearbyPolice: ['Tema Police Station (1.2km)'],
+   272→    agentName: 'Kofi Mensah',
+   273→    agentPhone: '233547293193',
+   274→    agentImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+   275→    propertyId: 'DC-2024-007',
+   276→  },
+   277→  {
+   278→    id: 8,
+   279→    title: 'Heritage 2BR Flat',
+   280→    price: 'GH\u20b5 2,800/mo',
+   281→    priceNum: 2800,
+   282→    location: 'Airport Residential, Accra',
+   283→    city: 'Accra',
+   284→    beds: 2,
+   285→    baths: 2,
+   286→    land: '150 sqm',
+   287→    landSqm: 150,
+   288→    type: 'Apartment',
+   289→    status: 'Available',
+   290→    img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&q=80',
+   291→    images: [
+   292→      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80',
+   293→      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80',
+   294→    ],
+   295→    description: 'A cozy 2-bedroom flat in the serene Airport Residential area. Ideal for professionals.',
+   296→    amenities: ['AC', 'Parking', 'Security', 'Generator'],
+   297→    nearbySchools: ['Airport International School (1.0km)'],
+   298→    nearbyHospitals: ['37 Military Hospital (2.0km)'],
+   299→    nearbyBanks: ['SBIC Bank (0.3km)', 'CAL Bank (0.8km)'],
+   300→    nearbyPolice: ['Airport Police Station (0.5km)'],
+   301→    agentName: 'Ama Adjei',
+   302→    agentPhone: '233547293193',
+   303→    agentImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+   304→    propertyId: 'DC-2024-008',
+   305→  },
+   306→];
+   307→
+   308→const uniqueCities = [...new Set(properties.map((p) => p.city))];
+   309→const uniqueTypes = [...new Set(properties.map((p) => p.type))];
+   310→const uniqueStatuses = ['Available', 'For Sale', 'For Rent', 'Rented', 'Sold'];
+   311→
+   312→const cardVariants = {
+   313→  hidden: { opacity: 0, y: 40 },
+   314→  visible: {
+   315→    opacity: 1,
+   316→    y: 0,
+   317→    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+   318→  },
+   319→};
+   320→
+   321→export default function FeaturedProperties() {
+   322→  const [showFilters, setShowFilters] = useState(false);
+   323→  const [filters, setFilters] = useState({
+   324→    search: '',
+   325→    city: '',
+   326→    type: '',
+   327→    bedrooms: '',
+   328→    priceRange: '',
+   329→    landSize: '',
+   330→    status: '',
+   331→  });
+   332→  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+   333→
+   334→  const toggleFavorite = (id: number) => {
+   335→    setFavorites((prev) => {
+   336→      const next = new Set(prev);
+   337→      if (next.has(id)) next.delete(id);
+   338→      else next.add(id);
+   339→      return next;
+   340→    });
+   341→  };
+   342→
+   343→  const filteredProperties = useMemo(() => {
+   344→    return properties.filter((p) => {
+   345→      if (filters.city && p.city !== filters.city) return false;
+   346→      if (filters.type && p.type !== filters.type) return false;
+   347→      if (filters.status && p.status !== filters.status) return false;
+   348→      if (filters.search) {
+   349→        const q = filters.search.toLowerCase();
+   350→        if (
+   351→          !p.title.toLowerCase().includes(q) &&
+   352→          !p.location.toLowerCase().includes(q) &&
+   353→          !p.description.toLowerCase().includes(q)
+   354→        )
+   355→          return false;
+   356→      }
+   357→      if (filters.bedrooms) {
+   358→        const min = parseInt(filters.bedrooms);
+   359→        if (filters.bedrooms === '5+' ? p.beds < 5 : p.beds !== min) return false;
+   360→      }
+   361→      if (filters.priceRange) {
+   362→        const [min, max] = filters.priceRange.split('-').map(Number);
+   363→        if (p.priceNum < min || (max && p.priceNum > max)) return false;
+   364→      }
+   365→      if (filters.landSize) {
+   366→        const [min, max] = filters.landSize.split('-').map(Number);
+   367→        if (p.landSqm < min || (max && p.landSqm > max)) return false;
+   368→      }
+   369→      return true;
+   370→    });
+   371→  }, [filters]);
+   372→
+   373→  const activeCount = [filters.city, filters.type, filters.status, filters.bedrooms, filters.priceRange, filters.landSize, filters.search].filter(Boolean).length;
+   374→
+   375→  const filterBtnClass = showFilters || activeCount > 0
+   376→    ? 'flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all sm:px-6 border-[#5F8768] bg-green-100 text-[#5F8768]'
+   377→    : 'flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition-all sm:px-6 border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768]';
+   378→
+   379→  const clearFilters = () => setFilters({ search: '', city: '', type: '', bedrooms: '', priceRange: '', landSize: '', status: '' });
+   380→
+   381→  const propertyLink = (id: string) => '/property/' + id;
+   382→  const whatsappLink = (phone: string, title: string, propId: string, price: string) => {
+   383→    return 'https://wa.me/' + phone + '?text=' + encodeURIComponent('Hi, I\'m interested in ' + title + ' (' + propId + ') - ' + price);
+   384→  };
+   385→  const telLink = (phone: string) => 'tel:+' + phone;
+   386→  const statusBadgeClass = (status: string) => {
+   387→    const base = 'absolute top-3 left-3 text-white text-xs font-medium px-3 py-1 rounded-full ';
+   388→    if (status === 'For Sale') return base + 'bg-[#5F8768]';
+   389→    if (status === 'For Rent' || status === 'Available') return base + 'bg-amber-500';
+   390→    if (status === 'Rented' || status === 'Sold') return base + 'bg-red-500';
+   391→    return base + 'bg-gray-500';
+   392→  };
+   393→  const heartClass = (id: string) => favorites.has(id) ? 'w-4 h-4 fill-red-500 text-red-500' : 'w-4 h-4 text-[#2F3A33]';
+   394→
+   395→  const SelectField = ({ label, value, onChange, children, className = '' }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode; className?: string }) => (
+   396→    <div className={className}>
+   397→      <label className="mb-1.5 block text-xs font-semibold tracking-wider text-[#6B7A6F] uppercase">{label}</label>
+   398→      <div className="relative">
+   399→        <select
+   400→          value={value}
+   401→          onChange={(e) => onChange(e.target.value)}
+   402→          className="w-full appearance-none rounded-xl border border-[#E5E3DC] bg-white py-2.5 pl-3 pr-8 text-sm text-[#2F3A33] focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]"
+   403→        >
+   404→          {children}
+   405→        </select>
+   406→        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#6B7A6F]" />
+   407→      </div>
+   408→    </div>
+   409→  );
+   410→
+   411→  return (
+   412→    <section id="properties" className="bg-[#F8F7F3] py-20 md:py-28 px-4">
+   413→      <div className="max-w-7xl mx-auto">
+   414→        {/* Section Header */}
+   415→        <div className="text-center mb-8">
+   416→          <h2 className="text-3xl md:text-4xl font-bold text-[#2F3A33]">
+   417→            Featured Properties
+   418→          </h2>
+   419→          <p className="mt-3 text-[#6B7A6F] max-w-2xl mx-auto">
+   420→            Handpicked properties across Ghana — homes, apartments for rent, lands for sale, and commercial real estate Ghana listings matching your lifestyle and investment goals
+   421→          </p>
+   422→        </div>
+   423→
+   424→        {/* Search & Filter Bar */}
+   425→        <div className="mb-8 rounded-2xl border border-[#E5E3DC] bg-white p-4 shadow-sm md:p-5">
+   426→          {/* Search Row */}
+   427→          <div className="flex flex-col gap-3 sm:flex-row">
+   428→            <div className="relative flex-1">
+   429→              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7A6F]" />
+   430→              <input
+   431→                type="text"
+   432→                placeholder="Search by name, location, or keyword..."
+   433→                value={filters.search}
+   434→                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+   435→                className="w-full rounded-xl border border-[#E5E3DC] bg-[#F8F7F3] py-2.5 pl-10 pr-4 text-sm text-[#2F3A33] placeholder:text-[#9ca3af] focus:border-[#5F8768] focus:outline-none focus:ring-1 focus:ring-[#5F8768]"
+   436→              />
+   437→            </div>
+   438→            <button
+   439→              onClick={() => setShowFilters(!showFilters)}
+   440→              className={filterBtnClass}
+   441→            >
+   442→              <SlidersHorizontal className="h-4 w-4" />
+   443→              Filters
+   444→              {activeCount > 0 && (
+   445→                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#5F8768] text-xs text-white">{activeCount}</span>
+   446→              )}
+   447→            </button>
+   448→          </div>
+   449→
+   450→          {/* Expandable Filters */}
+   451→          <AnimatePresence>
+   452→            {showFilters && (
+   453→              <motion.div
+   454→                initial={{ height: 0, opacity: 0 }}
+   455→                animate={{ height: 'auto', opacity: 1 }}
+   456→                exit={{ height: 0, opacity: 0 }}
+   457→                transition={{ duration: 0.25 }}
+   458→                className="overflow-hidden"
+   459→              >
+   460→                <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-3 md:grid-cols-6 border-t border-[#E5E3DC] mt-3">
+   461→                  <SelectField label="Location" value={filters.city} onChange={(v) => setFilters((f) => ({ ...f, city: v }))}>
+   462→                    <option value="">All Cities</option>
+   463→                    {uniqueCities.map((c) => <option key={c} value={c}>{c}</option>)}
+   464→                  </SelectField>
+   465→
+   466→                  <SelectField label="Property Type" value={filters.type} onChange={(v) => setFilters((f) => ({ ...f, type: v }))}>
+   467→                    <option value="">All Types</option>
+   468→                    {uniqueTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+   469→                  </SelectField>
+   470→
+   471→                  <SelectField label="Price Range" value={filters.priceRange} onChange={(v) => setFilters((f) => ({ ...f, priceRange: v }))}>
+   472→                    <option value="">Any Price</option>
+   473→                    <option value="0-3000">Under GH\u20b5 3,000</option>
+   474→                    <option value="3000-10000">GH\u20b5 3K - 10K</option>
+   475→                    <option value="10000-100000">GH\u20b5 10K - 100K</option>
+   476→                    <option value="100000-1000000">GH\u20b5 100K - 1M</option>
+   477→                    <option value="1000000-">Above GH\u20b5 1M</option>
+   478→                  </SelectField>
+   479→
+   480→                  <SelectField label="Bedrooms" value={filters.bedrooms} onChange={(v) => setFilters((f) => ({ ...f, bedrooms: v }))}>
+   481→                    <option value="">Any</option>
+   482→                    <option value="1">1 Bedroom</option>
+   483→                    <option value="2">2 Bedrooms</option>
+   484→                    <option value="3">3 Bedrooms</option>
+   485→                    <option value="4">4 Bedrooms</option>
+   486→                    <option value="5+">5+</option>
+   487→                  </SelectField>
+   488→
+   489→                  <SelectField label="Land Size" value={filters.landSize} onChange={(v) => setFilters((f) => ({ ...f, landSize: v }))}>
+   490→                    <option value="">Any Size</option>
+   491→                    <option value="0-200">Under 200 sqm</option>
+   492→                    <option value="200-500">200 - 500 sqm</option>
+   493→                    <option value="500-1000">500 - 1,000 sqm</option>
+   494→                    <option value="1000-">Above 1,000 sqm</option>
+   495→                  </SelectField>
+   496→
+   497→                  <SelectField label="Status" value={filters.status} onChange={(v) => setFilters((f) => ({ ...f, status: v }))}>
+   498→                    <option value="">All Statuses</option>
+   499→                    {uniqueStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
+   500→                  </SelectField>
+   501→                </div>
+   502→
+   503→                {activeCount > 0 && (
+   504→                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#E5E3DC]">
+   505→                    <span className="text-sm text-[#6B7A6F]">{filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''} found</span>
+   506→                    <button
+   507→                      onClick={clearFilters}
+   508→                      className="flex items-center gap-1 text-sm font-medium text-red-500 hover:text-red-600"
+   509→                    >
+   510→                      <X className="h-3.5 w-3.5" />
+   511→                      Clear all
+   512→                    </button>
+   513→                  </div>
+   514→                )}
+   515→              </motion.div>
+   516→            )}
+   517→          </AnimatePresence>
+   518→        </div>
+   519→
+   520→        {/* Results count when filters active but panel closed */}
+   521→        {!showFilters && activeCount > 0 && (
+   522→          <div className="mb-4 flex items-center justify-between">
+   523→            <p className="text-sm text-[#6B7A6F]">Showing {filteredProperties.length} of {properties.length} properties</p>
+   524→            <button onClick={clearFilters} className="text-sm font-medium text-[#5F8768] hover:underline">Clear filters</button>
+   525→          </div>
+   526→        )}
+   527→
+   528→        {/* Property Cards Grid */}
+   529→        <motion.div
+   530→          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+   531→          initial="hidden"
+   532→          whileInView="visible"
+   533→          viewport={{ once: true, margin: '-50px' }}
+   534→        >
+   535→          <AnimatePresence mode="popLayout">
+   536→            {filteredProperties.map((property) => (
+   537→              <motion.div
+   538→                key={property.id}
+   539→                variants={cardVariants}
+   540→                layout
+   541→                initial={{ opacity: 0, scale: 0.95 }}
+   542→                animate={{ opacity: 1, scale: 1 }}
+   543→                exit={{ opacity: 0, scale: 0.95 }}
+   544→                transition={{ duration: 0.3 }}
+   545→                className="property-card rounded-2xl overflow-hidden bg-white shadow-sm"
+   546→              >
+   547→                {/* Image */}
+   548→                <Link href={propertyLink(property.id)}>
+   549→                  <div className="relative h-56 cursor-pointer">
+   550→                    <img
+   551→                      src={property.img}
+   552→                      alt={property.title}
+   553→                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+   554→                      loading="lazy"
+   555→                    />
+   556→                    <span
+   557→                      className={statusBadgeClass(property.status)}
+   558→                    >
+   559→                      {property.status}
+   560→                    </span>
+   561→                    <button
+   562→                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(property.id); }}
+   563→                      className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-red-50 transition-colors cursor-pointer"
+   564→                      aria-label="Toggle favorite"
+   565→                    >
+   566→                      <Heart className={heartClass(property.id)} />
+   567→                    </button>
+   568→                    {/* Photo count */}
+   569→                    <span className="absolute bottom-3 right-3 bg-gray-800 text-white text-xs px-2 py-0.5 rounded-full">
+   570→                      {property.images.length} photos
+   571→                    </span>
+   572→                  </div>
+   573→                </Link>
+   574→
+   575→                {/* Content */}
+   576→                <div className="p-5">
+   577→                  <p className="text-2xl font-bold text-[#5F8768]">{property.price}</p>
+   578→                  <h3 className="text-lg font-semibold text-[#2F3A33] mt-1">{property.title}</h3>
+   579→                  <div className="flex items-center gap-1.5 mt-2">
+   580→                    <MapPin className="w-4 h-4 text-[#6B7A6F] shrink-0" />
+   581→                    <span className="text-sm text-[#6B7A6F]">{property.location}</span>
+   582→                  </div>
+   583→
+   584→                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#E5E3DC]">
+   585→                    {property.beds > 0 && (
+   586→                      <div className="flex items-center gap-1.5">
+   587→                        <Bed className="w-4 h-4 text-[#6B7A6F]" />
+   588→                        <span className="text-sm text-[#6B7A6F]">{property.beds} Beds</span>
+   589→                      </div>
+   590→                    )}
+   591→                    {property.beds > 0 && property.baths > 0 && <div className="w-px h-4 bg-[#E5E3DC]" />}
+   592→                    {property.baths > 0 && (
+   593→                      <div className="flex items-center gap-1.5">
+   594→                        <Bath className="w-4 h-4 text-[#6B7A6F]" />
+   595→                        <span className="text-sm text-[#6B7A6F]">{property.baths} Baths</span>
+   596→                      </div>
+   597→                    )}
+   598→                    <div className="w-px h-4 bg-[#E5E3DC]" />
+   599→                    <div className="flex items-center gap-1.5">
+   600→                      <Maximize className="w-4 h-4 text-[#6B7A6F]" />
+   601→                      <span className="text-sm text-[#6B7A6F]">{property.land}</span>
+   602→                    </div>
+   603→                  </div>
+   604→
+   605→                  <div className="flex items-center gap-2 mt-5">
+   606→                    <Link href={propertyLink(property.id)} className="flex-1 bg-[#5F8768] text-white text-sm font-medium rounded-xl px-4 py-2.5 hover:bg-[#4A6B52] transition-colors flex items-center justify-center gap-1.5">
+   607→                      <Eye className="w-4 h-4" />
+   608→                      View Details
+   609→                    </Link>
+   610→                    <a
+   611→                      href={whatsappLink(property.agentPhone, property.title, property.propertyId, property.price)}
+   612→                      target="_blank"
+   613→                      rel="noopener noreferrer"
+   614→                      className="p-2.5 rounded-xl border border-[#E5E3DC] text-[#2F3A33] hover:border-[#25D366] hover:text-[#25D366] transition-colors"
+   615→                      aria-label="WhatsApp"
+   616→                    >
+   617→                      <MessageCircle className="w-4 h-4" />
+   618→                    </a>
+   619→                    <a
+   620→                      href={telLink(property.agentPhone)}
+   621→                      className="p-2.5 rounded-xl border border-[#E5E3DC] text-[#2F3A33] hover:border-[#5F8768] hover:text-[#5F8768] transition-colors"
+   622→                      aria-label="Call agent"
+   623→                    >
+   624→                      <Phone className="w-4 h-4" />
+   625→                    </a>
+   626→                  </div>
+   627→                </div>
+   628→              </motion.div>
+   629→            ))}
+   630→          </AnimatePresence>
+   631→        </motion.div>
+   632→
+   633→        {filteredProperties.length === 0 && (
+   634→          <div className="text-center py-16">
+   635→            <Search className="mx-auto h-12 w-12 text-[#E5E3DC] mb-4" />
+   636→            <p className="text-lg font-semibold text-[#2F3A33]">No properties match your filters</p>
+   637→            <p className="text-sm text-[#6B7A6F] mt-1">Try adjusting your search criteria</p>
+   638→            <button onClick={clearFilters} className="mt-4 text-sm font-medium text-[#5F8768] hover:underline">Clear all filters</button>
+   639→          </div>
+   640→        )}
+   641→      </div>
+   642→    </section>
+   643→  );
+   644→}
+   645→

@@ -3,39 +3,76 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
+  metadataBase: new URL("https://dwellchroniclesgh.com"),
+  title: {
+    default: "Dwell Chronicles Ghana | #1 Property Listing Website in Ghana",
+    template: "%s | Dwell Chronicles Ghana",
+  },
   description:
-    "Find your dream property and build your future with Dwell Chronicles. Premium property listings, land sales, short-stay rentals, construction solutions & investment opportunities in Ghana.",
+    "Dwell Chronicles Ghana is the leading property listing website in Ghana. Browse verified houses, apartments, lands for sale, short-stay Airbnb rentals, and construction services across Accra, Ho, Kumasi, and all regions.",
   keywords: [
-    "Dwell Chronicles",
+    "property listing websites Ghana",
     "property listings Ghana",
     "real estate Ghana",
+    "houses for sale Ghana",
+    "apartments for rent Ghana",
     "land for sale Ghana",
-    "rentals Ghana",
     "Airbnb Ghana",
     "short stay Ho",
-    "construction services",
+    "construction services Ghana",
     "luxury homes Ghana",
-    "commercial buildings",
-    "investment properties",
-    "property development",
+    "commercial buildings Ghana",
+    "investment properties Ghana",
+    "property development Ghana",
+    "Dwell Chronicles",
+    "buy land in Ghana",
+    "rent apartment Accra",
+    "property management Ghana",
   ],
   authors: [{ name: "Dwell Chronicles" }],
+  creator: "Dwell Chronicles",
+  publisher: "Dwell Chronicles",
   icons: {
     icon: "/logo.jpg",
+    apple: "/logo.jpg",
   },
   openGraph: {
-    title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
+    title: "Dwell Chronicles Ghana | #1 Property Listing Website in Ghana",
     description:
-      "Find your dream property and build your future with Dwell Chronicles. Premium property listings, land sales, short-stay rentals, construction solutions & investment opportunities in Ghana.",
+      "Browse verified houses, apartments, lands for sale, short-stay Airbnb rentals, and construction services across Accra, Ho, Kumasi, and all regions of Ghana.",
     siteName: "Dwell Chronicles",
     type: "website",
+    locale: "en_GH",
+    url: "https://dwellchroniclesgh.com",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
+        width: 1200,
+        height: 630,
+        alt: "Dwell Chronicles Ghana - Property Listings and Real Estate Services",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dwell Chronicles Ghana | Property Listings, Land Sales, Rentals & Construction Services",
+    title: "Dwell Chronicles Ghana | #1 Property Listing Website in Ghana",
     description:
-      "Property Listings, Land Sales, Rentals & Construction Services in Ghana",
+      "Browse verified houses, apartments, lands for sale, short-stay rentals, and construction services in Ghana.",
+    images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80"],
+  },
+  alternates: {
+    canonical: "https://dwellchroniclesgh.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
