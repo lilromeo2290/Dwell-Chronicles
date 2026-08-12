@@ -537,13 +537,16 @@ export default function AirbnbListingPage() {
         const data = await res.json();
 
         if (res.ok) {
-          const fetched: Apartment[] = data.apartments;
+          // Exclude Property 1 apartments (Adaklu Road) - they have their own section below
+          const fetched: Apartment[] = (data.apartments || []).filter(
+            (a: Apartment) => a.area !== 'Adaklu Road'
+          );
           if (append) {
             setApartments((prev) => [...prev, ...fetched]);
           } else {
             setApartments(fetched);
           }
-          setTotal(data.total);
+          setTotal(fetched.length);
 
           // Build dynamic filter options from apartment data (only on initial full load)
           if (!append && initialLoad) {
