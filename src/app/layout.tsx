@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     url: "https://dwellchroniclesgh.com",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://dwellchroniclesgh.com/og-image.jpg",
         width: 1152,
         height: 864,
         alt: "Dwell Chronicles Ghana - Property Listings and Real Estate Services",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     title: "Dwell Chronicles Ghana | #1 Property Listing Website in Ghana",
     description:
       "Browse verified houses, apartments, lands for sale, short-stay rentals, and construction services in Ghana.",
-    images: ["/og-image.jpg"],
+    images: ["https://dwellchroniclesgh.com/og-image.jpg"],
   },
   alternates: {
     canonical: "https://dwellchroniclesgh.com",
