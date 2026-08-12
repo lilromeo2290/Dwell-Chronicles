@@ -1,0 +1,941 @@
+     1→     1→'use client';
+     2→     2→
+     3→     3→import React, { useState, useEffect, useCallback } from 'react';
+     4→     4→import Link from 'next/link';
+     5→     5→import { useRouter } from 'next/navigation';
+     6→     6→import { motion, AnimatePresence } from 'framer-motion';
+     7→     7→import {
+     8→     8→  Search,
+     9→     9→  MapPin,
+    10→    10→  BedDouble,
+    11→    11→  Bath,
+    12→    12→  Users,
+    13→    13→  Star,
+    14→    14→  Heart,
+    15→    15→  ChevronDown,
+    16→    16→  ArrowRight,
+    17→    17→  SlidersHorizontal,
+    18→    18→  Home,
+    19→    19→  Sparkles,
+    20→    20→  Clock,
+    21→    21→  Crown,
+    22→    22→  Building2,
+    23→    23→  Wallet,
+    24→    24→  X,
+    25→    25→  MessageCircle,
+    26→    26→  ArrowLeft,
+    27→    27→  Loader2,
+    28→    28→} from 'lucide-react';
+    29→    29→import RoomRates from '@/components/sections/RoomRates';
+    30→    30→import { Button } from '@/components/ui/button';
+    31→    31→import { Input } from '@/components/ui/input';
+    32→    32→import { Badge } from '@/components/ui/badge';
+    33→    33→import { Skeleton } from '@/components/ui/skeleton';
+    34→    34→import {
+    35→    35→  Sheet,
+    36→    36→  SheetTrigger,
+    37→    37→  SheetContent,
+    38→    38→  SheetHeader,
+    39→    39→  SheetTitle,
+    40→    40→  SheetDescription,
+    41→    41→  SheetFooter,
+    42→    42→} from '@/components/ui/sheet';
+    43→    43→
+    44→    44→// ─── Types ───────────────────────────────────────────────────────────────────
+    45→    45→
+    46→    46→interface ApartmentImage {
+    47→    47→  id: string;
+    48→    48→  url: string;
+    49→    49→  alt?: string;
+    50→    50→  sortOrder: number;
+    51→    51→}
+    52→    52→
+    53→    53→interface Apartment {
+    54→    54→  id: string;
+    55→    55→  name: string;
+    56→    56→  code: string;
+    57→    57→  description: string;
+    58→    58→  address: string;
+    59→    59→  city: string;
+    60→    60→  area: string;
+    61→    61→  pricePerNight: number;
+    62→    62→  weeklyPrice?: number | null;
+    63→    63→  monthlyPrice?: number | null;
+    64→    64→  bedrooms: number;
+    65→    65→  bathrooms: number;
+    66→    66→  maxGuests: number;
+    67→    67→  rating: number;
+    68→    68→  status: string;
+    69→    69→  category: string;
+    70→    70→  featured: boolean;
+    71→    71→  newlyAdded: boolean;
+    72→    72→  images: ApartmentImage[];
+    73→    73→}
+    74→    74→
+    75→    75→// ─── Constants ───────────────────────────────────────────────────────────────
+    76→    76→
+    77→    77→const CITIES = [
+    78→    78→  { label: 'All Cities', value: '' },
+    79→    79→  { label: 'Ho', value: 'Ho' },
+    80→    80→  { label: 'Accra', value: 'Accra' },
+    81→    81→];
+    82→    82→
+    83→    83→const BEDROOM_OPTIONS = [
+    84→    84→  { label: 'Any Bedrooms', value: '' },
+    85→    85→  { label: '1', value: '1' },
+    86→    86→  { label: '2', value: '2' },
+    87→    87→  { label: '3+', value: '3' },
+    88→    88→];
+    89→    89→
+    90→    90→const GUEST_OPTIONS = [
+    91→    91→  { label: 'Any Guests', value: '' },
+    92→    92→  { label: '1-2', value: '1' },
+    93→    93→  { label: '3-4', value: '3' },
+    94→    94→  { label: '5-8', value: '5' },
+    95→    95→];
+    96→    96→
+    97→    97→const CATEGORY_TABS = [
+    98→    98→  { label: 'All Apartments', icon: Home, category: '', featured: '', newlyAdded: '' },
+    99→    99→  { label: 'Featured', icon: Sparkles, category: '', featured: 'true', newlyAdded: '' },
+   100→   100→  { label: 'Newly Added', icon: Clock, category: '', featured: '', newlyAdded: 'true' },
+   101→   101→  { label: 'Available Today', icon: Building2, category: '', featured: '', newlyAdded: '', status: 'available' },
+   102→   102→  { label: 'Luxury', icon: Crown, category: 'luxury', featured: '', newlyAdded: '' },
+   103→   103→  { label: 'Executive', icon: Star, category: 'executive', featured: '', newlyAdded: '' },
+   104→   104→  { label: 'Budget', icon: Wallet, category: 'budget', featured: '', newlyAdded: '' },
+   105→   105→];
+   106→   106→
+   107→   107→const CATEGORY_COLORS: Record<string, string> = {
+   108→   108→  luxury: 'bg-amber-100 text-amber-800 border-amber-200',
+   109→   109→  executive: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+   110→   110→  budget: 'bg-orange-100 text-orange-800 border-orange-200',
+   111→   111→  standard: 'bg-slate-100 text-slate-700 border-slate-200',
+   112→   112→};
+   113→   113→
+   114→   114→const STATUS_CONFIG: Record<string, { label: string; dotColor: string; bgColor: string; textColor: string }> = {
+   115→   115→  available: { label: 'Available', dotColor: 'bg-emerald-500', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+   116→   116→  limited: { label: 'Limited', dotColor: 'bg-amber-500', bgColor: 'bg-amber-50', textColor: 'text-amber-700' },
+   117→   117→  reserved: { label: 'Reserved', dotColor: 'bg-yellow-500', bgColor: 'bg-yellow-50', textColor: 'text-yellow-700' },
+   118→   118→  booked: { label: 'Booked', dotColor: 'bg-red-500', bgColor: 'bg-red-50', textColor: 'text-red-700' },
+   119→   119→  maintenance: { label: 'Maintenance', dotColor: 'bg-gray-500', bgColor: 'bg-gray-50', textColor: 'text-gray-700' },
+   120→   120→};
+   121→   121→
+   122→   122→// ─── Custom Select Component ─────────────────────────────────────────────────
+   123→   123→
+   124→   124→function FilterSelect({
+   125→   125→  value,
+   126→   126→  onChange,
+   127→   127→  options,
+   128→   128→  placeholder,
+   129→   129→  className = '',
+   130→   130→}: {
+   131→   131→  value: string;
+   132→   132→  onChange: (val: string) => void;
+   133→   133→  options: { label: string; value: string; min?: string; max?: string }[];
+   134→   134→  placeholder: string;
+   135→   135→  className?: string;
+   136→   136→}) {
+   137→   137→  return (
+   138→   138→    <div className={`relative ${className}`}>
+   139→   139→      <select
+   140→   140→        value={value}
+   141→   141→        onChange={(e) => onChange(e.target.value)}
+   142→   142→        className="appearance-none w-full h-10 pl-3 pr-8 text-sm bg-white border border-[#E5E3DC] rounded-lg text-[#2F3A33] focus:outline-none focus:border-[#5F8768] focus:ring-2 focus:ring-[#5F8768]/20 transition-all cursor-pointer"
+   143→   143→      >
+   144→   144→        {options.map((opt) => (
+   145→   145→          <option key={opt.label} value={`${opt.value}|${opt.min || ''}|${opt.max || ''}`}>
+   146→   146→            {opt.label}
+   147→   147→          </option>
+   148→   148→        ))}
+   149→   149→      </select>
+   150→   150→      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F] pointer-events-none" />
+   151→   151→    </div>
+   152→   152→  );
+   153→   153→}
+   154→   154→
+   155→   155→// ─── Skeleton Card ───────────────────────────────────────────────────────────
+   156→   156→
+   157→   157→function SkeletonCard() {
+   158→   158→  return (
+   159→   159→    <div className="rounded-xl bg-white shadow-sm overflow-hidden border border-[#E5E3DC]/50">
+   160→   160→      <Skeleton className="w-full aspect-[4/3]" />
+   161→   161→      <div className="p-4 space-y-3">
+   162→   162→        <Skeleton className="h-4 w-32" />
+   163→   163→        <Skeleton className="h-5 w-full" />
+   164→   164→        <Skeleton className="h-3 w-16" />
+   165→   165→        <div className="border-t border-[#E5E3DC]" />
+   166→   166→        <div className="flex gap-4">
+   167→   167→          <Skeleton className="h-4 w-14" />
+   168→   168→          <Skeleton className="h-4 w-14" />
+   169→   169→          <Skeleton className="h-4 w-14" />
+   170→   170→        </div>
+   171→   171→        <div className="flex justify-between items-center">
+   172→   172→          <Skeleton className="h-5 w-24" />
+   173→   173→          <Skeleton className="h-4 w-12" />
+   174→   174→        </div>
+   175→   175→        <Skeleton className="h-9 w-full" />
+   176→   176→      </div>
+   177→   177→    </div>
+   178→   178→  );
+   179→   179→}
+   180→   180→
+   181→   181→// ─── Apartment Card ──────────────────────────────────────────────────────────
+   182→   182→
+   183→   183→function ApartmentCard({ apartment, index }: { apartment: Apartment; index: number }) {
+   184→   184→  const router = useRouter();
+   185→   185→  const [liked, setLiked] = useState(false);
+   186→   186→  const statusCfg = STATUS_CONFIG[apartment.status] || STATUS_CONFIG.available;
+   187→   187→  const catColor = CATEGORY_COLORS[apartment.category] || CATEGORY_COLORS.standard;
+   188→   188→  const firstImage = apartment.images?.[0]?.url;
+   189→   189→  const imageCount = apartment.images?.length || 0;
+   190→   190→
+   191→   191→  return (
+   192→   192→    <motion.div
+   193→   193→      layout
+   194→   194→      initial={{ opacity: 0, y: 24 }}
+   195→   195→      animate={{ opacity: 1, y: 0 }}
+   196→   196→      exit={{ opacity: 0, scale: 0.95 }}
+   197→   197→      transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+   198→   198→      className="group cursor-pointer rounded-xl bg-white shadow-sm border border-[#E5E3DC]/50 overflow-hidden hover:shadow-lg hover:shadow-[#5F8768]/8 transition-shadow duration-300"
+   199→   199→      onClick={() => router.push(`/airbnb/${apartment.id}`)}
+   200→   200→    >
+   201→   201→      {/* Image Container */}
+   202→   202→      <div className="relative aspect-[4/3] bg-[#F0EFE9] overflow-hidden">
+   203→   203→        {firstImage ? (
+   204→   204→          <img
+   205→   205→            src={firstImage}
+   206→   206→            alt={apartment.images[0]?.alt || apartment.name}
+   207→   207→            loading="lazy"
+   208→   208→            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+   209→   209→          />
+   210→   210→        ) : (
+   211→   211→          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#5F8768]/10 to-[#D8D5CC]/50">
+   212→   212→            <Building2 className="size-10 text-[#5F8768]/40" />
+   213→   213→          </div>
+   214→   214→        )}
+   215→   215→
+   216→   216→        {/* Category Badge */}
+   217→   217→        <span
+   218→   218→          className={`absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${catColor}`}
+   219→   219→        >
+   220→   220→          {apartment.category}
+   221→   221→        </span>
+   222→   222→
+   223→   223→        {/* Featured Badge */}
+   224→   224→        {apartment.featured && (
+   225→   225→          <span className="absolute top-3 left-[calc(3rem+8px+0.5rem)] flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-400 text-amber-900 border border-amber-300">
+   226→   226→            <Star className="size-3 fill-amber-500 text-amber-600" />
+   227→   227→            Featured
+   228→   228→          </span>
+   229→   229→        )}
+   230→   230→
+   231→   231→        {/* Status Badge */}
+   232→   232→        <span
+   233→   233→          className={`absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusCfg.bgColor} ${statusCfg.textColor}`}
+   234→   234→        >
+   235→   235→          <span className={`size-1.5 rounded-full ${statusCfg.dotColor}`} />
+   236→   236→          {statusCfg.label}
+   237→   237→        </span>
+   238→   238→
+   239→   239→        {/* Heart / Favorite */}
+   240→   240→        <button
+   241→   241→          onClick={(e) => {
+   242→   242→            e.stopPropagation();
+   243→   243→            setLiked(!liked);
+   244→   244→          }}
+   245→   245→          className="absolute top-11 right-3 mt-1 p-1.5 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white transition-colors"
+   246→   246→          aria-label="Toggle favorite"
+   247→   247→        >
+   248→   248→          <Heart
+   249→   249→            className={`size-4 transition-colors ${
+   250→   250→              liked ? 'fill-red-500 text-red-500' : 'text-gray-500'
+   251→   251→            }`}
+   252→   252→          />
+   253→   253→        </button>
+   254→   254→
+   255→   255→        {/* Image Dots */}
+   256→   256→        {imageCount > 1 && (
+   257→   257→          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1">
+   258→   258→            <span className="size-1.5 rounded-full bg-white shadow-sm" />
+   259→   259→            {imageCount > 1 && <span className="size-1.5 rounded-full bg-white/50 shadow-sm" />}
+   260→   260→            {imageCount > 2 && <span className="size-1.5 rounded-full bg-white/50 shadow-sm" />}
+   261→   261→          </div>
+   262→   262→        )}
+   263→   263→      </div>
+   264→   264→
+   265→   265→      {/* Card Body */}
+   266→   266→      <div className="p-4 space-y-2">
+   267→   267→        {/* Location */}
+   268→   268→        <div className="flex items-center gap-1 text-sm text-gray-500">
+   269→   269→          <MapPin className="size-3.5 shrink-0" />
+   270→   270→          <span className="truncate">{apartment.city}, {apartment.area}</span>
+   271→   271→        </div>
+   272→   272→
+   273→   273→        {/* Name */}
+   274→   274→        <h3 className="font-semibold text-[15px] text-[#2F3A33] leading-snug truncate">
+   275→   275→          {apartment.name}
+   276→   276→        </h3>
+   277→   277→
+   278→   278→        {/* Code */}
+   279→   279→        <span className="text-xs text-gray-400 font-medium">{apartment.code}</span>
+   280→   280→
+   281→   281→        {/* Divider */}
+   282→   282→        <div className="border-t border-[#E5E3DC]" />
+   283→   283→
+   284→   284→        {/* Amenities Row */}
+   285→   285→        <div className="flex items-center gap-4 text-sm text-gray-600">
+   286→   286→          <span className="flex items-center gap-1">
+   287→   287→            <BedDouble className="size-3.5 text-[#5F8768]" />
+   288→   288→            {apartment.bedrooms} {apartment.bedrooms === 1 ? 'Bed' : 'Beds'}
+   289→   289→          </span>
+   290→   290→          <span className="flex items-center gap-1">
+   291→   291→            <Bath className="size-3.5 text-[#5F8768]" />
+   292→   292→            {apartment.bathrooms} {apartment.bathrooms === 1 ? 'Bath' : 'Baths'}
+   293→   293→          </span>
+   294→   294→          <span className="flex items-center gap-1">
+   295→   295→            <Users className="size-3.5 text-[#5F8768]" />
+   296→   296→            {apartment.maxGuests} Guests
+   297→   297→          </span>
+   298→   298→        </div>
+   299→   299→
+   300→   300→        {/* Price + Rating Row */}
+   301→   301→        <div className="flex items-center justify-between">
+   302→   302→          <span className="font-bold text-[15px] text-[#5F8768]">
+   303→   303→            GH₵ {apartment.pricePerNight.toLocaleString()}
+   304→   304→            <span className="font-normal text-xs text-gray-400 ml-1">/ night</span>
+   305→   305→          </span>
+   306→   306→          <span className="flex items-center gap-1 text-sm text-gray-600">
+   307→   307→            <Star className="size-3.5 fill-amber-400 text-amber-400" />
+   308→   308→            {apartment.rating.toFixed(1)}
+   309→   309→          </span>
+   310→   310→        </div>
+   311→   311→
+   312→   312→        {/* View Details Button */}
+   313→   313→        <Button
+   314→   314→          variant="default"
+   315→   315→          className="w-full mt-2 bg-[#5F8768] hover:bg-[#4A6B52] text-white h-9 text-sm font-medium gap-2 rounded-lg"
+   316→   316→          onClick={(e) => {
+   317→   317→            e.stopPropagation();
+   318→   318→            router.push(`/airbnb/${apartment.id}`);
+   319→   319→          }}
+   320→   320→        >
+   321→   321→          View Details
+   322→   322→          <ArrowRight className="size-3.5" />
+   323→   323→        </Button>
+   324→   324→      </div>
+   325→   325→    </motion.div>
+   326→   326→  );
+   327→   327→}
+   328→   328→
+   329→   329→// ─── Mobile Filter Sheet ─────────────────────────────────────────────────────
+   330→   330→
+   331→   331→function MobileFilterSheet({
+   332→   332→  search,
+   333→   333→  onSearchChange,
+   334→   334→  city,
+   335→   335→  onCityChange,
+   336→   336→  area,
+   337→   337→  onAreaChange,
+   338→   338→  priceRange,
+   339→   339→  onPriceRangeChange,
+   340→   340→  bedrooms,
+   341→   341→  onBedroomsChange,
+   342→   342→  guests,
+   343→   343→  onGuestsChange,
+   344→   344→  onApply,
+   345→   345→  areaOptions,
+   346→   346→  priceOptions,
+   347→   347→}: {
+   348→   348→  search: string;
+   349→   349→  onSearchChange: (v: string) => void;
+   350→   350→  city: string;
+   351→   351→  onCityChange: (v: string) => void;
+   352→   352→  area: string;
+   353→   353→  onAreaChange: (v: string) => void;
+   354→   354→  priceRange: string;
+   355→   355→  onPriceRangeChange: (v: string) => void;
+   356→   356→  bedrooms: string;
+   357→   357→  onBedroomsChange: (v: string) => void;
+   358→   358→  guests: string;
+   359→   359→  onGuestsChange: (v: string) => void;
+   360→   360→  onApply: () => void;
+   361→   361→  areaOptions: { label: string; value: string; min: string; max: string }[];
+   362→   362→  priceOptions: { label: string; value: string; min: string; max: string }[];
+   363→   363→}) {
+   364→   364→  return (
+   365→   365→    <Sheet>
+   366→   366→      <SheetTrigger asChild>
+   367→   367→        <Button variant="outline" className="h-10 gap-2 border-[#E5E3DC] text-[#2F3A33]">
+   368→   368→          <SlidersHorizontal className="size-4" />
+   369→   369→          Filters
+   370→   370→        </Button>
+   371→   371→      </SheetTrigger>
+   372→   372→      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+   373→   373→        <SheetHeader className="text-left">
+   374→   374→          <SheetTitle className="text-lg font-semibold text-[#2F3A33]">Search & Filters</SheetTitle>
+   375→   375→          <SheetDescription>Find your perfect short-stay apartment</SheetDescription>
+   376→   376→        </SheetHeader>
+   377→   377→
+   378→   378→        <div className="px-4 space-y-4 pb-4">
+   379→   379→          {/* Search Input */}
+   380→   380→          <div className="space-y-1.5">
+   381→   381→            <label className="text-sm font-medium text-[#2F3A33]">Search</label>
+   382→   382→            <div className="relative">
+   383→   383→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   384→   384→              <Input
+   385→   385→                placeholder="Apartment name, keyword..."
+   386→   386→                value={search}
+   387→   387→                onChange={(e) => onSearchChange(e.target.value)}
+   388→   388→                className="pl-9 h-10 border-[#E5E3DC] bg-white"
+   389→   389→              />
+   390→   390→            </div>
+   391→   391→          </div>
+   392→   392→
+   393→   393→          {/* City */}
+   394→   394→          <div className="space-y-1.5">
+   395→   395→            <label className="text-sm font-medium text-[#2F3A33]">City</label>
+   396→   396→            <FilterSelect
+   397→   397→              value={city}
+   398→   398→              onChange={onCityChange}
+   399→   399→              options={CITIES.map((c) => ({ label: c.label, value: c.value, min: '', max: '' }))}
+   400→   400→              placeholder="All Cities"
+   401→   401→            />
+   402→   402→          </div>
+   403→   403→
+   404→   404→          {/* Area */}
+   405→   405→          <div className="space-y-1.5">
+   406→   406→            <label className="text-sm font-medium text-[#2F3A33]">Area</label>
+   407→   407→            <FilterSelect
+   408→   408→              value={area}
+   409→   409→              onChange={onAreaChange}
+   410→   410→              options={areaOptions}
+   411→   411→              placeholder="All Areas"
+   412→   412→            />
+   413→   413→          </div>
+   414→   414→
+   415→   415→          {/* Price Range */}
+   416→   416→          <div className="space-y-1.5">
+   417→   417→            <label className="text-sm font-medium text-[#2F3A33]">Price Range</label>
+   418→   418→            <FilterSelect
+   419→   419→              value={priceRange}
+   420→   420→              onChange={onPriceRangeChange}
+   421→   421→              options={priceOptions}
+   422→   422→              placeholder="Any Price"
+   423→   423→            />
+   424→   424→          </div>
+   425→   425→
+   426→   426→          {/* Bedrooms & Guests in a row */}
+   427→   427→          <div className="grid grid-cols-2 gap-3">
+   428→   428→            <div className="space-y-1.5">
+   429→   429→              <label className="text-sm font-medium text-[#2F3A33]">Bedrooms</label>
+   430→   430→              <FilterSelect
+   431→   431→                value={bedrooms}
+   432→   432→                onChange={onBedroomsChange}
+   433→   433→                options={BEDROOM_OPTIONS.map((b) => ({ label: b.label, value: b.value, min: '', max: '' }))}
+   434→   434→                placeholder="Any"
+   435→   435→              />
+   436→   436→            </div>
+   437→   437→            <div className="space-y-1.5">
+   438→   438→              <label className="text-sm font-medium text-[#2F3A33]">Guests</label>
+   439→   439→              <FilterSelect
+   440→   440→                value={guests}
+   441→   441→                onChange={onGuestsChange}
+   442→   442→                options={GUEST_OPTIONS.map((g) => ({ label: g.label, value: g.value, min: '', max: '' }))}
+   443→   443→                placeholder="Any"
+   444→   444→              />
+   445→   445→            </div>
+   446→   446→          </div>
+   447→   447→        </div>
+   448→   448→
+   449→   449→        <SheetFooter className="border-t border-[#E5E3DC] pt-4 px-4 pb-6">
+   450→   450→          <Button
+   451→   451→            onClick={onApply}
+   452→   452→            className="w-full h-11 bg-[#5F8768] hover:bg-[#4A6B52] text-white font-medium gap-2 text-sm"
+   453→   453→          >
+   454→   454→            <Search className="size-4" />
+   455→   455→            Search Apartments
+   456→   456→          </Button>
+   457→   457→        </SheetFooter>
+   458→   458→      </SheetContent>
+   459→   459→    </Sheet>
+   460→   460→  );
+   461→   461→}
+   462→   462→
+   463→   463→// ─── Main Page Component ─────────────────────────────────────────────────────
+   464→   464→
+   465→   465→export default function AirbnbListingPage() {
+   466→   466→  const router = useRouter();
+   467→   467→
+   468→   468→  // Filter state
+   469→   469→  const [search, setSearch] = useState('');
+   470→   470→  const [city, setCity] = useState('');
+   471→   471→  const [area, setArea] = useState('');
+   472→   472→  const [priceRange, setPriceRange] = useState('');
+   473→   473→  const [bedrooms, setBedrooms] = useState('');
+   474→   474→  const [guests, setGuests] = useState('');
+   475→   475→
+   476→   476→  // Tab state
+   477→   477→  const [activeTab, setActiveTab] = useState(0);
+   478→   478→  const [tabCategory, setTabCategory] = useState('');
+   479→   479→  const [tabFeatured, setTabFeatured] = useState('');
+   480→   480→  const [tabNewlyAdded, setTabNewlyAdded] = useState('');
+   481→   481→  const [tabStatus, setTabStatus] = useState('');
+   482→   482→
+   483→   483→  // Dynamic filter options derived from apartment data
+   484→   484→  const [dynamicAreas, setDynamicAreas] = useState<{ label: string; value: string }[]>([
+   485→   485→    { label: 'All Areas', value: '' },
+   486→   486→  ]);
+   487→   487→  const [dynamicPriceRanges, setDynamicPriceRanges] = useState<
+   488→   488→    { label: string; value: string; min: string; max: string }[]
+   489→   489→  >([{ label: 'Any Price', value: '', min: '', max: '' }]);
+   490→   490→
+   491→   491→  // Data state
+   492→   492→  const [apartments, setApartments] = useState<Apartment[]>([]);
+   493→   493→  const [total, setTotal] = useState(0);
+   494→   494→  const [loading, setLoading] = useState(true);
+   495→   495→  const [loadingMore, setLoadingMore] = useState(false);
+   496→   496→
+   497→   497→  // Track if initial load
+   498→   498→  const [initialLoad, setInitialLoad] = useState(true);
+   499→   499→
+   500→   500→  // Parse price range value from combined select value
+   501→   501→  const parsePriceRange = useCallback((val: string) => {
+   502→   502→    if (!val) return { min: '', max: '' };
+   503→   503→    const parts = val.split('|');
+   504→   504→    return { min: parts[1] || '', max: parts[2] || '' };
+   505→   505→  }, []);
+   506→   506→
+   507→   507→  // Fetch apartments
+   508→   508→  const fetchApartments = useCallback(
+   509→   509→    async (offset = 0, append = false) => {
+   510→   510→      if (offset === 0) {
+   511→   511→        setLoading(true);
+   512→   512→      } else {
+   513→   513→        setLoadingMore(true);
+   514→   514→      }
+   515→   515→
+   516→   516→      try {
+   517→   517→        const params = new URLSearchParams();
+   518→   518→        if (search) params.set('search', search);
+   519→   519→        if (city) params.set('city', city);
+   520→   520→        if (area) params.set('area', area);
+   521→   521→        if (tabCategory) params.set('category', tabCategory);
+   522→   522→        if (tabFeatured) params.set('featured', tabFeatured);
+   523→   523→        if (tabNewlyAdded) params.set('newlyAdded', tabNewlyAdded);
+   524→   524→        if (tabStatus) params.set('status', tabStatus);
+   525→   525→
+   526→   526→        const { min, max } = parsePriceRange(priceRange);
+   527→   527→        if (min) params.set('minPrice', min);
+   528→   528→        if (max) params.set('maxPrice', max);
+   529→   529→
+   530→   530→        if (bedrooms) params.set('bedrooms', bedrooms);
+   531→   531→        if (guests) params.set('minGuests', guests);
+   532→   532→
+   533→   533→        params.set('limit', '20');
+   534→   534→        params.set('offset', String(offset));
+   535→   535→
+   536→   536→        const res = await fetch(`/api/apartments?${params.toString()}`);
+   537→   537→        const data = await res.json();
+   538→   538→
+   539→   539→        if (res.ok) {
+   540→   540→          const fetched: Apartment[] = data.apartments;
+   541→   541→          if (append) {
+   542→   542→            setApartments((prev) => [...prev, ...fetched]);
+   543→   543→          } else {
+   544→   544→            setApartments(fetched);
+   545→   545→          }
+   546→   546→          setTotal(data.total);
+   547→   547→
+   548→   548→          // Build dynamic filter options from apartment data (only on initial full load)
+   549→   549→          if (!append && initialLoad) {
+   550→   550→            // Derive unique areas
+   551→   551→            const allApts = data.apartments || [];
+   552→   552→            const uniqueAreas = [...new Set(allApts.map((a: Apartment) => a.area).filter(Boolean))].sort();
+   553→   553→            setDynamicAreas([
+   554→   554→              { label: 'All Areas', value: '' },
+   555→   555→              ...uniqueAreas.map((a: string) => ({ label: a, value: a })),
+   556→   556→            ]);
+   557→   557→
+   558→   558→            // Derive price ranges from actual prices
+   559→   559→            const prices = allApts.map((a: Apartment) => a.pricePerNight).filter((p: number) => p > 0);
+   560→   560→            if (prices.length > 0) {
+   561→   561→              const minP = Math.min(...prices);
+   562→   562→              const maxP = Math.max(...prices);
+   563→   563→              const ranges: { label: string; value: string; min: string; max: string }[] = [
+   564→   564→                { label: 'Any Price', value: '', min: '', max: '' },
+   565→   565→              ];
+   566→   566→              const brackets = [100, 200, 400, 600, 1000, 1500, 2000].filter(
+   567→   567→                (b) => b >= Math.floor(minP / 100) * 100
+   568→   568→              );
+   569→   569→              for (let i = 0; i < brackets.length; i++) {
+   570→   570→                const lo = i === 0 ? Math.floor(minP / 100) * 100 : brackets[i - 1];
+   571→   571→                const hi = brackets[i];
+   572→   572→                if (lo < hi) {
+   573→   573→                  ranges.push({
+   574→   574→                    label: `GH₵ ${lo.toLocaleString()} - GH₵ ${hi.toLocaleString()}`,
+   575→   575→                    value: `${lo}|${hi}`,
+   576→   576→                    min: String(lo),
+   577→   577→                    max: String(hi),
+   578→   578→                  });
+   579→   579→                }
+   580→   580→              }
+   581→   581→              // "Over" bracket for the highest
+   582→   582→              const lastBracket = brackets[brackets.length - 1];
+   583→   583→              if (lastBracket < maxP) {
+   584→   584→                ranges.push({
+   585→   585→                  label: `Over GH₵ ${lastBracket.toLocaleString()}`,
+   586→   586→                  value: `${lastBracket}|`,
+   587→   587→                  min: String(lastBracket),
+   588→   588→                  max: '',
+   589→   589→                });
+   590→   590→              }
+   591→   591→              setDynamicPriceRanges(ranges);
+   592→   592→            }
+   593→   593→          }
+   594→   594→        }
+   595→   595→      } catch (err) {
+   596→   596→        console.error('Failed to fetch apartments:', err);
+   597→   597→      } finally {
+   598→   598→        setLoading(false);
+   599→   599→        setLoadingMore(false);
+   600→   600→        setInitialLoad(false);
+   601→   601→      }
+   602→   602→    },
+   603→   603→    [search, city, area, tabCategory, tabFeatured, tabNewlyAdded, tabStatus, priceRange, bedrooms, guests, parsePriceRange]
+   604→   604→  );
+   605→   605→
+   606→   606→  // Handle select value changes (parsing combined value)
+   607→   607→  const handleCityChange = (val: string) => {
+   608→   608→    const parts = val.split('|');
+   609→   609→    setCity(parts[0]);
+   610→   610→  };
+   611→   611→  const handleAreaChange = (val: string) => {
+   612→   612→    const parts = val.split('|');
+   613→   613→    setArea(parts[0]);
+   614→   614→  };
+   615→   615→  const handlePriceRangeChange = (val: string) => {
+   616→   616→    setPriceRange(val);
+   617→   617→  };
+   618→   618→  const handleBedroomsChange = (val: string) => {
+   619→   619→    const parts = val.split('|');
+   620→   620→    setBedrooms(parts[0]);
+   621→   621→  };
+   622→   622→  const handleGuestsChange = (val: string) => {
+   623→   623→    const parts = val.split('|');
+   624→   624→    setGuests(parts[0]);
+   625→   625→  };
+   626→   626→
+   627→   627→  // Tab click
+   628→   628→  const handleTabClick = (index: number) => {
+   629→   629→    setActiveTab(index);
+   630→   630→    const tab = CATEGORY_TABS[index];
+   631→   631→    setTabCategory(tab.category);
+   632→   632→    setTabFeatured(tab.featured);
+   633→   633→    setTabNewlyAdded(tab.newlyAdded);
+   634→   634→    setTabStatus(tab.status || '');
+   635→   635→  };
+   636→   636→
+   637→   637→  // Apply filters (triggers fetch)
+   638→   638→  const applyFilters = () => {
+   639→   639→    fetchApartments(0, false);
+   640→   640→  };
+   641→   641→
+   642→   642→  // Load more
+   643→   643→  const loadMore = () => {
+   644→   644→    fetchApartments(apartments.length, true);
+   645→   645→  };
+   646→   646→
+   647→   647→  // Reset all filters
+   648→   648→  const resetFilters = () => {
+   649→   649→    setSearch('');
+   650→   650→    setCity('');
+   651→   651→    setArea('');
+   652→   652→    setPriceRange('');
+   653→   653→    setBedrooms('');
+   654→   654→    setGuests('');
+   655→   655→    setActiveTab(0);
+   656→   656→    setTabCategory('');
+   657→   657→    setTabFeatured('');
+   658→   658→    setTabNewlyAdded('');
+   659→   659→    setTabStatus('');
+   660→   660→  };
+   661→   661→
+   662→   662→  // Auto-fetch when filters or tabs change
+   663→   663→  useEffect(() => {
+   664→   664→    const timer = setTimeout(() => {
+   665→   665→      fetchApartments(0, false);
+   666→   666→    }, 100);
+   667→   667→    return () => clearTimeout(timer);
+   668→   668→  }, [tabCategory, tabFeatured, tabNewlyAdded, tabStatus, fetchApartments]);
+   669→   669→
+   670→   670→  const hasMore = apartments.length < total;
+   671→   671→
+   672→   672→  return (
+   673→   673→    <div className="min-h-screen bg-[#F8F7F3]">
+   674→   674→      {/* ── Hero Banner ──────────────────────────────────────────────── */}
+   675→   675→      <section className="relative bg-gradient-to-br from-[#2F3A33] via-[#5F8768] to-[#4A6B52] overflow-hidden">
+   676→   676→        {/* Subtle pattern overlay */}
+   677→   677→        <div className="absolute inset-0 opacity-10">
+   678→   678→          <div
+   679→   679→            className="w-full h-full"
+   680→   680→            style={{
+   681→   681→              backgroundImage:
+   682→   682→                'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+   683→   683→            }}
+   684→   684→          />
+   685→   685→        </div>
+   686→   686→
+   687→   687→        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+   688→   688→          {/* Back Link */}
+   689→   689→          <Link
+   690→   690→            href="/"
+   691→   691→            className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium mb-4 transition-colors"
+   692→   692→          >
+   693→   693→            <ArrowLeft className="size-3.5" />
+   694→   694→            Back to Home
+   695→   695→          </Link>
+   696→   696→
+   697→   697→          <div className="max-w-2xl">
+   698→   698→            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight tracking-tight">
+   699→   699→              Short-Stay Apartments
+   700→   700→              <br />
+   701→   701→              <span className="text-white/90">in Volta Region and Accra</span>
+   702→   702→            </h1>
+   703→   703→            <p className="mt-2 text-sm sm:text-base text-white/70 leading-relaxed max-w-lg">
+   704→   704→              Discover handpicked short-term stays across Ho, Accra, and beyond.
+   705→   705→              Find the perfect apartment for your visit to Ghana&apos;s beautiful Volta Region and Accra.
+   706→   706→            </p>
+   707→   707→          </div>
+   708→   708→        </div>
+   709→   709→      </section>
+   710→   710→
+   711→   711→      <RoomRates />
+   712→   712→
+   713→   713→      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E3DC] shadow-sm">
+   714→   714→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   715→   715→          {/* Desktop Search Row */}
+   716→   716→          <div className="hidden md:flex items-center gap-2 py-3">
+   717→   717→            <div className="relative flex-1 max-w-xs">
+   718→   718→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   719→   719→              <Input
+   720→   720→                placeholder="Search apartments..."
+   721→   721→                value={search}
+   722→   722→                onChange={(e) => setSearch(e.target.value)}
+   723→   723→                onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+   724→   724→                className="pl-9 h-10 border-[#E5E3DC] bg-white"
+   725→   725→              />
+   726→   726→            </div>
+   727→   727→            <FilterSelect
+   728→   728→              value={city}
+   729→   729→              onChange={handleCityChange}
+   730→   730→              options={CITIES.map((c) => ({ label: c.label, value: c.value, min: '', max: '' }))}
+   731→   731→              placeholder="All Cities"
+   732→   732→              className="w-36"
+   733→   733→            />
+   734→   734→            <FilterSelect
+   735→   735→              value={area}
+   736→   736→              onChange={handleAreaChange}
+   737→   737→              options={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+   738→   738→              placeholder="All Areas"
+   739→   739→              className="w-40"
+   740→   740→            />
+   741→   741→            <FilterSelect
+   742→   742→              value={priceRange}
+   743→   743→              onChange={handlePriceRangeChange}
+   744→   744→              options={dynamicPriceRanges}
+   745→   745→              placeholder="Any Price"
+   746→   746→              className="w-44"
+   747→   747→            />
+   748→   748→            <FilterSelect
+   749→   749→              value={bedrooms}
+   750→   750→              onChange={handleBedroomsChange}
+   751→   751→              options={BEDROOM_OPTIONS.map((b) => ({ label: b.label, value: b.value, min: '', max: '' }))}
+   752→   752→              className="w-36"
+   753→   753→            />
+   754→   754→            <FilterSelect
+   755→   755→              value={guests}
+   756→   756→              onChange={handleGuestsChange}
+   757→   757→              options={GUEST_OPTIONS.map((g) => ({ label: g.label, value: g.value, min: '', max: '' }))}
+   758→   758→              className="w-36"
+   759→   759→            />
+   760→   760→            <Button
+   761→   761→              onClick={applyFilters}
+   762→   762→              className="h-10 bg-[#5F8768] hover:bg-[#4A6B52] text-white gap-2 px-5 shrink-0"
+   763→   763→            >
+   764→   764→              <Search className="size-4" />
+   765→   765→              Search
+   766→   766→            </Button>
+   767→   767→            {(search || city || area || priceRange || bedrooms || guests) && (
+   768→   768→              <Button variant="ghost" size="icon" onClick={resetFilters} className="shrink-0 text-gray-400 hover:text-[#2F3A33]" title="Reset filters">
+   769→   769→                <X className="size-4" />
+   770→   770→              </Button>
+   771→   771→            )}
+   772→   772→          </div>
+   773→   773→
+   774→   774→          {/* Mobile Search Row */}
+   775→   775→          <div className="flex md:hidden items-center gap-2 py-3">
+   776→   776→            <div className="relative flex-1">
+   777→   777→              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#6B7A6F]" />
+   778→   778→              <Input
+   779→   779→                placeholder="Search apartments..."
+   780→   780→                value={search}
+   781→   781→                onChange={(e) => setSearch(e.target.value)}
+   782→   782→                className="pl-9 h-10 border-[#E5E3DC] bg-white text-sm"
+   783→   783→              />
+   784→   784→            </div>
+   785→   785→            <MobileFilterSheet
+   786→   786→              search={search}
+   787→   787→              onSearchChange={setSearch}
+   788→   788→              city={city}
+   789→   789→              onCityChange={handleCityChange}
+   790→   790→              area={area}
+   791→   791→              onAreaChange={handleAreaChange}
+   792→   792→              priceRange={priceRange}
+   793→   793→              onPriceRangeChange={handlePriceRangeChange}
+   794→   794→              bedrooms={bedrooms}
+   795→   795→              onBedroomsChange={handleBedroomsChange}
+   796→   796→              guests={guests}
+   797→   797→              onGuestsChange={handleGuestsChange}
+   798→   798→              onApply={applyFilters}
+   799→   799→              areaOptions={dynamicAreas.map((a) => ({ label: a.label, value: a.value, min: '', max: '' }))}
+   800→   800→              priceOptions={dynamicPriceRanges}
+   801→   801→            />
+   802→   802→            <Button
+   803→   803→              onClick={applyFilters}
+   804→   804→              size="icon"
+   805→   805→              className="h-10 w-10 bg-[#5F8768] hover:bg-[#4A6B52] text-white shrink-0"
+   806→   806→            >
+   807→   807→              <Search className="size-4" />
+   808→   808→            </Button>
+   809→   809→          </div>
+   810→   810→        </div>
+   811→   811→      </div>
+   812→   812→
+   813→   813→      {/* ── Category Tabs ────────────────────────────────────────────── */}
+   814→   814→      <div className="border-b border-[#E5E3DC] bg-white">
+   815→   815→        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+   816→   816→          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2 -mb-px">
+   817→   817→            {CATEGORY_TABS.map((tab, i) => {
+   818→   818→              const Icon = tab.icon;
+   819→   819→              const isActive = activeTab === i;
+   820→   820→              return (
+   821→   821→                <button
+   822→   822→                  key={tab.label}
+   823→   823→                  onClick={() => handleTabClick(i)}
+   824→   824→                  className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-all duration-200 shrink-0 ${
+   825→   825→                    isActive
+   826→   826→                      ? 'bg-[#5F8768] text-white shadow-sm'
+   827→   827→                      : 'text-[#6B7A6F] hover:text-[#2F3A33] hover:bg-[#F0EFE9]'
+   828→   828→                  }`}
+   829→   829→                >
+   830→   830→                  <Icon className="size-3.5" />
+   831→   831→                  {tab.label}
+   832→   832→                </button>
+   833→   833→              );
+   834→   834→            })}
+   835→   835→          </div>
+   836→   836→        </div>
+   837→   837→      </div>
+   838→   838→
+   839→   839→      {/* ── Main Content ─────────────────────────────────────────────── */}
+   840→   840→      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+   841→   841→        {/* Results Count */}
+   842→   842→        {!loading && !initialLoad && apartments.length > 0 && (
+   843→   843→          <motion.p
+   844→   844→            initial={{ opacity: 0, y: -8 }}
+   845→   845→            animate={{ opacity: 1, y: 0 }}
+   846→   846→            className="text-sm text-[#6B7A6F] mb-5 font-medium"
+   847→   847→          >
+   848→   848→            {total} apartment{total !== 1 ? 's' : ''} found
+   849→   849→          </motion.p>
+   850→   850→        )}
+   851→   851→
+   852→   852→        {/* Loading State */}
+   853→   853→        {loading && initialLoad && (
+   854→   854→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   855→   855→            {Array.from({ length: 6 }).map((_, i) => (
+   856→   856→              <SkeletonCard key={i} />
+   857→   857→            ))}
+   858→   858→          </div>
+   859→   859→        )}
+   860→   860→
+   861→   861→        {/* Empty State */}
+   862→   862→        {!loading && !initialLoad && apartments.length === 0 && (
+   863→   863→          <motion.div
+   864→   864→            initial={{ opacity: 0, y: 20 }}
+   865→   865→            animate={{ opacity: 1, y: 0 }}
+   866→   866→            className="flex flex-col items-center justify-center py-20 text-center"
+   867→   867→          >
+   868→   868→            <div className="w-16 h-16 rounded-full bg-[#F0EFE9] flex items-center justify-center mb-4">
+   869→   869→              <Building2 className="size-7 text-[#6B7A6F]" />
+   870→   870→            </div>
+   871→   871→            <h3 className="text-lg font-semibold text-[#2F3A33] mb-1">No apartments found</h3>
+   872→   872→            <p className="text-sm text-[#6B7A6F] mb-5 max-w-sm">
+   873→   873→              Try adjusting your search or filter criteria to discover available apartments.
+   874→   874→            </p>
+   875→   875→            <Button
+   876→   876→              onClick={resetFilters}
+   877→   877→              variant="outline"
+   878→   878→              className="border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white gap-2"
+   879→   879→            >
+   880→   880→              <X className="size-4" />
+   881→   881→              Reset Filters
+   882→   882→            </Button>
+   883→   883→          </motion.div>
+   884→   884→        )}
+   885→   885→
+   886→   886→        {/* Apartment Grid */}
+   887→   887→        <AnimatePresence mode="popLayout">
+   888→   888→          {!loading && apartments.length > 0 && (
+   889→   889→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   890→   890→              {apartments.map((apt, i) => (
+   891→   891→                <ApartmentCard key={apt.id} apartment={apt} index={i} />
+   892→   892→              ))}
+   893→   893→            </div>
+   894→   894→          )}
+   895→   895→        </AnimatePresence>
+   896→   896→
+   897→   897→        {/* Load More */}
+   898→   898→        {!loading && hasMore && apartments.length > 0 && (
+   899→   899→          <div className="flex justify-center mt-8 mb-4">
+   900→   900→            <Button
+   901→   901→              onClick={loadMore}
+   902→   902→              disabled={loadingMore}
+   903→   903→              variant="outline"
+   904→   904→              className="h-11 px-8 border-[#5F8768] text-[#5F8768] hover:bg-[#5F8768] hover:text-white gap-2 font-medium text-sm rounded-lg transition-all"
+   905→   905→            >
+   906→   906→              {loadingMore ? (
+   907→   907→                <>
+   908→   908→                  <Loader2 className="size-4 animate-spin" />
+   909→   909→                  Loading...
+   910→   910→                </>
+   911→   911→              ) : (
+   912→   912→                <>
+   913→   913→                  Load More
+   914→   914→                  <ArrowRight className="size-4" />
+   915→   915→                </>
+   916→   916→              )}
+   917→   917→            </Button>
+   918→   918→          </div>
+   919→   919→        )}
+   920→   920→
+   921→   921→        {/* End of results indicator */}
+   922→   922→        {!loading && !hasMore && apartments.length > 0 && (
+   923→   923→          <p className="text-center text-xs text-[#6B7A6F] mt-6 mb-4">
+   924→   924→            You&apos;ve viewed all {apartments.length} apartments
+   925→   925→          </p>
+   926→   926→        )}
+   927→   927→      </main>
+   928→   928→
+   929→   929→      {/* ── Floating WhatsApp Button ─────────────────────────────────── */}
+   930→   930→      <a
+   931→   931→        href="https://wa.me/233204700023"
+   932→   932→        target="_blank"
+   933→   933→        rel="noopener noreferrer"
+   934→   934→        className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 whatsapp-pulse"
+   935→   935→        aria-label="Chat on WhatsApp"
+   936→   936→      >
+   937→   937→        <MessageCircle className="size-6" />
+   938→   938→      </a>
+   939→   939→    </div>
+   940→   940→  );
+   941→   941→}
